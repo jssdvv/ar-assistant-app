@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [<!ENTITY applicationId "com.jssdvv.ara">]>
+<resources>
+    <string name="PREFERENCE_CAMERA_REQUEST_PERMISSION_COUNT" translatable="false">
+        &applicationId;.PREFERENCE_CAMERA_REQUEST_PERMISSION_COUNT
+    </string>
+</resources>
