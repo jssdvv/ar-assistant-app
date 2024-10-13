@@ -1,11 +1,11 @@
-package com.jssdvv.ara.home.data.repositories
+package com.jssdvv.ara.scanner.data.repositories
 
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.jssdvv.ara.home.domain.ImageAnalyzerRepository
+import com.jssdvv.ara.scanner.domain.ImageAnalyzerRepository
 
 class ImageAnalyzerRepositoryImpl(
     private val onBarcodesDetected: (barcodes: MutableList<Barcode>) -> Unit

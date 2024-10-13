@@ -1,4 +1,4 @@
-package com.jssdvv.ara.home.presentation.screens.components
+package com.jssdvv.ara.scanner.presentation.scanner.components
 
 import android.content.Context
 import androidx.camera.core.CameraSelector
@@ -30,6 +30,7 @@ fun CameraPreview(
     val cameraProvider = cameraProviderFuture.get()
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
+    // TODO: Add buttons for managing camera basic functionalities
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { androidViewContext ->

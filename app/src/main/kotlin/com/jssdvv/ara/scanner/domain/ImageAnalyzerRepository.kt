@@ -1,4 +1,4 @@
-package com.jssdvv.ara.home.domain
+package com.jssdvv.ara.scanner.domain
 
 import androidx.camera.core.ImageAnalysis
 
