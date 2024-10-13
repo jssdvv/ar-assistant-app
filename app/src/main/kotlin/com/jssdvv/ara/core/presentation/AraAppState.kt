@@ -12,20 +12,20 @@ import com.jssdvv.ara.core.presentation.navigation.components.AraNavGraphItems
 
 @Composable
 fun rememberAraAppState(
-    navHostController: NavHostController = rememberNavController()
+    navHostController: NavHostController = rememberNavController(),
 ): AraAppState {
     return remember(
         navHostController
     ) {
         AraAppState(
-            navHostController = navHostController
+            navHostController = navHostController,
         )
     }
 }
 
 @Stable
 class AraAppState(
-    val navHostController: NavHostController
+    val navHostController: NavHostController,
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navHostController
@@ -51,6 +51,7 @@ class AraAppState(
                 saveState = true
             }
             launchSingleTop = true
+            restoreState = true
         }
     }
 }
