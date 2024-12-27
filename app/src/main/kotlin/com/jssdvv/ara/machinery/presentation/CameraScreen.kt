@@ -12,16 +12,11 @@ import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -52,20 +47,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.google.ar.core.AugmentedImage
 import com.google.ar.core.AugmentedImageDatabase
@@ -73,6 +60,7 @@ import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.presentation.theme.TubShapes
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.node.AugmentedImageNode
 import io.github.sceneview.rememberEngine
@@ -85,53 +73,6 @@ import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
 import kotlinx.coroutines.launch
 
-class TicketShape(private val cornerRadius: Float) : Shape {
-    override fun createOutline(
-        size: Size,
-        layoutDirection: LayoutDirection,
-        density: Density,
-    ): Outline {
-        return Outline.Generic(
-            path = drawTicketPath(size = size, cornerRadius = cornerRadius)
-        )
-    }
-
-    private fun drawTicketPath(size: Size, cornerRadius: Float): Path {
-        val cornerDiameter = 2 * cornerRadius
-        return Path().apply {
-            reset()
-            lineTo(0f, -cornerRadius)
-            arcTo(
-                rect = Rect(
-                    left = 0f,
-                    top = -cornerDiameter,
-                    right = cornerDiameter,
-                    bottom = 0f
-                ),
-                startAngleDegrees = 180f,
-                sweepAngleDegrees = -90f,
-                forceMoveTo = false
-            )
-            lineTo(x = size.width - cornerRadius, y = 0f)
-            // Top right arc
-            arcTo(
-                rect = Rect(
-                    left = size.width - cornerDiameter,
-                    top = -cornerDiameter,
-                    right = size.width,
-                    bottom = 0f
-                ),
-                startAngleDegrees = 90.0f,
-                sweepAngleDegrees = -90.0f,
-                forceMoveTo = false
-            )
-            lineTo(x = size.width, y = size.height)
-            lineTo(x = 0f, y = size.height)
-            lineTo(x = 0f, y = 0f)
-            close()
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
@@ -167,8 +108,8 @@ fun ARCameraScreen(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars),
         scaffoldState = bottomSheetScaffoldState,
-        sheetPeekHeight = 80.dp,
-        sheetShape = TicketShape(100f),
+        sheetPeekHeight = 100.dp,
+        sheetShape = TubShapes().extraLarge,
         sheetDragHandle = {
             SheetDragHandle(
                 modifier = Modifier,
