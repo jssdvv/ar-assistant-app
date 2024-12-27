@@ -1,9 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AR Assistance</string>
-    <string name="scanner_title">Scan</string>
-    <string name="machines_title">Machines</string>
-    <string name="inventory_title">Inventory</string>
-    <string name="agenda_title">Agenda</string>
+    <!--App Global Strings-->
+    <string name="app_name">AR Assistant</string>
+
+    <!--App Navigation Graphs Strings-->
+    <string name="scanner_label_text">Scanner</string>
+    <string name="machinery_label_text">Machinery</string>
+    <string name="inventory_label_text">Inventory</string>
+
+    <string name="scanner_icon_desc">Icon for Scanner bottom bar feature section</string>
+    <string name="machinery_icon_desc">Icon for Machinery bottom bar feature section</string>
+    <string name="inventory_icon_desc">Icon for Inventory bottom bar feature section</string>
+
+    <!--AR Camera Screen Strings-->
+    <string name="requirements_label_text">Requirements</string>
+    <string name="instructions_label_text">Instructions</string>
+
+    <string name="requirements_icon_desc">Icon for Requirements chip option</string>
+    <string name="instructions_icon_desc">Icon for Instructions chip option</string>
+
     <string name="activity_button_label">Activities</string>
     <string name="technical_sheet_button_label">Technical sheet</string>
     <string name="machine_image_content_description">Image of the current machine card</string>

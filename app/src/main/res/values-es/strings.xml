@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--App Global Strings-->
     <string name="app_name">Asistente RA</string>
-    <string name="scanner_title">Escanear</string>
-    <string name="machines_title">Máquinas</string>
-    <string name="inventory_title">Inventario</string>
-    <string name="agenda_title">Agenda</string>
+
+    <!--App Navigation Graphs Strings-->
+    <string name="scanner_label_text">Escáner</string>
+    <string name="machinery_label_text">Máquinas</string>
+    <string name="inventory_label_text">Inventario</string>
+
+    <string name="scanner_icon_desc">Icono para la sección de la barra de navegación de la característica de Escáner</string>
+    <string name="machinery_icon_desc">Icono para la sección de la barra de navegación de la característica de Maquinaria</string>
+    <string name="inventory_icon_desc">Icono para la sección de la barra de navegación de la característica de Inventario</string>
+
+    <!--AR Camera Screen Strings-->
+    <string name="requirements_label_text">Requerimientos</string>
+    <string name="instructions_label_text">Instrucciones</string>
+
+    <string name="requirements_icon_desc">Icono para la opción del chip de Requerimientos</string>
+    <string name="instructions_icon_desc">Icono para la opción del chip de Instrucciones</string>
+
     <string name="activity_button_label">Actividades</string>
     <string name="technical_sheet_button_label">Ficha técnica</string>
     <string name="machine_image_content_description">Imagen de la carta de la máquina</string>
