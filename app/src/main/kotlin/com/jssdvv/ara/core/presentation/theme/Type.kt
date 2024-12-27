@@ -77,7 +77,7 @@ val arbutusSlabFontFamily = FontFamily(
     )
 )
 
-internal val AraTypography = Typography(
+internal val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = arbutusSlabFontFamily,
         fontWeight = FontWeight.Normal,

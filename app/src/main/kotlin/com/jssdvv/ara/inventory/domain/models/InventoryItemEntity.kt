@@ -22,15 +22,3 @@ data class InventoryItemEntity(
 )
 
 class InvalidInventoryItemException(exception: String) : Exception(exception)
-
-class InventoryItemTypeConverter {
-    @TypeConverter
-    fun uriToString(uri: Uri): String {
-        return uri.toString()
-    }
-
-    @TypeConverter
-    fun stringToUri(string: String): Uri {
-        return Uri.parse(string)
-    }
-}
