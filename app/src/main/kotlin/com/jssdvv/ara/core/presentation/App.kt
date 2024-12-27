@@ -1,9 +1,6 @@
 package com.jssdvv.ara.core.presentation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -18,14 +15,15 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.jssdvv.ara.core.presentation.navigation.AraNavHost
+import com.jssdvv.ara.core.presentation.navigation.AppNavHost
+import kotlin.reflect.KClass
 
 @Composable
-fun AraApp(
-    appState: AraAppState,
-    windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()
+fun App(
+    appState: AppState,
+    windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
-    AraApp(
+    InternalApp(
         appState = appState,
         modifier = Modifier,
         windowAdaptiveInfo = windowAdaptiveInfo
@@ -33,10 +31,10 @@ fun AraApp(
 }
 
 @Composable
-internal fun AraApp(
-    appState: AraAppState,
+internal fun InternalApp(
+    appState: AppState,
     modifier: Modifier,
-    windowAdaptiveInfo: WindowAdaptiveInfo
+    windowAdaptiveInfo: WindowAdaptiveInfo,
 ) {
     val currentDestination = appState.currentDestination
     val currentGraphDestination = appState.currentNavGraphDestination
@@ -54,9 +52,9 @@ internal fun AraApp(
         navigationSuiteItems = {
             appState.navGraphItems.forEach { navGraphItem ->
                 val selected = currentGraphDestination
-                    .isDestinationInHierarchy(navGraphItem.navGraphDestination)
+                    .isDestinationInHierarchy(navGraphItem.route)
                 val onClick = {
-                    appState.navigateToGraphDestination(navGraphItem.navGraphDestination)
+                    appState.navigateToNavGraphDestination(navGraphItem)
                 }
                 item(
                     selected = selected,
@@ -66,7 +64,7 @@ internal fun AraApp(
                             painter = painterResource(
                                 if (selected) navGraphItem.selectedIconId else navGraphItem.unselectedIconId
                             ),
-                            contentDescription = navGraphItem.description
+                            contentDescription = stringResource(navGraphItem.iconDescId)
                         )
                     },
                     modifier = Modifier,
@@ -77,17 +75,20 @@ internal fun AraApp(
         modifier = modifier,
         layoutType = layoutType
     ) {
-        Scaffold { paddingValues ->
-            AraNavHost(
-                appState = appState,
-                modifier = Modifier.padding(paddingValues)
-            )
-        }
+        AppNavHost(
+            appState = appState,
+            modifier = Modifier
+        )
     }
+//    Box(
+//        modifier
+//            .fillMaxSize()
+//            .background(Color.Blue)
+//    )
 }
 
-private fun NavDestination?.isDestinationInHierarchy(destination: Any): Boolean {
+private fun NavDestination?.isDestinationInHierarchy(destination: KClass<*>): Boolean {
     return this?.hierarchy?.any { navDestination ->
-        navDestination.hasRoute(destination::class)
+        navDestination.hasRoute(destination)
     } ?: false
 }

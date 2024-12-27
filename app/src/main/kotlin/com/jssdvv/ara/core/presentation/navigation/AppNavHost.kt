@@ -8,28 +8,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
-import com.jssdvv.ara.core.presentation.AraAppState
-import com.jssdvv.ara.core.presentation.navigation.graphs.ScannerNavGraphDestination
-import com.jssdvv.ara.core.presentation.navigation.graphs.agendaNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graphs.scannerNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graphs.inventoryNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graphs.machinesNavGraph
+import com.jssdvv.ara.core.presentation.AppState
+import com.jssdvv.ara.core.presentation.navigation.graph.ScannerNavGraph
+import com.jssdvv.ara.core.presentation.navigation.graph.scannerNavGraph
+import com.jssdvv.ara.core.presentation.navigation.graph.inventoryNavGraph
+import com.jssdvv.ara.core.presentation.navigation.graph.machineryNavGraph
 
 @Composable
-fun AraNavHost(
-    appState: AraAppState,
+fun AppNavHost(
+    appState: AppState,
     modifier: Modifier,
 ) {
     val navHostController = appState.navHostController
     NavHost(
-        startDestination = ScannerNavGraphDestination,
+        startDestination = ScannerNavGraph,
         navController = navHostController,
         modifier = modifier
     ) {
         scannerNavGraph(appState)
-        machinesNavGraph(appState)
+        machineryNavGraph(appState)
         inventoryNavGraph(appState)
-        agendaNavGraph(appState)
     }
 }
 

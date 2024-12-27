@@ -8,23 +8,27 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.jssdvv.ara.core.presentation.navigation.components.AraNavGraphItems
+import androidx.navigation.navOptions
+import com.jssdvv.ara.core.presentation.navigation.AppNavGraphItem
+import com.jssdvv.ara.core.presentation.navigation.graph.InventoryNavGraph
+import com.jssdvv.ara.core.presentation.navigation.graph.MachineryNavGraph
+import com.jssdvv.ara.core.presentation.navigation.graph.ScannerNavGraph
 
 @Composable
-fun rememberAraAppState(
+fun rememberAppState(
     navHostController: NavHostController = rememberNavController(),
-): AraAppState {
+): AppState {
     return remember(
         navHostController
     ) {
-        AraAppState(
+        AppState(
             navHostController = navHostController,
         )
     }
 }
 
 @Stable
-class AraAppState(
+class AppState(
     val navHostController: NavHostController,
 ) {
     val currentDestination: NavDestination?
@@ -36,22 +40,22 @@ class AraAppState(
         @Composable get() = navHostController.currentBackStackEntryAsState()
             .value?.destination?.parent?.findStartDestination()
 
-    val navGraphItems: List<AraNavGraphItems> = listOf(
-        AraNavGraphItems.ScannerNavItem,
-        AraNavGraphItems.MachinesNavItem,
-        AraNavGraphItems.InventoryNavItem,
-        AraNavGraphItems.AgendaNavItem
-    )
+    val navGraphItems: List<AppNavGraphItem> = AppNavGraphItem.entries
 
-    fun navigateToGraphDestination(
-        graphDestination: Any
+    fun navigateToNavGraphDestination(
+        appNavGraphItem: AppNavGraphItem,
     ) {
-        navHostController.navigate(graphDestination) {
+        val navOptions = navOptions {
             popUpTo(navHostController.graph.findStartDestination().id) {
                 saveState = true
             }
             launchSingleTop = true
             restoreState = true
+        }
+        when (appNavGraphItem) {
+            AppNavGraphItem.SCANNER -> navHostController.navigate(ScannerNavGraph, navOptions)
+            AppNavGraphItem.MACHINERY -> navHostController.navigate(MachineryNavGraph, navOptions)
+            AppNavGraphItem.INVENTORY -> navHostController.navigate(InventoryNavGraph, navOptions)
         }
     }
 }
