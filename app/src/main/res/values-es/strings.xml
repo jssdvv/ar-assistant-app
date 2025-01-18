@@ -12,6 +12,17 @@
     <string name="machinery_icon_desc">Icono para la sección de la barra de navegación de la característica de Maquinaria</string>
     <string name="inventory_icon_desc">Icono para la sección de la barra de navegación de la característica de Inventario</string>
 
+    <!--Add Machine Screen Strings-->
+    <string name="add_machine_topbar_text">Crear máquina</string>
+
+    <string name="add_machine_save_button_text">Guardar</string>
+    <string name="add_machine_save_button_description">Botón para guardar cambios y navegar atrás</string>
+    <string name="add_machine_cancel_button_description">Botón para salir de la pantalla de crear máquina</string>
+
+    <string name="add_machine_name_text_field">Nombre</string>
+    <string name="add_machine_category_text_field">Categoría</string>
+    <string name="add_machine_description_text_field">Descripción</string>
+
     <!--AR Camera Screen Strings-->
     <string name="requirements_label_text">Requerimientos</string>
     <string name="instructions_label_text">Instrucciones</string>

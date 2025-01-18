@@ -12,6 +12,17 @@
     <string name="machinery_icon_desc">Icon for Machinery bottom bar feature section</string>
     <string name="inventory_icon_desc">Icon for Inventory bottom bar feature section</string>
 
+    <!--Add Machine Screen Strings-->
+    <string name="add_machine_topbar_text">Create machine</string>
+
+    <string name="add_machine_save_button_text">Save</string>
+    <string name="add_machine_save_button_description">Button to save changes and navigate back</string>
+    <string name="add_machine_cancel_button_description">Button to exit the create machine screen</string>
+
+    <string name="add_machine_name_text_field">Name</string>
+    <string name="add_machine_category_text_field">Category</string>
+    <string name="add_machine_description_text_field">Description</string>
+
     <!--AR Camera Screen Strings-->
     <string name="requirements_label_text">Requirements</string>
     <string name="instructions_label_text">Instructions</string>
