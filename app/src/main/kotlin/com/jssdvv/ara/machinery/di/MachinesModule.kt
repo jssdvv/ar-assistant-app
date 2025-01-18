@@ -2,19 +2,19 @@ package com.jssdvv.ara.machinery.di
 
 import android.app.Application
 import androidx.room.Room
-import com.jssdvv.ara.machinery.data.local.MachineryDatabase
-import com.jssdvv.ara.machinery.data.repository.ActivityRepositoryImpl
-import com.jssdvv.ara.machinery.data.repository.MachineRepositoryImpl
-import com.jssdvv.ara.machinery.domain.repository.ActivityRepository
-import com.jssdvv.ara.machinery.domain.repository.MachineRepository
-import com.jssdvv.ara.machinery.domain.usecase.ActivityUseCases
+import com.jssdvv.ara.core.data.local.AppDatabase
+import com.jssdvv.ara.core.data.repository.ActivityRepositoryImpl
+import com.jssdvv.ara.core.data.repository.MachineRepositoryImpl
+import com.jssdvv.ara.core.domain.repository.ActivityRepository
+import com.jssdvv.ara.core.domain.repository.MachineRepository
+import com.jssdvv.ara.machinery.domain.model.ActivityUseCases
+import com.jssdvv.ara.machinery.domain.model.MachineUseCases
 import com.jssdvv.ara.machinery.domain.usecase.DeleteActivity
 import com.jssdvv.ara.machinery.domain.usecase.DeleteMachine
 import com.jssdvv.ara.machinery.domain.usecase.GetActivities
 import com.jssdvv.ara.machinery.domain.usecase.GetMachines
 import com.jssdvv.ara.machinery.domain.usecase.InsertActivity
 import com.jssdvv.ara.machinery.domain.usecase.InsertMachine
-import com.jssdvv.ara.machinery.domain.usecase.MachineUseCases
 import com.jssdvv.ara.machinery.domain.usecase.UpdateActivity
 import com.jssdvv.ara.machinery.domain.usecase.UpdateMachine
 import dagger.Module
@@ -28,23 +28,25 @@ import javax.inject.Singleton
 object MachinesModule {
     @Provides
     @Singleton
-    fun provideMachineDatabase(context: Application): MachineryDatabase {
+    fun provideMachineDatabase(context: Application): AppDatabase {
         return Room.databaseBuilder(
             context = context,
-            klass = MachineryDatabase::class.java,
-            name = MachineryDatabase.DATABASE_NAME
-        ).createFromAsset("database/machinesDatabase.db").build()
+            klass = AppDatabase::class.java,
+            name = AppDatabase.DATABASE_NAME
+        ).createFromAsset("database/database.db")
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
     @Singleton
-    fun provideMachineRepository(database: MachineryDatabase): MachineRepository {
+    fun provideMachineRepository(database: AppDatabase): MachineRepository {
         return MachineRepositoryImpl(database.machineDao)
     }
 
     @Provides
     @Singleton
-    fun provideActivityRepository(database: MachineryDatabase): ActivityRepository {
+    fun provideActivityRepository(database: AppDatabase): ActivityRepository {
         return ActivityRepositoryImpl(database.activityDao)
     }
 

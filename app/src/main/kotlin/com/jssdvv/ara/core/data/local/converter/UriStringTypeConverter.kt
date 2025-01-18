@@ -1,4 +1,4 @@
-package com.jssdvv.ara.core.data.utility
+package com.jssdvv.ara.core.data.local.converter
 
 import android.net.Uri
 import androidx.room.TypeConverter
@@ -23,8 +23,8 @@ class UriStringTypeConverter {
      * @return A `String` representation of the `Uri`, which can be stored in the database.
      */
     @TypeConverter
-    fun uriToString(uri: Uri): String {
-        return uri.toString()
+    fun uriToString(uri: Uri?): String? {
+        return uri?.toString()
     }
 
     /**
@@ -34,7 +34,7 @@ class UriStringTypeConverter {
      * @return A `Uri` object constructed from the `String`.
      */
     @TypeConverter
-    fun stringToUri(string: String): Uri {
-        return Uri.parse(string)
+    fun stringToUri(string: String?): Uri? {
+        return string?.let { Uri.parse(it) }
     }
 }
