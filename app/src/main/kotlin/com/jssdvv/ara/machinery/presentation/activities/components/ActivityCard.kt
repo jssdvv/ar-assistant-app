@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation.screen.activities_list.components
+package com.jssdvv.ara.machinery.presentation.camera.activities_list.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
-import com.jssdvv.ara.machinery.domain.model.ActivityEntity
+import com.jssdvv.ara.core.data.local.entity.ActivityEntity
+import com.jssdvv.ara.core.domain.model.Activity
 
 @Composable
 fun ActivityCard(
     modifier: Modifier = Modifier,
-    entity: ActivityEntity,
+    entity: Activity,
     onNavigateToArCamera: () -> Unit
 ) {
     ElevatedCard(

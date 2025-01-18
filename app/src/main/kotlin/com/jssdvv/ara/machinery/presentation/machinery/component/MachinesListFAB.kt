@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation.screen.activities_list.components
+package com.jssdvv.ara.machinery.presentation.machinery.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -8,17 +8,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun ActivitiesListFAB(
-    onNavigateToAddActivity: () -> Unit
+fun MachinesListFAB(
+    onNavigateToAddMachine: () -> Unit
 ) {
     ExtendedFloatingActionButton(
-        text = { Text(text = "Nueva actividad") },
+        text = { Text(text = "Nueva máquina") },
         icon = {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null
             )
         },
-        onClick = onNavigateToAddActivity
+        onClick = onNavigateToAddMachine
     )
 }

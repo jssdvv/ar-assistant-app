@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation.component
+package com.jssdvv.ara.machinery.presentation.machinery.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
-import com.jssdvv.ara.machinery.domain.model.MachineEntity
+import com.jssdvv.ara.core.data.local.entity.MachineEntity
+import com.jssdvv.ara.core.domain.model.Machine
 
 @Composable
 fun MachineCard(
     modifier: Modifier = Modifier,
-    entity: MachineEntity,
+    entity: Machine,
     onNavigateToActivitiesList: (Int) -> Unit,
     onNavigateToEditMachine: (Int) -> Unit
 ) {

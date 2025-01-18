@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation.screen.activities_list.components
+package com.jssdvv.ara.machinery.presentation.camera.activities_list.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

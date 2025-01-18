@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation.component
+package com.jssdvv.ara.machinery.presentation.machinery.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width

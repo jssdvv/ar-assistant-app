@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation.screen.edit_machine
+package com.jssdvv.ara.machinery.presentation.edit_machine
 
 import androidx.compose.runtime.Composable
 

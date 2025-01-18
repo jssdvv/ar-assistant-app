@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.presentation
+package com.jssdvv.ara.machinery.presentation.camera
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -27,7 +31,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -105,10 +111,9 @@ fun ARCameraScreen(
 
         },
         modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars),
+            .fillMaxSize(),
         scaffoldState = bottomSheetScaffoldState,
-        sheetPeekHeight = 100.dp,
+        sheetPeekHeight = 105.dp,
         sheetShape = TubShapes().extraLarge,
         sheetDragHandle = {
             SheetDragHandle(
@@ -124,7 +129,7 @@ fun ARCameraScreen(
         topBar = {
             //TopBar inside the scaffold occupies that portion of background I want the camera to take
         },
-    ) {
+    ) { paddingValues ->
         val context = LocalContext.current
 
         val engine = rememberEngine()
@@ -141,11 +146,15 @@ fun ARCameraScreen(
         val imageNode = remember { mutableStateOf<AugmentedImageNode?>(null) }
 
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .background(Color.Green)
+                .padding(paddingValues)
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ){
             ARScene(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize(),
                 engine = engine,
                 modelLoader = modelLoader,
                 materialLoader = materialLoader,
@@ -203,7 +212,7 @@ fun ARCameraScreen(
         modifier = Modifier.background(
             Brush.verticalGradient(
                 listOf(
-                    Color.Black,
+                    Color.DarkGray,
                     Color.Transparent
                 )
             )
@@ -266,13 +275,12 @@ fun SheetDragHandle(
     val state = rememberLazyListState()
     val snappingLayout = remember(state) { SnapLayoutInfoProvider(state) }
     val flingBehavior = rememberSnapFlingBehavior(snappingLayout)
-
     val scope = rememberCoroutineScope()
 
-
-
     LazyRow(
-        modifier = Modifier,
+        modifier = Modifier.defaultMinSize(
+            minHeight = 60.dp
+        ),
         verticalAlignment = Alignment.CenterVertically,
         state = state,
         flingBehavior = flingBehavior,
@@ -280,6 +288,9 @@ fun SheetDragHandle(
     ) {
         items(chipsOptions){arChipOption ->
             FilterChip(
+                modifier = Modifier.defaultMinSize(
+                    minHeight = 32.dp
+                ),
                 selected = arChipOption.ordinal == selectedChip,
                 onClick = {
                     scope.launch {
