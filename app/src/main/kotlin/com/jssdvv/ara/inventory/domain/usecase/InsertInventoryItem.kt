@@ -3,7 +3,7 @@ package com.jssdvv.ara.inventory.domain.usecase
 import com.jssdvv.ara.inventory.domain.models.InvalidInventoryItemException
 import com.jssdvv.ara.inventory.domain.models.InventoryItemEntity
 import com.jssdvv.ara.inventory.domain.repository.InventoryItemRepository
-import com.jssdvv.ara.machinery.domain.model.InvalidMachineException
+import com.jssdvv.ara.core.data.local.entity.InvalidMachineException
 
 class InsertInventoryItem(
     private val repository: InventoryItemRepository

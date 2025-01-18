@@ -1,20 +1,23 @@
 package com.jssdvv.ara.machinery.domain.usecase
 
-import com.jssdvv.ara.machinery.domain.model.InvalidMachineException
-import com.jssdvv.ara.machinery.domain.model.MachineEntity
-import com.jssdvv.ara.machinery.domain.repository.MachineRepository
+import com.jssdvv.ara.core.data.local.entity.InvalidMachineException
+import com.jssdvv.ara.core.data.local.entity.MachineEntity
+import com.jssdvv.ara.core.domain.model.Machine
+import com.jssdvv.ara.core.domain.repository.MachineRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class InsertMachine(
+class InsertMachine @Inject constructor(
     private val repository: MachineRepository
 ) {
     @Throws(InvalidMachineException::class)
-    suspend operator fun invoke(entity: MachineEntity) {
-        if (entity.name.isBlank()) {
+    suspend operator fun invoke(model: Machine) {
+        if (model.name.isBlank()) {
             throw InvalidMachineException("La máquina debe tener un nombre")
         }
-        if (entity.category.isBlank()) {
+        if (model.category.isBlank()) {
             throw InvalidMachineException("La máquina debe tener una categoría")
         }
-        repository.insertMachine(entity)
+        repository.insertMachine(model)
     }
 }

@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machinery.data.local
+package com.jssdvv.ara.core.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.jssdvv.ara.machinery.domain.model.ActivityEntity
+import com.jssdvv.ara.core.data.local.entity.ActivityEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

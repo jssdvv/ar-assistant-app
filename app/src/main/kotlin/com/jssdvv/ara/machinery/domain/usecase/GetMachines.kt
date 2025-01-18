@@ -1,8 +1,9 @@
 package com.jssdvv.ara.machinery.domain.usecase
 
 import com.jssdvv.ara.core.domain.utility.OrderType
-import com.jssdvv.ara.machinery.domain.model.MachineEntity
-import com.jssdvv.ara.machinery.domain.repository.MachineRepository
+import com.jssdvv.ara.core.data.local.entity.MachineEntity
+import com.jssdvv.ara.core.domain.model.Machine
+import com.jssdvv.ara.core.domain.repository.MachineRepository
 import com.jssdvv.ara.machinery.domain.utility.MachineOrderKey
 import kotlinx.coroutines.flow.Flow
 
@@ -11,7 +12,7 @@ class GetMachines(
 ) {
     operator fun invoke(
         orderKey: MachineOrderKey = MachineOrderKey.Name(OrderType.ASCENDING),
-    ): Flow<List<MachineEntity>> {
+    ): Flow<List<Machine>> {
         return when (orderKey.orderType) {
             OrderType.ASCENDING -> when (orderKey) {
                 is MachineOrderKey.Name -> repository.getAllMachinesByNameAsc()
