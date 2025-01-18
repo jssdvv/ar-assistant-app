@@ -10,9 +10,9 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import com.jssdvv.ara.core.presentation.AppState
 import com.jssdvv.ara.core.presentation.navigation.graph.ScannerNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graph.scannerNavGraph
 import com.jssdvv.ara.core.presentation.navigation.graph.inventoryNavGraph
 import com.jssdvv.ara.core.presentation.navigation.graph.machineryNavGraph
+import com.jssdvv.ara.core.presentation.navigation.graph.scannerNavGraph
 
 @Composable
 fun AppNavHost(

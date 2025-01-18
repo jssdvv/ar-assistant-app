@@ -8,12 +8,12 @@ import androidx.navigation.toRoute
 import com.jssdvv.ara.core.presentation.AppState
 import com.jssdvv.ara.core.presentation.navigation.slideInToLeft
 import com.jssdvv.ara.core.presentation.navigation.slideOutToRight
-import com.jssdvv.ara.machinery.presentation.ARCameraScreen
-import com.jssdvv.ara.machinery.presentation.ActivitiesListScreen
-import com.jssdvv.ara.machinery.presentation.MachinesListScreen
-import com.jssdvv.ara.machinery.presentation.screen.add_machine.AddMachineScreen
-import com.jssdvv.ara.machinery.presentation.screen.edit_activity.EditActivityScreen
-import com.jssdvv.ara.machinery.presentation.screen.edit_machine.EditMachineScreen
+import com.jssdvv.ara.machinery.presentation.camera.ARCameraScreen
+import com.jssdvv.ara.machinery.presentation.activities.ActivitiesScreen
+import com.jssdvv.ara.machinery.presentation.machinery.MachineryScreen
+import com.jssdvv.ara.machinery.presentation.add_machine.AddMachineScreen
+import com.jssdvv.ara.machinery.presentation.edit_activity.EditActivityScreen
+import com.jssdvv.ara.machinery.presentation.edit_machine.EditMachineScreen
 import kotlinx.serialization.Serializable
 
 // Machinery Nested Navigation Graph Destination
@@ -36,7 +36,7 @@ fun NavGraphBuilder.machineryNavGraph(
     val navHostController = appState.navHostController
     navigation<MachineryNavGraph>(MachineryListDestination) {
         composable<MachineryListDestination> {
-            MachinesListScreen(
+            MachineryScreen(
                 onNavigateBack = { navHostController.navigateUp() },
                 onNavigateToAddMachine = navHostController::navigateToAddMachine,
                 onNavigateToEditMachine = navHostController::navigateToEditMachine,
@@ -62,7 +62,7 @@ fun NavGraphBuilder.machineryNavGraph(
         }
         composable<ActivitiesListDestination> { navBackStackEntry ->
             val args = navBackStackEntry.toRoute<ActivitiesListDestination>()
-            ActivitiesListScreen(
+            ActivitiesScreen(
                 machineId = args.machineId,
                 onNavigateBack = { navHostController.navigateUp() },
                 onNavigateToAddActivity = navHostController::navigateToAddActivity,

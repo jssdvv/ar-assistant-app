@@ -8,11 +8,9 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jssdvv.ara.core.presentation.component.LoadingWheel
 import com.jssdvv.ara.scanner.data.repository.MLKitBarcodeAnalyzer
 import com.jssdvv.ara.scanner.presentation.components.CameraPreview
 import com.jssdvv.ara.scanner.presentation.components.PermissionDialog
@@ -37,10 +36,10 @@ fun ScannerScreen(
     onNavigateToActivityList: (Int) -> Unit,
 ) {
     val viewModel = hiltViewModel<ScannerViewModel>()
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val permission = Manifest.permission.CAMERA
 
-    when (uiState.value) {
+    when (uiState) {
         is ScannerUiState.Loading -> {
             ScannerLoadingScreen(
                 modifier = Modifier.fillMaxSize(),
@@ -51,10 +50,11 @@ fun ScannerScreen(
         }
 
         is ScannerUiState.RequestingPermission -> {
+            val currentUiState = uiState as ScannerUiState.RequestingPermission
             ScannerRequestingPermissionsScreen(
                 permission = permission,
-                isPermissionDialogVisible = (uiState.value as ScannerUiState.RequestingPermission).isPermissionDialogVisible,
-                permissionRequestCount = (uiState.value as ScannerUiState.RequestingPermission).permissionRequestCount,
+                isPermissionDialogVisible = currentUiState.isPermissionDialogVisible,
+                permissionRequestCount = currentUiState.permissionRequestCount,
                 onPermissionResult = viewModel::onPermissionResult,
                 onPermissionGranted = viewModel::onPermissionsGranted,
                 setPermissionDialogVisibility = viewModel::setPermissionDialogVisibility
@@ -62,9 +62,10 @@ fun ScannerScreen(
         }
 
         is ScannerUiState.Success -> {
+            val currentUiState = uiState as ScannerUiState.Success
             ScannerSuccessScreen(
-                isScanning = (uiState.value as ScannerUiState.Success).isScanning,
-                isTorchEnabled = (uiState.value as ScannerUiState.Success).isTorchEnabled,
+                isScanning = currentUiState.isScanning,
+                isTorchEnabled = currentUiState.isTorchEnabled,
                 onSetScanningState = viewModel::setScanningState,
                 onToggleTorchState = viewModel::toggleTorchState,
                 onNavigateToActivityList = onNavigateToActivityList
@@ -81,12 +82,9 @@ fun ScannerLoadingScreen(
     context: Context = LocalContext.current,
     permission: String = Manifest.permission.CAMERA,
 ) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
+    LoadingWheel(
+        modifier = modifier
+    )
     when (ContextCompat.checkSelfPermission(context, permission)) {
         PackageManager.PERMISSION_GRANTED -> onPermissionGranted(context)
         else -> onPermissionNeeded(context)
@@ -120,7 +118,7 @@ fun ScannerRequestingPermissionsScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
