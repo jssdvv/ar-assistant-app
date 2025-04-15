@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+    <!ENTITY package_name "com.jssdvv.ara">
+    <!ENTITY preference_permissions_file_key "PREFERENCE_PERMISSIONS_FILE_KEY">]>
+<resources>
+
+    <!--description>
+
+        The preference's file keys are strings for the shared preferences files that store
+        key-value pairs. These file keys and value keys are represented with the following
+        format structure:
+
+        Format Structure: <package_name>.<preference_file_key>.<preference_value_key>
+
+            - <package_name> The package name of the application.
+            - <preference_file_key> The unique identifier in SCREAMING_SNAKE_CASE.
+            - <preference_value_key> The unique identifier in SCREAMING_SNAKE_CASE.
+
+        Note: Adding just the file key will create a new shared preferences file, but appending
+        the value key to the file key will create the key for the key-value pair for the shared
+        preference file.
+
+        Examples:
+
+            - File Key: com.jssdvv.ara.PREFERENCE_PERMISSIONS_FILE_KEY
+            - Value Key: com.jssdvv.ara.PREFERENCE_PERMISSIONS_FILE_KEY.CAMERA_INT
+
+    </description-->
+
+    <!--PREFERENCE FILE KEY-->
+
+    <!--permissions-->
+    <string name="preference_permissions_file_key" translatable="false">
+        &package_name;.&preference_permissions_file_key;
+    </string>
+
+    <!--PREFERENCE VALUE KEY-->
+
+    <!--permission>
+
+        %1$s is the permission value key string followed by the value type or descriptive name. This
+        is done to avoid another value-key stored for the same permission file key of being override
+        by this value. All of this is typed as a string in SCREAMING_SNAKE_CASE.
+
+        Examples using CAMERA permission value key:
+
+            - com.jssdvv.ara.PREFERENCE_PERMISSIONS_FILE_KEY.CAMERA_INT
+            - com.jssdvv.ara.PREFERENCE_PERMISSIONS_FILE_KEY.CAMERA_FIRST_INTERACTION
+
+    </permission-->
+    <string name="preference_permission_value_key" translatable="false">
+        &package_name;.&preference_permissions_file_key;.%1$s
+    </string>
+
+</resources>
