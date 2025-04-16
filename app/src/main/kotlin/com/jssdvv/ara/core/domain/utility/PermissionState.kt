@@ -35,11 +35,11 @@ sealed interface PermissionState {
      * This state is triggered when the [ContextCompat.checkSelfPermission] class is evaluated and
      * returns [PackageManager.PERMISSION_DENIED].
      *
-     * @property [rationale] The resource ID of the message explaining why the feature requires the
+     * @property [rationaleId] The resource ID of the message explaining why the feature requires the
      * permission.
      */
     data class Denied(
-        @StringRes val rationale: Int = R.string.denied_generic_permission_rationale,
+        @StringRes val rationaleId: Int = R.string.permission_denied_generic_rationale,
     ) : PermissionState
 
     /**
@@ -52,10 +52,10 @@ sealed interface PermissionState {
      *
      * For more details check the [Permissions dialog visibility docs](https://developer.android.com/about/versions/11/privacy/permissions#dialog-visibility).
      *
-     * @property [rationale] The resource ID of the message explaining why the feature requires the
+     * @property [rationaleId] The resource ID of the message explaining why the feature requires the
      * permission.
      */
     data class PermanentlyDenied(
-        @StringRes val rationale: Int = R.string.permanently_denied_generic_permission_rationale,
+        @StringRes val rationaleId: Int = R.string.permission_permanently_denied_generic_rationale,
     ) : PermissionState
 }
