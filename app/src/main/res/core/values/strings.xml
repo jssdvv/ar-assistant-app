@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--description>
+
+        String resources are text strings used throughout the app. This file follows a custom naming
+        convention that reflects where the string is used, a unique identifier, and its textual
+        purpose, following the structure below:
+
+        Naming Structure: <place>_<identifier>_<textual_purpose>
+
+            - <place> The primary locations: class, function, object or component where the string
+                is used (e.g., screen, dialog, button, form, card, text field, enum, etc.).
+            - <identifier> A unique and contextual name that distinguishes this string
+                from others used in similar components (e.g., settings, filter).
+            - <textual_purpose> The communicative role or function of the text.
+
+        Some <textual_purpose> types examples:
+
+        Identificational: Texts used to name, label, or distinguish interface elements.
+
+            - [identifier] For internal labels like IDs or codes shown in UI.
+            - [label] A short text identifying a UI component, like a button or field.
+            - [name] A proper name for entities like users, items, or custom components.
+            - [role] A label describing the function or responsibility of a component.
+            - [section] For named parts of UI layouts, like "Profile", "Settings", or "Search".
+            - [status]: Text indicating a status, like "Online", "Busy", "Pending".
+            - [tag] A compact keyword used for categorization or quick identification.
+
+        Informational: Texts that communicate data, states, or facts for user understanding.
+
+            - [body] The main content text of a screen, dialog, or section.
+            - [date_format] A string representing formatted date, time, or both.
+            - [headline] A prominent, attention-grabbing text often at the top of a component.
+            - [subtitle] A supporting heading that provides additional context.
+            - [title] The main heading of a screen, dialog, or section.
+            - [tooltip] A brief popup description when hovering or long-pressing.
+
+        Instructional: Texts that guide users through actions, tasks, or interactions.
+
+            - [action] Text for interactive elements such as buttons or clickable links.
+            - [disclaimer] Legal or advisory instruction that users must read or accept.
+            - [hint] A short input guide that suggests expected user input.
+            - [instruction] Text that explains how to use a component or complete a task.
+            - [message] A general-purpose prompt or notice shown to the user.
+            - [step] Used in wizards or onboarding (e.g., “Step 1: Choose an option”).
+
+        Explanatory: Texts that clarify system behavior, intentions, or requirements.
+
+            - [rationale] Explains the need for a permission or specific behavior.
+            - [supporting_text] Additional details that reinforce or explain a component’s purpose.
+            - [warning] Highlights potential risks or issues to avoid.
+
+        Feedback: Texts that report outcomes of system or user actions.
+
+            - [error] Describes a problem, validation issue, or failure.
+            - [exception] Indicates an abnormal state or condition during execution.
+            - [failure] Reports a failed action or process.
+            - [snackbar] A notification displayed at the bottom of the screen temporarily.
+            - [success] Confirms that an action was completed successfully.
+            - [toast] A short, transient message typically shown briefly.
+
+        Descriptive: Texts that outline features, attributes, or visual aspects of an element.
+
+            - [caption] A brief text that describes or summarizes media or UI content.
+            - [summary] A brief overview or synopsis of a screen, feature, or component.
+            - [content_desc] Text used by accessibility services to describe a UI element’s role.
+
+    </description-->
+
+    <!--APPLICATION [GLOBAL]-->
+
+    <string name="app_name">AR Assistant</string>
+
+    <!--COMMON BUTTON [COMPONENT]-->
+
+    <string name="button_check_action">Confirm</string>
+    <string name="button_cancel_action">Cancel</string>
+    <string name="button_save_action">Save</string>
+    <string name="button_edit_action">Edit</string>
+
+    <string name="button_icon_check_content_desc">Confirm Action</string>
+    <string name="button_icon_cancel_content_desc">Cancel Action</string>
+    <string name="button_icon_save_content_desc">Save Content</string>
+    <string name="button_icon_edit_content_desc">Edit Content</string>
+    <string name="button_icon_filter_content_desc">Filter Content</string>
+
+    <!--ORDER TYPE [ENUM]-->
+
+    <string name="order_type_sort_action">Sort by</string>
+
+    <string name="order_type_ascending_label">Ascending</string>
+    <string name="order_type_descending_label">Descending</string>
+    <string name="order_type_ascending_alphabet_label">A to Z</string>
+    <string name="order_type_descending_alphabet_label">Z to A</string>
+    <string name="order_type_ascending_date_label">New to old</string>
+    <string name="order_type_descending_date_label">Old to new</string>
+
+    <!--NAVIGATION GRAPH [ENUM]-->
+
+    <string name="graph_scanner_label">Scanner</string>
+    <string name="graph_machines_label">Machines</string>
+    <string name="graph_inventory_label">Inventory</string>
+
+    <string name="graph_icon_scanner_content_desc">Open the Barcode Scanner</string>
+    <string name="graph_icon_machines_content_desc">Open the Machines List</string>
+    <string name="graph_icon_inventory_content_desc">Open the Inventory List</string>
+
+    <!--BARCODE WRITER [CLASS]-->
+
+    <string name="barcode_writer_required_length_error" translatable="false">
+        Side length must be greater than 0 pixels.</string>
+    <string name="barcode_writer_required_content_error" translatable="false">
+        Text cannot be empty or blank.</string>
+
+    <!--RATIONALE PROVIDER [CLASS]-->
+
+    <string name="permission_denied_generic_rationale">
+        This app requires this permission to use this feature.</string>
+    <string name="permission_denied_camera_rationale">
+        This app requires access to the camera to scan codes.</string>
+    <string name="permission_denied_read_media_images_rationale">
+        This app requires access to read media images.</string>
+    <string name="permission_denied_read_media_visual_user_selected_rationale">
+        This app requires access to read media images.</string>
+    <string name="permission_denied_read_external_storage_rationale">
+        This app requires access to read media images.</string>
+    <string name="permission_denied_write_external_storage_rationale">
+        This app requires access to save files in this device.</string>
+
+    <string name="permission_permanently_denied_generic_rationale">
+        This app requires this permission to use this feature. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_camera_rationale">
+        This app requires access to the camera to scan codes. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_read_media_images_rationale">
+        This app requires access to read media images. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_read_media_visual_user_selected_rationale">
+        This app requires access to read media images. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_read_external_storage_rationale">
+        This app requires access to read media images. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_write_external_storage_rationale">
+        This app requires access to save files in this device. Go to settings to allow access.</string>
+
+</resources>
