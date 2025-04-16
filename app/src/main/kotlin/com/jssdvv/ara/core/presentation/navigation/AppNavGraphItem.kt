@@ -3,37 +3,46 @@ package com.jssdvv.ara.core.presentation.navigation
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.navigation.graph.InventoryNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graph.MachineryNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graph.ScannerNavGraph
+import com.jssdvv.ara.inventory.presentation.navigation.InventoryGraphRoute
+import com.jssdvv.ara.machines.presentation.navigation.MachinesGraphRoute
+import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraphRoute
 import kotlin.reflect.KClass
 
+/**
+ * A enum class representing the navigation graph items of the app.
+ *
+ * @property [selectedIconId] The resource id of the icon to be used when the item is selected.
+ * @property [unselectedIconId] The resource id of the icon to be used when the item is not selected.
+ * @property [labelTextId] The string resource id of the label text to be used for this item.
+ * @property [iconContentDescId] The string resource id of the icon's content description.
+ * @property [route] The [KClass] `Serializable` data class or data object route of this item.
+ */
 enum class AppNavGraphItem(
     @DrawableRes val selectedIconId: Int,
     @DrawableRes val unselectedIconId: Int,
     @StringRes val labelTextId: Int,
-    @StringRes val iconDescId: Int,
-    val route: KClass<*>
+    @StringRes val iconContentDescId: Int,
+    val route: KClass<*>,
 ) {
     SCANNER(
-        selectedIconId = R.drawable.scanner_filled,
-        unselectedIconId = R.drawable.scanner_outlined,
-        labelTextId = R.string.scanner_label_text,
-        iconDescId = R.string.scanner_icon_desc,
-        route = ScannerNavGraph::class
+        selectedIconId = R.drawable.ic_scanner_filled,
+        unselectedIconId = R.drawable.ic_scanner_outlined,
+        labelTextId = R.string.graph_scanner_label,
+        iconContentDescId = R.string.graph_icon_scanner_content_desc,
+        route = ScannerGraphRoute::class
     ),
-    MACHINERY(
-        selectedIconId = R.drawable.machines_filled,
-        unselectedIconId = R.drawable.machines_outlined,
-        labelTextId = R.string.machinery_label_text,
-        iconDescId = R.string.machinery_icon_desc,
-        route = MachineryNavGraph::class
+    MACHINES(
+        selectedIconId = R.drawable.ic_machines_filled,
+        unselectedIconId = R.drawable.ic_machines_outlined,
+        labelTextId = R.string.graph_machines_label,
+        iconContentDescId = R.string.graph_icon_machines_content_desc,
+        route = MachinesGraphRoute::class
     ),
     INVENTORY(
-        selectedIconId = R.drawable.inventory_filled,
-        unselectedIconId = R.drawable.inventory_outlined,
-        labelTextId = R.string.inventory_label_text,
-        iconDescId = R.string.inventory_icon_desc,
-        route = InventoryNavGraph::class
+        selectedIconId = R.drawable.ic_inventory_filled,
+        unselectedIconId = R.drawable.ic_inventory_outlined,
+        labelTextId = R.string.graph_inventory_label,
+        iconContentDescId = R.string.graph_icon_inventory_content_desc,
+        route = InventoryGraphRoute::class
     )
 }
