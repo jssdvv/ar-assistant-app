@@ -43,8 +43,8 @@ class BarcodeWriterImpl(
         sideLength: Int,
     ): IntArray {
 
-        require(text.isNotBlank()) { context.getString(R.string.text_cannot_be_empty) }
-        require(sideLength > 0) { context.getString(R.string.side_length_greater_than_zero) }
+        require(text.isNotBlank()) { context.getString(R.string.barcode_writer_required_content_error) }
+        require(sideLength > 0) { context.getString(R.string.barcode_writer_required_length_error) }
 
         val hints = mapOf(EncodeHintType.ERROR_CORRECTION to errorCorrectionLevel)
         val bitMatrix = qrCodeWriter.encode(

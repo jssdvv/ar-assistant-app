@@ -17,21 +17,21 @@ class RationaleProviderImpl : RationaleProvider {
 
     override fun getDeniedPermissionRationale(permission: String): Int =
         when (permission) {
-            CAMERA -> R.string.denied_camera_permission_rationale
-            READ_MEDIA_IMAGES -> R.string.denied_write_external_storage_permission_rationale
-            READ_MEDIA_VISUAL_USER_SELECTED -> R.string.denied_write_external_storage_permission_rationale
-            READ_EXTERNAL_STORAGE -> R.string.denied_read_media_images_permission_rationale
-            WRITE_EXTERNAL_STORAGE -> R.string.denied_write_external_storage_permission_rationale
-            else -> R.string.denied_generic_permission_rationale
+            CAMERA -> R.string.permission_denied_camera_rationale
+            READ_MEDIA_IMAGES -> R.string.permission_denied_write_external_storage_rationale
+            READ_MEDIA_VISUAL_USER_SELECTED -> R.string.permission_denied_write_external_storage_rationale
+            READ_EXTERNAL_STORAGE -> R.string.permission_denied_read_media_images_rationale
+            WRITE_EXTERNAL_STORAGE -> R.string.permission_denied_write_external_storage_rationale
+            else -> R.string.permission_denied_generic_rationale
         }
 
     override fun getPermanentlyDeniedPermissionRationale(permission: String): Int =
         when (permission) {
-            CAMERA -> R.string.permanently_denied_camera_permission_rationale
-            READ_MEDIA_IMAGES -> R.string.permanently_denied_write_external_storage_permission_rationale
-            READ_MEDIA_VISUAL_USER_SELECTED -> R.string.permanently_denied_write_external_storage_permission_rationale
-            READ_EXTERNAL_STORAGE -> R.string.permanently_denied_read_media_images_permission_rationale
-            WRITE_EXTERNAL_STORAGE -> R.string.permanently_denied_write_external_storage_permission_rationale
-            else -> R.string.permanently_denied_generic_permission_rationale
+            CAMERA -> R.string.permission_permanently_denied_camera_rationale
+            READ_MEDIA_IMAGES -> R.string.permission_permanently_denied_write_external_storage_rationale
+            READ_MEDIA_VISUAL_USER_SELECTED -> R.string.permission_permanently_denied_write_external_storage_rationale
+            READ_EXTERNAL_STORAGE -> R.string.permission_permanently_denied_read_media_images_rationale
+            WRITE_EXTERNAL_STORAGE -> R.string.permission_permanently_denied_write_external_storage_rationale
+            else -> R.string.permission_permanently_denied_generic_rationale
         }
 }
