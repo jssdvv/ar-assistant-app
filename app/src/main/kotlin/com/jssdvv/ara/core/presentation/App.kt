@@ -64,7 +64,7 @@ internal fun InternalApp(
                             painter = painterResource(
                                 if (selected) navGraphItem.selectedIconId else navGraphItem.unselectedIconId
                             ),
-                            contentDescription = stringResource(navGraphItem.iconDescId)
+                            contentDescription = stringResource(navGraphItem.iconContentDescId)
                         )
                     },
                     modifier = Modifier,
@@ -80,11 +80,6 @@ internal fun InternalApp(
             modifier = Modifier
         )
     }
-//    Box(
-//        modifier
-//            .fillMaxSize()
-//            .background(Color.Blue)
-//    )
 }
 
 private fun NavDestination?.isDestinationInHierarchy(destination: KClass<*>): Boolean {

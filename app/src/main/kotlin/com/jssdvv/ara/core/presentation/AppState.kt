@@ -10,9 +10,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.jssdvv.ara.core.presentation.navigation.AppNavGraphItem
-import com.jssdvv.ara.core.presentation.navigation.graph.InventoryNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graph.MachineryNavGraph
-import com.jssdvv.ara.core.presentation.navigation.graph.ScannerNavGraph
+import com.jssdvv.ara.inventory.presentation.navigation.InventoryGraphRoute
+import com.jssdvv.ara.machines.presentation.navigation.MachinesGraphRoute
+import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraphRoute
 
 @Composable
 fun rememberAppState(
@@ -53,9 +53,9 @@ class AppState(
             restoreState = true
         }
         when (appNavGraphItem) {
-            AppNavGraphItem.SCANNER -> navHostController.navigate(ScannerNavGraph, navOptions)
-            AppNavGraphItem.MACHINERY -> navHostController.navigate(MachineryNavGraph, navOptions)
-            AppNavGraphItem.INVENTORY -> navHostController.navigate(InventoryNavGraph, navOptions)
+            AppNavGraphItem.SCANNER -> navHostController.navigate(ScannerGraphRoute, navOptions)
+            AppNavGraphItem.MACHINES -> navHostController.navigate(MachinesGraphRoute, navOptions)
+            AppNavGraphItem.INVENTORY -> navHostController.navigate(InventoryGraphRoute, navOptions)
         }
     }
 }
