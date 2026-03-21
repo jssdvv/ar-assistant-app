@@ -2,32 +2,83 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!--FEATURE-->
+
+    <uses-feature android:name="android.hardware.camera.any" />
+
+    <!--PERMISSION-->
+
+    <!--camera>
+        - For AR sessions
+        - For barcode scanning
+    </camera-->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!--read media>
+        - Creation of Markers
+        - Attachment of Machine Media
+    </read media-->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
-    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!--write external storage>
+        - Creation of Markers in External Storage
+        - Attachment of Machine Media in External Storage
+    </write external storage-->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".core.HiltAndroidApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ara"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ara_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ara"
         tools:targetApi="31">
         <activity
             android:name=".core.MainActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.ara"
             android:windowSoftInputMode="adjustResize">
+
+            <!--INTENT-->
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="arassistant.vercel.app" />
+                <data android:pathPrefix="/" />
+            </intent-filter>
         </activity>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

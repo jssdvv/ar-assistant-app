@@ -9,25 +9,43 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import com.jssdvv.ara.core.presentation.AppState
-import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraphRoute
-import com.jssdvv.ara.inventory.presentation.navigation.inventoryNavGraph
 import com.jssdvv.ara.machines.presentation.navigation.machinesNavGraph
+import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
 import com.jssdvv.ara.scanner.presentation.navigation.scannerNavGraph
+import com.jssdvv.ara.schedule.presentation.navigation.scheduleNavGraph
 
+/**
+ * Root navigation host for the application.
+ *
+ * Navigation Structure:
+ * ```
+ * AppNavHost
+ *   ├─ ScannerGraph (start)
+ *   ├─ MachinesGraph
+ *   └─ ScheduleGraph
+ * ```
+ *
+ * Each graph contains its own navigation tree. See individual graph functions for details:
+ * - [scannerNavGraph]
+ * - [machinesNavGraph]
+ * - [scheduleNavGraph]
+ *
+ * @param appState Application state containing the NavHostController and UI state.
+ * @param modifier Modifier to be applied to the NavHost.
+ */
 @Composable
 fun AppNavHost(
     appState: AppState,
     modifier: Modifier,
 ) {
-    val navHostController = appState.navHostController
     NavHost(
-        startDestination = ScannerGraphRoute,
-        navController = navHostController,
+        startDestination = ScannerGraph,
+        navController = appState.navHostController,
         modifier = modifier
     ) {
         scannerNavGraph(appState)
         machinesNavGraph(appState)
-        inventoryNavGraph(appState)
+        scheduleNavGraph(appState)
     }
 }
 
