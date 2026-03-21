@@ -1,5 +1,7 @@
 package com.jssdvv.ara.scanner.data.repository
 
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -8,37 +10,35 @@ import com.google.mlkit.vision.common.InputImage
 import com.jssdvv.ara.scanner.domain.repository.BarcodeAnalyzerRepository
 
 class MLKitBarcodeAnalyzer(
-    private val barcode: (barcode: Barcode, width: Int, height: Int) -> Unit
+    private val barcodes: (
+        barcodes: List<Barcode>,
+        width: Int,
+        height: Int,
+        rotationDegrees: Int,
+    ) -> Unit,
 ) : BarcodeAnalyzerRepository {
 
-    private val options = BarcodeScannerOptions.Builder()
+    private val scannerOptions = BarcodeScannerOptions.Builder()
         .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-        .enableAllPotentialBarcodes()
+        //.enableAllPotentialBarcodes() // Keeps bounds for all potential barcodes
         .build()
 
-    private val scanner = BarcodeScanning.getClient(options)
+    private val scanner = BarcodeScanning.getClient(scannerOptions)
 
+    @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        imageProxy.image?.let { image ->
-            InputImage.fromMediaImage(
-                image,
-                imageProxy.imageInfo.rotationDegrees
-            ).let { inputImage ->
-                scanner.process(inputImage)
-                    .addOnSuccessListener { barcodes ->
-                        if (barcodes.isNotEmpty()) {
-                            barcodes.firstOrNull().let { barcode ->
-                                if (barcode != null) {
-                                    barcode(barcode, inputImage.width, inputImage.height)
-                                }
-                            }
-                        }
-                    }.addOnFailureListener { exception ->
-                        exception.printStackTrace()
-                    }.addOnCompleteListener {
-                        imageProxy.close()
-                    }
+
+        val mediaImage = imageProxy.image ?: return
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+        val inputImage = InputImage.fromMediaImage(mediaImage, rotationDegrees)
+
+        scanner.process(inputImage)
+            .addOnSuccessListener { barcodes ->
+                barcodes(barcodes, inputImage.width, inputImage.height, rotationDegrees)
+            }.addOnFailureListener { exception ->
+                exception.printStackTrace()
+            }.addOnCompleteListener {
+                imageProxy.close()
             }
-        }
     }
 }
