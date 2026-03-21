@@ -4,10 +4,16 @@ import android.content.Context
 import androidx.room.Room
 import com.jssdvv.ara.core.data.local.AppDatabase
 import com.jssdvv.ara.core.data.repository.BarcodeWriterImpl
+import com.jssdvv.ara.core.data.repository.DirectoriesManagerImpl
+import com.jssdvv.ara.core.data.repository.FilesManagerImpl
+import com.jssdvv.ara.core.data.repository.PDFGeneratorHelperImpl
 import com.jssdvv.ara.core.data.repository.PermissionHandlerImpl
 import com.jssdvv.ara.core.data.repository.RationaleProviderImpl
 import com.jssdvv.ara.core.data.repository.VibratorHelperImpl
 import com.jssdvv.ara.core.domain.repository.BarcodeWriter
+import com.jssdvv.ara.core.domain.repository.DirectoriesManager
+import com.jssdvv.ara.core.domain.repository.FilesManager
+import com.jssdvv.ara.core.domain.repository.PDFGeneratorHelper
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
 import com.jssdvv.ara.core.domain.repository.RationaleProvider
 import com.jssdvv.ara.core.domain.repository.VibratorHelper
@@ -33,16 +39,36 @@ object AppModule {
             context = context,
             klass = AppDatabase::class.java,
             name = AppDatabase.DATABASE_NAME
-        ).createFromAsset(AppDatabase.DATABASE_PATH)
+        ).createFromAsset(AppDatabase.DATABASE_ASSET_PATH)
+            //.fallbackToDestructiveMigration()
             .build()
 
     @Provides
     @Singleton
-    fun provideBarcodeWriter(context: Context): BarcodeWriter = BarcodeWriterImpl(context)
+    fun provideDirectoriesManager(context: Context): DirectoriesManager =
+        DirectoriesManagerImpl(context)
+
+    @Provides
+    @Singleton
+    fun provideBarcodeWriter(
+        context: Context,
+        directoriesManager: DirectoriesManager,
+    ): BarcodeWriter =
+        BarcodeWriterImpl(
+            context = context,
+            directoriesManager = directoriesManager
+        )
 
     @Provides
     @Singleton
     fun provideVibratorHelper(context: Context): VibratorHelper = VibratorHelperImpl(context)
+
+    @Provides
+    @Singleton
+    fun providesLoaderHelper(
+        context: Context,
+        directoriesManager: DirectoriesManager,
+    ): FilesManager = FilesManagerImpl(context, directoriesManager)
 
     @Provides
     @Singleton
@@ -55,4 +81,13 @@ object AppModule {
         rationaleProvider: RationaleProvider,
     ): PermissionHandler =
         PermissionHandlerImpl(context, rationaleProvider)
+
+    @Provides
+    @Singleton
+    fun providePDFGeneratorHelper(
+        context: Context,
+        directoriesManager: DirectoriesManager,
+        filesManager: FilesManager
+    ): PDFGeneratorHelper =
+        PDFGeneratorHelperImpl(context, directoriesManager, filesManager)
 }
