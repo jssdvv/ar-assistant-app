@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--MACHINES SEARCH BAR [COMPONENT]-->
+
+    <string name="search_bar_machines_supporting_text">Search machines</string>
+
+    <!--MACHINE ORDER KEY [ENUM]-->
+
+    <string name="machine_order_key_code_label">Code</string>
+    <string name="machine_order_key_name_label">Name</string>
+    <string name="machine_order_key_type_label">Type</string>
+    <string name="machine_order_key_creation_date_label">Creation date</string>
+    <string name="machine_order_key_modification_date_label">Modification date</string>
+    
+    <!--MACHINE TYPE [ENUM]-->
+    
+    <string name="machine_type_electrical_label">Electrical</string>
+    <string name="machine_type_hydraulic_label">Hydraulic</string>
+    <string name="machine_type_mechanical_label">Mechanical</string>
+    <string name="machine_type_pneumatic_label">Pneumatic</string>
+    <string name="machine_type_thermal_label">Thermal</string>
+    <string name="machine_type_unknown_label">Unknown</string>
+
+    <string name="icon_electrical_content_desc">Electrical Machine</string>
+    <string name="icon_hydraulic_content_desc">Hydraulic Machine</string>
+    <string name="icon_mechanical_content_desc">Mechanical Machine</string>
+    <string name="icon_pneumatic_content_desc">Pneumatic Machine</string>
+    <string name="icon_thermal_content_desc">Thermal Machine</string>
+    <string name="icon_unknown_content_desc">Unknown Machine</string>
+
+    <!--MACHINE DETAILS [SCREEN]-->
+
+    <string name="machine_image_content_desc">Image Of The Machine</string>
+
+    <!--MACHINE AND MOTOR IDENTIFICATION CARD [COMPONENT]-->
+
+    <string name="text_field_code_label">Code</string>
+    <string name="text_field_name_label">Name</string>
+    <string name="text_field_type_label">Machine type</string>
+    <string name="text_field_location_label">Location</string>
+    <string name="text_field_brand_label">Brand</string>
+    <string name="text_field_model_label">Model</string>
+    <string name="text_field_serial_number_label">Serial number</string>
+    <string name="text_field_fabrication_year_label">Fabrication year</string>
+    <string name="text_field_price_label">Price</string>
+    <string name="text_field_acquisition_date_label">Acquisition date</string>
+    
+    <string name="icon_machine_code_content_desc">Enter the Machine Code</string>
+    <string name="icon_machine_name_content_desc">Enter the Machine Name</string>
+    <string name="icon_machine_type_content_desc">Enter the Machine Type</string>
+    <string name="icon_machine_location_content_desc">Enter the Machine Location</string>
+    <string name="icon_machine_brand_content_desc">Enter the Machine Brand</string>
+    <string name="icon_machine_model_content_desc">Enter the Machine Model</string>
+    <string name="icon_machine_serial_content_desc">Enter the Machine Serial Number</string>
+    <string name="icon_machine_fabrication_year_content_desc">Enter the Machine Year of Manufacture</string>
+    <string name="icon_machine_price_content_desc">Enter the Machine Price</string>
+    <string name="icon_machine_acquisition_date_content_desc">Enter the Machine Acquisition Date</string>
+
+    <string name="icon_motor_brand_content_desc">Enter the Motor Brand</string>
+    <string name="icon_motor_model_content_desc">Enter the Motor Model</string>
+    <string name="icon_motor_serial_content_desc">Enter the Motor Serial Number</string>
+    <string name="icon_motor_product_number_content_desc">Enter the Motor Product Number</string>
+    <string name="icon_motor_fabrication_country_content_desc">Enter the Motor Country of Manufacture</string>
+    <string name="icon_motor_fabrication_year_content_desc">Enter the Motor Year of Manufacture</string>
+    <string name="icon_motor_standards_applied_content_desc">Enter the Motor Applied Standards</string>
+    <string name="icon_motor_price_content_desc">Enter the Motor Price</string>
+    <string name="icon_motor_acquisition_date_content_desc">Enter the Motor Acquisition Year</string>
+
+    <!--MACHINE SPECIFICATIONS CARDS [COMPONENT]-->
+    
+    <string name="text_field_machine_service_capacity_label">Service capacity</string>
+    <string name="text_field_machine_speed_label">Machine speed</string>
+    <string name="text_field_machine_lubricant_label">Lubricant</string>
+    <string name="text_field_machine_power_supply_label">Power supply</string>
+    <string name="text_field_machine_weight_label">Weight</string>
+    <string name="text_field_machine_height_label">Height</string>
+    <string name="text_field_machine_width_label">Width</string>
+    <string name="text_field_machine_length_label">Length</string>
+    <string name="text_field_machine_job_desc_label">Job description</string>
+    <string name="text_field_machine_hours_per_day_label">Hours per day</string>
+    <string name="text_field_machine_room_temp_label">Room temperature</string>
+    <string name="text_field_machine_additional_desc_label">Additional description</string>
+
+    <string name="icon_machine_service_capacity_content_desc">Enter the Machine Service Capacity</string>
+    <string name="icon_machine_speed_content_desc">Enter the Machine Speed</string>
+    <string name="icon_machine_lubricant_content_desc">Enter the Machine Lubricant</string>
+    <string name="icon_machine_power_supply_content_desc">Enter the Machine Power Supply</string>
+    <string name="icon_machine_weight_content_desc">Enter the Machine Weight</string>
+    <string name="icon_machine_height_content_desc">Enter the Machine Height</string>
+    <string name="icon_machine_width_content_desc">Enter the Machine Width</string>
+    <string name="icon_machine_length_content_desc">Enter the Machine Length</string>
+    <string name="icon_machine_job_desc_content_desc">Enter the Machine Job Description</string>
+    <string name="icon_machine_hours_per_day_content_desc">Enter the Machine Hours per Day</string>
+    <string name="icon_machine_room_temp_content_desc">Enter the Machine Room Temperature</string>
+    <string name="icon_machine_additional_desc_content_desc">Enter the Machine Additional Description</string>
+
+    <!--MOTOR SPECIFICATIONS CARD [COMPONENT]-->
+
+    <string name="text_field_motor_efficiency_class_label">Efficiency class</string>
+    <string name="text_field_motor_phases_number_label">Number of phases</string>
+    <string name="text_field_motor_nominal_power_label">Nominal power</string>
+    <string name="text_field_motor_frequency_label">Frequency</string>
+    <string name="text_field_motor_rpm_label">text_field speed</string>
+    <string name="text_field_motor_rpm_range_label">Speed range</string>
+    <string name="text_field_motor_nominal_voltage_label">Nominal voltage</string>
+    <string name="text_field_motor_nominal_current_label">Nominal current</string>
+    <string name="text_field_motor_service_factor_label">Service factor</string>
+    <string name="text_field_motor_power_factor_label">Power factor</string>
+    <string name="text_field_motor_duty_label">Duty</string>
+    <string name="text_field_motor_room_temp_label">Room temperature</string>
+    <string name="text_field_motor_energy_efficiency_label">Energy efficiency</string>
+    <string name="text_field_motor_max_altitude_label">Maximum operation altitude</string>
+    <string name="text_field_motor_ingress_protection_label">Ingress protection</string>
+    <string name="text_field_motor_mounting_type_label">Mounting type</string>
+    <string name="text_field_motor_frame_type_label">Frame type</string>
+    <string name="text_field_motor_cooling_method_label">Cooling method</string>
+    <string name="text_field_motor_drive_end_label">text_field drive end</string>
+    <string name="text_field_motor_non_drive_end_label">text_field non drive end</string>
+    <string name="text_field_motor_insulation_class_label">Insulation class</string>
+    <string name="text_field_motor_insulation_class_temp_label">Insulation class temperature</string>
+    <string name="text_field_motor_weight_label">text_field weight</string>
+    
+    <!--MOTOR SYMBOLS DESIGNATIONS [TEXT]-->
+
+    <string name="motor_efficiency_class_symbol_designation" translatable="false">IE</string>
+    <string name="motor_phases_number_symbol_designation" translatable="false">PH ~</string>
+    <string name="motor_nominal_power_symbol_designation" translatable="false">kW (HP)</string>
+    <string name="motor_frequency_symbol_designation" translatable="false">Hz</string>
+    <string name="motor_rpm_symbol_designation" translatable="false">min -1</string>
+    <string name="motor_rpm_range_symbol_designation" translatable="false">CT</string>
+    <string name="motor_nominal_voltage_symbol_designation" translatable="false">V</string>
+    <string name="motor_nominal_current_symbol_designation" translatable="false">A</string>
+    <string name="motor_service_factor_symbol_designation" translatable="false">S.F.</string>
+    <string name="motor_power_factor_symbol_designation" translatable="false">P.F.</string>
+    <string name="motor_duty_symbol_designation" translatable="false">DUTY</string>
+    <string name="motor_room_temp_symbol_designation" translatable="false">AMB.</string>
+    <string name="motor_energy_efficiency_symbol_designation" translatable="false">EFF.</string>
+    <string name="motor_max_altitude_symbol_designation" translatable="false">m.a.s.l</string>
+    <string name="motor_ingress_protection_symbol_designation" translatable="false">IP</string>
+    <string name="motor_mounting_type_symbol_designation" translatable="false">IM</string>
+    <string name="motor_frame_type_symbol_designation" translatable="false">FR</string>
+    <string name="motor_cooling_method_symbol_designation" translatable="false">IC</string>
+    <string name="motor_drive_end_symbol_designation" translatable="false">DE</string>
+    <string name="motor_non_drive_end_symbol_designation" translatable="false">NDE</string>
+    <string name="motor_insulation_class_symbol_designation" translatable="false">INS.CL.</string>
+    <string name="motor_insulation_class_rise_temp_symbol_designation" translatable="false">ΔT</string>
+    <string name="motor_weight_symbol_designation" translatable="false">Kg (lb)</string>
+
+</resources>

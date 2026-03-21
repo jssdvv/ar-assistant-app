@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--NAVIGATION GRAPH [ENUM]-->
+
+    <string name="graph_scanner_label">Scanner</string>
+    <string name="graph_machines_label">Machines</string>
+    <string name="graph_schedule_label">Events</string>
+
+    <!--NAVIGATION GRAPH ICON [COMPONENT]-->
+
+    <string name="icon_scanner_content_desc">Open the Barcode Scanner</string>
+    <string name="icon_machines_content_desc">Open the Machines List</string>
+    <string name="icon_schedule_content_desc">Open the Schedule</string>
+
+    <!--COUNTER NAVIGATION BUTTON [COMPONENT]-->
+
+    <string name="counter_button_activities_label">Activities</string>
+    <string name="counter_button_documents_label">Documents</string>
+    <string name="counter_button_suppliers_label">Suppliers</string>
+    <string name="counter_button_markers_label">Markers</string>
+    <string name="counter_button_calibration_label">Calibration</string>
+
+    <!--COUNTER NAVIGATION ICON [COMPONENT]-->
+
+    <string name="icon_activities_content_desc">Go To Machine Maintenance Activities</string>
+    <string name="icon_documents_content_desc">Go to Machine Documents</string>
+    <string name="icon_suppliers_content_desc">Go To Machine Suppliers</string>
+    <string name="icon_markers_content_desc">Go To Maintenance Markers</string>
+    <string name="icon_calibration_content_desc">Go To 3D Markers Calibration</string>
+
+    <!--NAVIGATION WITH ICON BUTTON [COMPONENT]-->
+
+    <string name="button_navigate_to_specs_from_machines_label">Specifications</string>
+    <string name="button_navigate_to_animations_from_activities_label">Edit animations</string>
+    <string name="button_navigate_to_ar_session_from_activities_label">Start</string>
+
+    <string name="icon_navigate_to_specs_from_machines_content_desc">Inspect Machine Specifications</string>
+    <string name="icon_navigate_to_animations_from_activities_content_desc">Edit animations</string>
+    <string name="icon_navigate_to_ar_session_from_activities_content_desc">Initiate AR session</string>
+
+</resources>

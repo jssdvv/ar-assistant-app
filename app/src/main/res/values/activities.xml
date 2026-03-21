@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--ACTIVITY SCREEN-->
+
+    <string name="top_bar_activities_title">Activities</string>
+
+    <!--ACTIVITY TYPE [ENUM]-->
+
+    <string name="activity_type_general_label">General</string>
+    <string name="activity_type_calibration_label">Calibration</string>
+    <string name="activity_type_inspection_label">Inspection</string>
+    <string name="activity_type_installation_label">Installation</string>
+    <string name="activity_type_restoration_label">Restoration</string>
+    <string name="activity_type_replacement_label">Replacement</string>
+    <string name="activity_type_other_label">Other</string>
+
+    <string name="icon_activity_type_general_content_desc">General Activity</string>
+    <string name="icon_activity_type_calibration_content_desc">Calibration Activity</string>
+    <string name="icon_activity_type_inspection_content_desc">Inspection Activity</string>
+    <string name="icon_activity_type_installation_content_desc">Installation Activity</string>
+    <string name="icon_activity_type_restoration_content_desc">Restoration Activity</string>
+    <string name="icon_activity_type_replacement_content_desc">Replacement Activity</string>
+    <string name="icon_activity_type_other_content_desc">Other Activity Type</string>
+
+    <!--TRANSLATION MODE [ENUM]-->
+
+    <string name="translation_mode_meters_label">Meters</string>
+    <string name="translation_mode_decimeters_label">Decimeters</string>
+    <string name="translation_mode_centimeters_label">Centimeters</string>
+    <string name="translation_mode_millimeters_label">Millimeters</string>
+    <string name="rotation_mode_degrees_label">Degrees</string>
+
+    <string name="translation_mode_meters_symbol" translatable="false">1m</string>
+    <string name="translation_mode_decimeters_symbol" translatable="false">1dm</string>
+    <string name="translation_mode_centimeters_symbol" translatable="false">1cm</string>
+    <string name="translation_mode_millimeters_symbol" translatable="false">1mm</string>
+
+    <!--ROTATION MODE [ENUM]-->
+
+    <string name="rotation_mode_degrees_half_symbol" translatable="false">.5°</string>
+    <string name="rotation_mode_degrees_01_symbol" translatable="false">01°</string>
+    <string name="rotation_mode_degrees_10_symbol" translatable="false">10°</string>
+    <string name="rotation_mode_degrees_45_symbol" translatable="false">45°</string>
+
+    <!--TRANSFORMATION MODE [ENUM]-->
+
+    <string name="transformation_mode_translation_label">Translation</string>
+    <string name="transformation_mode_rotation_label">Rotation</string>
+
+    <!--MEASUREMENT [ENUM]-->
+
+    <string name="measurement_millimeters_symbol" translatable="false">mm</string>
+    <string name="measurement_centimeters_symbol" translatable="false">cm</string>
+    <string name="measurement_decimeters_symbol" translatable="false">dm</string>
+    <string name="measurement_meters_symbol" translatable="false">m</string>
+    <string name="measurement_degree_symbol" translatable="false">deg</string>
+
+    <!--MARKER DIALOG [COMPONENT]-->
+
+    <string name="marker_dialog_edit_title">Edit Marker</string>
+    <string name="marker_dialog_create_title">Create Marker</string>
+    <string name="marker_dialog_barcode_content_desc">QR Code</string>
+    <string name="marker_codification" translatable="false">M%1$dP%2$d</string>
+
+    <!--ACTIVITY CARD [COMPONENT]-->
+
+    <string name="activity_image_content_desc">Image Of The Maintenance Activity</string>
+
+    <!--TOOL TYPE [ENUM]-->
+
+    <string name="tool_type_wrenches_label">Wrench</string>
+    <string name="tool_type_screw_drivers_label">Screwdriver</string>
+    <string name="tool_type_pliers_label">Pliers</string>
+    <string name="tool_type_hammers_label">Hammer</string>
+    <string name="tool_type_saw_label">Saw</string>
+    <string name="tool_type_measuring_label">Measuring</string>
+    <string name="tool_type_other_label">Other</string>
+
+    <string name="icon_tool_type_wrench_content_desc">Wrench</string>
+    <string name="icon_tool_type_screw_driver_content_desc">Screwdriver</string>
+    <string name="icon_tool_type_pliers_content_desc">Pliers</string>
+    <string name="icon_tool_type_hammer_content_desc">Hammer</string>
+    <string name="icon_tool_type_saw_content_desc">Saw</string>
+    <string name="icon_tool_type_measuring_content_desc">Measuring</string>
+    <string name="icon_tool_type_other_content_desc">Other</string>
+
+    <string name="operation_type_free_label">Point To Point Operation</string>
+    <string name="operation_type_screw_label">Screw Operation</string>
+    <string name="operation_type_cylindrical_label">Cylindrical Operation</string>
+    <string name="operation_type_joint_label">Joint Operation</string>
+    <string name="operation_type_visibility_label">Visibility Animation</string>
+
+    <string name="icon_operation_type_free_content_desc">Adjust Point To Point Operation</string>
+    <string name="icon_operation_type_screw_content_desc">Adjust Screw Operation</string>
+    <string name="icon_operation_type_cylindrical_content_desc">Adjust Cylindrical Operation</string>
+    <string name="icon_operation_type_joint_content_desc">Adjust Joint Operation</string>
+    <string name="icon_operation_type_visibility_content_desc">Adjust Visibility Operation</string>
+
+</resources>

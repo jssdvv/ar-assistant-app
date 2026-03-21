@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Allows accessing files in internal storage -->
+    <files-path
+        name="internal_files"
+        path="." />
+
+    <files-path
+        name="machine_documents"
+        path="machine/" />
+</paths>

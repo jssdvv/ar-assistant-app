@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--MACHINES SEARCH BAR [COMPONENT]-->
+
+    <string name="search_bar_machines_supporting_text">Buscar máquinas</string>
+
+    <!--MACHINE ORDER KEY [ENUM]-->
+
+    <string name="machine_order_key_code_label">Código</string>
+    <string name="machine_order_key_name_label">Nombre</string>
+    <string name="machine_order_key_type_label">Tipo</string>
+    <string name="machine_order_key_creation_date_label">Fecha de creación</string>
+    <string name="machine_order_key_modification_date_label">Fecha de modificación</string>
+
+    <!--MACHINE TYPE [ENUM]-->
+
+    <string name="machine_type_electrical_label">Eléctrica</string>
+    <string name="machine_type_hydraulic_label">Hidráulica</string>
+    <string name="machine_type_mechanical_label">Mecánica</string>
+    <string name="machine_type_pneumatic_label">Pneumática</string>
+    <string name="machine_type_thermal_label">Térmica</string>
+    <string name="machine_type_unknown_label">Desconocida</string>
+
+    <string name="icon_electrical_content_desc">Máquina Eléctrica</string>
+    <string name="icon_hydraulic_content_desc">Máquina Hidráulica</string>
+    <string name="icon_mechanical_content_desc">Máquina Mecánica</string>
+    <string name="icon_pneumatic_content_desc">Máquina Pneumática</string>
+    <string name="icon_thermal_content_desc">Máquina Térmica</string>
+    <string name="icon_unknown_content_desc">Máquina Desconocida</string>
+
+    <!--MACHINE DETAILS [SCREEN]-->
+    
+    <string name="machine_image_content_desc">Imagen De La Máquina</string>
+
+    <!--MACHINE AND MOTOR IDENTIFICATION CARD [COMPONENT]-->
+    
+    <string name="text_field_code_label">Código</string>
+    <string name="text_field_name_label">Nombre</string>
+    <string name="text_field_type_label">Tipo de maquina</string>
+    <string name="text_field_location_label">Ubicación</string>
+    <string name="text_field_brand_label">Marca</string>
+    <string name="text_field_model_label">Modelo</string>
+    <string name="text_field_serial_number_label">Número de serie</string>
+    <string name="text_field_fabrication_year_label">Año de fabricación</string>
+    <string name="text_field_price_label">Precio</string>
+    <string name="text_field_acquisition_date_label">Fecha de adquisición</string>
+    
+    <string name="icon_machine_code_content_desc">Ingrese el Código de la Máquina</string>
+    <string name="icon_machine_name_content_desc">Ingrese el Nombre de la Máquina</string>
+    <string name="icon_machine_type_content_desc">Ingrese el Tipo de Máquina</string>
+    <string name="icon_machine_location_content_desc">Ingrese la Ubicación de la Máquina</string>
+    <string name="icon_machine_brand_content_desc">Ingrese la Marca de la Máquina</string>
+    <string name="icon_machine_model_content_desc">Ingrese el Modelo de la Máquina</string>
+    <string name="icon_machine_serial_content_desc">Ingrese el Número de Serie de la Máquina</string>
+    <string name="icon_machine_fabrication_year_content_desc">Ingrese el Año de Fabricación de la Máquina</string>
+    <string name="icon_machine_price_content_desc">Ingrese el Precio de la Máquina</string>
+    <string name="icon_machine_acquisition_date_content_desc">Ingrese la Fecha de Adquisición de la Máquina</string>
+
+    <string name="icon_motor_brand_content_desc">Ingrese la Marca del Motor</string>
+    <string name="icon_motor_model_content_desc">Ingrese el Modelo del Motor</string>
+    <string name="icon_motor_serial_content_desc">Ingrese el Número de Serie del Motor</string>
+    <string name="icon_motor_product_number_content_desc">Ingrese el Número de Producto del Motor</string>
+    <string name="icon_motor_fabrication_country_content_desc">Ingrese el País de Fabricación del Motor</string>
+    <string name="icon_motor_fabrication_year_content_desc">Ingrese el Año de Fabricación del Motor</string>
+    <string name="icon_motor_standards_applied_content_desc">Ingrese las Normas Aplicadas al Motor</string>
+    <string name="icon_motor_price_content_desc">Ingrese el Precio del Motor</string>
+    <string name="icon_motor_acquisition_date_content_desc">Ingrese el Año de Adquisición del Motor</string>
+
+    <!--MACHINE SPECIFICATIONS CARDS [COMPONENT]-->
+    
+    <string name="text_field_machine_service_capacity_label">Capacidad de servicio</string>
+    <string name="text_field_machine_speed_label">Velocidad de la máquina</string>
+    <string name="text_field_machine_lubricant_label">Lubricante</string>
+    <string name="text_field_machine_power_supply_label">Fuente de alimentación</string>
+    <string name="text_field_machine_weight_label">Peso</string>
+    <string name="text_field_machine_height_label">Alto</string>
+    <string name="text_field_machine_width_label">Ancho</string>
+    <string name="text_field_machine_length_label">Largo</string>
+    <string name="text_field_machine_job_desc_label">Descripción del trabajo</string>
+    <string name="text_field_machine_hours_per_day_label">Horas por día</string>
+    <string name="text_field_machine_room_temp_label">Temperatura</string>
+    <string name="text_field_machine_additional_desc_label">Descripción adicional</string>
+
+    <string name="icon_machine_service_capacity_content_desc">Ingrese la Capacidad de servicio de la Máquina</string>
+    <string name="icon_machine_speed_content_desc">Ingrese la Velocidad de la Máquina</string>
+    <string name="icon_machine_lubricant_content_desc">Ingrese el Lubricante de la Máquina</string>
+    <string name="icon_machine_power_supply_content_desc">Ingrese la Fuente de alimentación de la Máquina</string>
+    <string name="icon_machine_weight_content_desc">Ingrese el Peso de la Máquina</string>
+    <string name="icon_machine_height_content_desc">Ingrese el Alto de la Máquina</string>
+    <string name="icon_machine_width_content_desc">Ingrese el Ancho de la Máquina</string>
+    <string name="icon_machine_length_content_desc">Ingrese el Largo de la Máquina</string>
+    <string name="icon_machine_job_desc_content_desc">Ingrese la Descripción del trabajo de la Máquina</string>
+    <string name="icon_machine_hours_per_day_content_desc">Ingrese las Horas por Día de la Máquina</string>
+    <string name="icon_machine_room_temp_content_desc">Ingrese la Temperatura de la Máquina</string>
+    <string name="icon_machine_additional_desc_content_desc">Ingrese la Descripción Adicional de la Máquina</string>
+
+    <!--MOTOR SPECIFICATIONS CARD [COMPONENT]-->
+    
+    <string name="text_field_motor_efficiency_class_label">Clase de eficiencia</string>
+    <string name="text_field_motor_phases_number_label">Número de fases</string>
+    <string name="text_field_motor_nominal_power_label">Potencia nominal</string>
+    <string name="text_field_motor_frequency_label">Frecuencia</string>
+    <string name="text_field_motor_rpm_label">Velocidad del motor</string>
+    <string name="text_field_motor_rpm_range_label">Rango de velocidad</string>
+    <string name="text_field_motor_nominal_voltage_label">Voltaje nominal</string>
+    <string name="text_field_motor_nominal_current_label">Corriente nominal</string>
+    <string name="text_field_motor_service_factor_label">Factor de servicio</string>
+    <string name="text_field_motor_power_factor_label">Factor de potencia</string>
+    <string name="text_field_motor_duty_label">Tipo de servicio</string>
+    <string name="text_field_motor_room_temp_label">Temperatura ambiente</string>
+    <string name="text_field_motor_energy_efficiency_label">Eficiencia energética</string>
+    <string name="text_field_motor_max_altitude_label">Altitud máxima de operación</string>
+    <string name="text_field_motor_ingress_protection_label">Grado de protección</string>
+    <string name="text_field_motor_mounting_type_label">Tipo de montaje</string>
+    <string name="text_field_motor_frame_type_label">Tipo de marco</string>
+    <string name="text_field_motor_cooling_method_label">Método de refrigeración</string>
+    <string name="text_field_motor_drive_end_label">Rodamientos delanteros</string>
+    <string name="text_field_motor_non_drive_end_label">Rodamientos traseros</string>
+    <string name="text_field_motor_insulation_class_label">Clase de aislamiento</string>
+    <string name="text_field_motor_insulation_class_temp_label">Temperatura de clase de aislamiento</string>
+    <string name="text_field_motor_weight_label">Peso del motor</string>
+
+</resources>

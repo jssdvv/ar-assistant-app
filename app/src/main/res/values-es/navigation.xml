@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--NAVIGATION GRAPH [ENUM]-->
+
+    <string name="graph_scanner_label">Escáner</string>
+    <string name="graph_machines_label">Máquinas</string>
+    <string name="graph_schedule_label">Eventos</string>
+
+    <!--NAVIGATION GRAPH ICON [COMPONENT]-->
+
+    <string name="icon_scanner_content_desc">Abrir el Escáner de Códigos</string>
+    <string name="icon_machines_content_desc">Abrir la Lista de Máquinas</string>
+    <string name="icon_schedule_content_desc">Abrir la Lista de Inventario</string>
+
+    <!--COUNTER NAVIGATION BUTTON [COMPONENT]-->
+
+    <string name="counter_button_activities_label">Actividades</string>
+    <string name="counter_button_documents_label">Documentos</string>
+    <string name="counter_button_suppliers_label">Proveedores</string>
+    <string name="counter_button_markers_label">Marcadores</string>
+    <string name="counter_button_calibration_label">Calibración</string>
+
+    <!--COUNTER NAVIGATION ICON [COMPONENT]-->
+
+    <string name="icon_activities_content_desc">Ir A Las Actividades De Mantenimiento</string>
+    <string name="icon_documents_content_desc">Ir A Los Documentos De La Máquina</string>
+    <string name="icon_suppliers_content_desc">Ir A Los Proveedores De La Máquina</string>
+    <string name="icon_markers_content_desc">Ir A Los Marcadores De La Máquina</string>
+    <string name="icon_calibration_content_desc">Ir A La Calibración De La Máquina</string>
+
+    <!--NAVIGATION WITH ICON BUTTON [COMPONENT]-->
+
+    <string name="button_navigate_to_specs_from_machines_label">Especificaciones</string>
+    <string name="button_navigate_to_animations_from_activities_label">Editar animaciones</string>
+    <string name="button_navigate_to_ar_session_from_activities_label">Iniciar</string>
+
+    <string name="icon_navigate_to_specs_from_machines_content_desc">Inspeccionar Las Especificaciones De La Máquina</string>
+    <string name="icon_navigate_to_animations_from_activities_content_desc">Editar Animaciones</string>
+    <string name="icon_navigate_to_ar_session_from_activities_content_desc">Iniciar Sesión De RA</string>
+
+</resources>

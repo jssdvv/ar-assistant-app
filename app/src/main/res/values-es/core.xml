@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--APPLICATION [GLOBAL]-->
+
+    <string name="app_name">Asistente de RA</string>
+
+    <!--COMMON BUTTON [COMPONENT]-->
+
+    <string name="button_check_action">Confirmar</string>
+    <string name="button_cancel_action">Cancelar</string>
+    <string name="button_save_action">Guardar</string>
+    <string name="button_edit_action">Editar</string>
+
+    <!--COMMON ICON [COMPONENT]-->
+
+    <string name="icon_check_content_desc">Confirmar</string>
+    <string name="icon_add_content_desc">Agregar</string>
+    <string name="icon_arrow_back_content_desc">Ir Atras</string>
+    <string name="icon_arrow_back_opposite_content_desc">Ir Adelante</string>
+    <string name="icon_arrow_down_content_desc">Expandir</string>
+    <string name="icon_arrow_down_opposite_content_desc">Reducir</string>
+    <string name="icon_arrow_drop_down_content_desc">Abrir</string>
+    <string name="icon_arrow_drop_down_opposite_content_desc">Cerrar</string>
+    <string name="icon_arrow_downward_content_desc">Mover Abajo</string>
+    <string name="icon_arrow_downward_opposite_content_desc">Mover Arriba</string>
+    <string name="icon_arrow_previous_item_content_desc">Elemento Anterior</string>
+    <string name="icon_arrow_previous_item_opposite_content_desc">Siguiente Elemento</string>
+    <string name="icon_check_list_content_desc">Lista de Chequeo</string>
+    <string name="icon_close_content_desc">Cerrar</string>
+    <string name="icon_edit_content_desc">Editar</string>
+    <string name="icon_remove_content_desc">Eliminar</string>
+    <string name="icon_search_content_desc">Buscar</string>
+    <string name="icon_share_content_desc">Compartir</string>
+    <string name="icon_text_content_desc">Descripción</string>
+    <string name="icon_menu_close_content_desc">Cerrar Menú</string>
+    <string name="icon_menu_open_content_desc">Abrir Menú</string>
+    <string name="icon_delete_content_desc">Eliminar</string>
+    <string name="icon_warning_content_desc">Advertencia</string>
+
+    <!--ORDER TYPE [ENUM]-->
+
+    <string name="order_type_sort_action">Ordenar por</string>
+
+    <string name="order_type_ascending_label">Ascendente</string>
+    <string name="order_type_descending_label">Descendente</string>
+    <string name="order_type_ascending_alphabet_label">De la A a la Z</string>
+    <string name="order_type_descending_alphabet_label">De la Z a la A</string>
+    <string name="order_type_ascending_date_label">De nueva a antigua</string>
+    <string name="order_type_descending_date_label">De antigua a nueva</string>
+
+    <!--RATIONALE PROVIDER [CLASS]-->
+
+    <string name="permission_denied_generic_rationale">
+        Esta aplicación requiere este permiso para usar esta funcionalidad.</string>
+    <string name="permission_denied_camera_rationale">
+        Esta aplicación requiere acceso a la cámara para escanear códigos.</string>
+    <string name="permission_denied_read_media_images_rationale">
+        Esta aplicación requiere acceso a la galería.</string>
+    <string name="permission_denied_read_media_visual_user_selected_rationale">
+        Esta aplicación requiere acceso a la galería.</string>
+    <string name="permission_denied_read_external_storage_rationale">
+        Esta aplicación requiere acceso de lectura de archivos.</string>
+    <string name="permission_denied_write_external_storage_rationale">
+        Esta aplicación requiere acceso para guardar archivos en este dispositivo.</string>
+
+    <string name="permission_permanently_denied_generic_rationale">
+        Esta aplicación requiere este permiso para usar esta funcionalidad. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_camera_rationale">
+        Esta aplicación requiere acceso a la cámara para escanear códigos. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_read_media_images_rationale">
+        Esta aplicación requiere acceso a la galería. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_read_media_visual_user_selected_rationale">
+        Esta aplicación requiere acceso a la galería. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_read_external_storage_rationale">
+        Esta aplicación requiere acceso de lectura de archivos. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_write_external_storage_rationale">
+        Esta aplicación requiere acceso para guardar archivos en este dispositivo. Ve a ajustes para permitirlo.</string>
+
+</resources>

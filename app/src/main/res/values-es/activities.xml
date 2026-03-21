@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--ACTIVITY SCREEN-->
+
+    <string name="top_bar_activities_title">Actividades</string>
+
+    <!--ACTIVITY TYPE [ENUM]-->
+
+    <string name="activity_type_general_label">General</string>
+    <string name="activity_type_calibration_label">Calibración</string>
+    <string name="activity_type_inspection_label">Inspección</string>
+    <string name="activity_type_installation_label">Instalación</string>
+    <string name="activity_type_restoration_label">Restauración</string>
+    <string name="activity_type_replacement_label">Reemplazo</string>
+    <string name="activity_type_other_label">Otro</string>
+
+    <string name="icon_activity_type_general_content_desc">Actividad General</string>
+    <string name="icon_activity_type_calibration_content_desc">Actividad De Calibración</string>
+    <string name="icon_activity_type_inspection_content_desc">Actividad De Inspección</string>
+    <string name="icon_activity_type_installation_content_desc">Actividad De Instalación</string>
+    <string name="icon_activity_type_restoration_content_desc">Actividad De Restauración</string>
+    <string name="icon_activity_type_replacement_content_desc">Actividad De Reemplazo</string>
+    <string name="icon_activity_type_other_content_desc">Otro Tipo De Actividad</string>
+
+    <!--TRANSLATION MODE [ENUM]-->
+
+    <string name="translation_mode_meters_label">Metros</string>
+    <string name="translation_mode_decimeters_label">Decimetros</string>
+    <string name="translation_mode_centimeters_label">Centimetros</string>
+    <string name="translation_mode_millimeters_label">Milimetros</string>
+    <string name="rotation_mode_degrees_label">Grados</string>
+
+    <!--TRANSFORMATION MODE [ENUM]-->
+
+    <string name="transformation_mode_translation_label">Traslación</string>
+    <string name="transformation_mode_rotation_label">Rotación</string>
+
+    <!--MARKER DIALOG [COMPONENT]-->
+
+    <string name="marker_dialog_edit_title">Editar Marcador</string>
+    <string name="marker_dialog_create_title">Crear Marcador</string>
+    <string name="marker_dialog_barcode_content_desc">Código QR</string>
+
+    <!--ACTIVITY CARD [COMPONENT]-->
+
+    <string name="activity_image_content_desc">Imagen De La Actividad De Mantenimiento</string>
+
+    <!--TOOL TYPE [ENUM]-->
+
+    <string name="tool_type_wrenches_label">Llave</string>
+    <string name="tool_type_screw_drivers_label">Destornillador</string>
+    <string name="tool_type_pliers_label">Alicates</string>
+    <string name="tool_type_hammers_label">Martillo</string>
+    <string name="tool_type_other_label">Otro</string>
+
+    <string name="icon_tool_type_wrench_content_desc">Llave</string>
+    <string name="icon_tool_type_screw_driver_content_desc">Destornillador</string>
+    <string name="icon_tool_type_pliers_content_desc">Alicates</string>
+    <string name="icon_tool_type_hammer_content_desc">Martillo</string>
+    <string name="icon_tool_type_saw_content_desc">Sierra</string>
+    <string name="icon_tool_type_measuring_content_desc">Medición</string>
+    <string name="icon_tool_type_other_content_desc">Otro</string>
+
+    <string name="operation_type_free_label">Operación de Punto a Punto</string>
+    <string name="operation_type_screw_label">Operación de Tornillo</string>
+    <string name="operation_type_cylindrical_label">Operación Cilíndrica</string>
+    <string name="operation_type_joint_label">Operación de Junta</string>
+    <string name="operation_type_visibility_label">Operación de Visibilidad</string>
+
+    <string name="icon_operation_type_free_content_desc">Ajustar Operación De Punto a Punto</string>
+    <string name="icon_operation_type_screw_content_desc">Ajustar Operación De Tornillo</string>
+    <string name="icon_operation_type_cylindrical_content_desc">Ajustar Operación Cilíndrica</string>
+    <string name="icon_operation_type_joint_content_desc">Ajustar Operación De Junta</string>
+    <string name="icon_operation_type_visibility_content_desc">Ajustar Operación De Visibilidad</string>
+
+</resources>

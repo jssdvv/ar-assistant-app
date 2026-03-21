@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="gizmo_x">#E6334D</color>
+    <color name="gizmo_y">#80CC1A</color>
+    <color name="gizmo_z">#3380E6</color>
+    <color name="gizmo_c">#FF9933</color>
+
+    <color name="gizmo_disabled">#808080</color>
+
+</resources>
