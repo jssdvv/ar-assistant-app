@@ -2,13 +2,22 @@ package com.jssdvv.ara.core.data.repository
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.Typeface
+import android.net.Uri
 import com.google.zxing.BarcodeFormat
-import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.repository.BarcodeWriter
+import com.jssdvv.ara.core.domain.repository.DirectoriesManager
+import java.io.File
+import kotlin.random.Random
 
 /**
  * Helper class for generating QR codes as bitmaps.
@@ -20,10 +29,16 @@ import com.jssdvv.ara.core.domain.repository.BarcodeWriter
 class BarcodeWriterImpl(
     private val context: Context,
     private val bitmapConfig: Bitmap.Config = Bitmap.Config.ARGB_8888,
-    val darkCellColor: Int = Color.BLACK,
+    private val directoriesManager: DirectoriesManager,
+    var darkCellColor: Int = Color.BLACK,
     val lightCellColor: Int = Color.WHITE,
     val errorCorrectionLevel: ErrorCorrectionLevel = ErrorCorrectionLevel.L,
 ) : BarcodeWriter {
+
+    companion object {
+        private val DEFAULT_FORMAT = Bitmap.CompressFormat.PNG
+        private const val DEFAULT_QUALITY = 100
+    }
 
     private val qrCodeWriter by lazy { QRCodeWriter() }
 
@@ -41,6 +56,7 @@ class BarcodeWriterImpl(
     private fun getQRCodeIntArray(
         text: String,
         sideLength: Int,
+        randomQRColor: Boolean = false
     ): IntArray {
 
         require(text.isNotBlank()) { context.getString(R.string.barcode_writer_required_content_error) }
@@ -54,6 +70,14 @@ class BarcodeWriterImpl(
             sideLength,
             hints
         )
+
+        if(randomQRColor) {
+            val hsv = FloatArray(3)
+            hsv[0] = (Random.nextFloat() * 360).coerceIn(0F, 360F)
+            hsv[1] = 1F
+            hsv[2] = 0.5F
+            darkCellColor = Color.HSVToColor(hsv)
+        }
 
         // Creates a 2D array of ints representing the QR code,
         // with true for dark cells and false for light cells.
@@ -98,6 +122,121 @@ class BarcodeWriterImpl(
             //      width: The number of pixels in the x direction to be filled.
             //      height: The number of pixels in the y direction to be filled.
             setPixels(pixels, 0, sideLength, 0, 0, sideLength, sideLength)
+        }
+    }
+
+    override fun saveBitmapToInternalStorage(
+        machineId: Int,
+        displayName: String,
+        bitmap: Bitmap,
+        format: Bitmap.CompressFormat?,
+        quality: Int?,
+    ): Uri {
+        val dir = directoriesManager.getMarkersDir(machineId)
+        val actualFormat = format ?: DEFAULT_FORMAT
+        val actualQuality = quality ?: DEFAULT_QUALITY
+        val density = context.resources.displayMetrics.density
+
+        val padding = 5F * density
+        val cornerRadius = 8F * density
+        val textSize = 40F * density
+        val spacingBetweenQrAndText = 10F * density
+        val strokeWidth = 2F * density
+
+        val textPaint = Paint().apply {
+            this.textSize = textSize
+            color = Color.BLACK
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.DEFAULT_BOLD
+            isAntiAlias = true
+            isDither = true
+        }
+
+        val textBounds = Rect().apply {
+            textPaint.getTextBounds(displayName, 0, displayName.length, this)
+        }
+        val textHeight = textBounds.height().toFloat()
+        val textWidth = textPaint.measureText(displayName)
+
+        val finalWidth = maxOf(bitmap.width + padding * 2, textWidth + padding * 2)
+        val finalHeight = bitmap.height + padding * 2 + spacingBetweenQrAndText + textSize
+
+        val newBitmap = Bitmap.createBitmap(
+            finalWidth.toInt(),
+            finalHeight.toInt(),
+            Bitmap.Config.ARGB_8888
+        )
+
+        val borderPaint = Paint().apply {
+            color = Color.BLACK
+            style = Paint.Style.STROKE
+            this.strokeWidth = strokeWidth
+            isAntiAlias = true
+            isDither = true
+        }
+
+        val halfStrokeWidth = strokeWidth / 2
+        val roundedRect = RectF(
+            halfStrokeWidth,
+            halfStrokeWidth,
+            finalWidth - halfStrokeWidth,
+            finalHeight - halfStrokeWidth
+        )
+
+        val qrLeft = (finalWidth - bitmap.width) / 2
+
+        Canvas(newBitmap).apply {
+            // Background color
+            drawColor(Color.WHITE)
+
+            // QR code
+            drawBitmap(
+                bitmap,
+                qrLeft,
+                padding,
+                null
+            )
+
+            // Border Rect
+            drawRoundRect(
+                roundedRect,
+                cornerRadius,
+                cornerRadius,
+                borderPaint
+            )
+
+            // Display name below the QR
+            if (displayName.isNotBlank()) {
+                drawText(
+                    displayName,
+                    finalWidth / 2,
+                    padding + bitmap.height + spacingBetweenQrAndText + textHeight / 2,
+                    textPaint
+                )
+            }
+        }
+
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dir, "$displayName.${actualFormat.name.lowercase()}")
+
+        return try {
+            file.outputStream().use { newBitmap.compress(actualFormat, actualQuality, it) }
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            Uri.EMPTY
+        }
+    }
+
+    override fun deleteBitmapFromInternalStorage(
+        machineId: Int,
+        displayName: String
+    ) {
+        try {
+            val dir = directoriesManager.getMarkersDir(machineId)
+            val file = File(dir, displayName)
+            file.delete()
+        } catch (e: Exception) {
+            throw e
         }
     }
 }

@@ -4,9 +4,6 @@ import android.content.pm.PackageManager
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.domain.utility.PermissionState.Denied
-import com.jssdvv.ara.core.domain.utility.PermissionState.Granted
-import com.jssdvv.ara.core.domain.utility.PermissionState.PermanentlyDenied
 
 /**
  * A sealed interface representing the possible states of a permission.
@@ -39,7 +36,7 @@ sealed interface PermissionState {
      * permission.
      */
     data class Denied(
-        @StringRes val rationaleId: Int = R.string.permission_denied_generic_rationale,
+        @param:StringRes val rationaleId: Int = R.string.permission_denied_generic_rationale,
     ) : PermissionState
 
     /**
@@ -56,6 +53,6 @@ sealed interface PermissionState {
      * permission.
      */
     data class PermanentlyDenied(
-        @StringRes val rationaleId: Int = R.string.permission_permanently_denied_generic_rationale,
+        @param:StringRes val rationaleId: Int = R.string.permission_permanently_denied_generic_rationale,
     ) : PermissionState
 }
