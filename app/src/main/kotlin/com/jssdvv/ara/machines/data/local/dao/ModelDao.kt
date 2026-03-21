@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.jssdvv.ara.machines.data.local.entity.ModelEntity
-import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

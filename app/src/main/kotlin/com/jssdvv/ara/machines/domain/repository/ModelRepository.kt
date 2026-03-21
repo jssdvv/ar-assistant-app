@@ -1,7 +1,6 @@
 package com.jssdvv.ara.machines.domain.repository
 
 import com.jssdvv.ara.machines.domain.model.Model
-import com.jssdvv.ara.machines.domain.model.Operation
 import kotlinx.coroutines.flow.Flow
 
 interface ModelRepository {
