@@ -21,11 +21,12 @@ import kotlin.reflect.KClass
 @Composable
 fun App(
     appState: AppState,
+    modifier: Modifier = Modifier,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
     InternalApp(
         appState = appState,
-        modifier = Modifier,
+        modifier = modifier,
         windowAdaptiveInfo = windowAdaptiveInfo
     )
 }
@@ -33,8 +34,8 @@ fun App(
 @Composable
 internal fun InternalApp(
     appState: AppState,
-    modifier: Modifier,
-    windowAdaptiveInfo: WindowAdaptiveInfo,
+    modifier: Modifier = Modifier,
+    windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
     val currentDestination = appState.currentDestination
     val currentGraphDestination = appState.currentNavGraphDestination
@@ -51,23 +52,20 @@ internal fun InternalApp(
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             appState.navGraphItems.forEach { navGraphItem ->
-                val selected = currentGraphDestination
-                    .isDestinationInHierarchy(navGraphItem.route)
-                val onClick = {
-                    appState.navigateToNavGraphDestination(navGraphItem)
-                }
+                val selected = currentGraphDestination.isDestinationInHierarchy(navGraphItem.route)
+                val onClick = { appState.navigateToNavGraphDestination(navGraphItem) }
                 item(
                     selected = selected,
                     onClick = onClick,
                     icon = {
                         Icon(
                             painter = painterResource(
-                                if (selected) navGraphItem.selectedIconId else navGraphItem.unselectedIconId
+                                if (selected) navGraphItem.selectedIconId
+                                else navGraphItem.unselectedIconId
                             ),
                             contentDescription = stringResource(navGraphItem.iconContentDescId)
                         )
                     },
-                    modifier = Modifier,
                     label = { Text(stringResource(navGraphItem.labelTextId)) }
                 )
             }
@@ -87,3 +85,5 @@ private fun NavDestination?.isDestinationInHierarchy(destination: KClass<*>): Bo
         navDestination.hasRoute(destination)
     } ?: false
 }
+
+//TODO Fix deprecated things here

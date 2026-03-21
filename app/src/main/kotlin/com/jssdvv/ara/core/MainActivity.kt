@@ -20,14 +20,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Theme {
+                val appState = rememberAppState()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val appState = rememberAppState()
-                    App(appState)
-                }
+                    color = MaterialTheme.colorScheme.background,
+                    content = { App(appState) }
+                )
             }
         }
     }
 }
+
+// TODO: Fix all strings in the app
+// TODO: Create common icons for the app and fix the use of them
+// TODO: Fix colors
+// TODO: normalize spacings
+// TODO: normalize shapes
