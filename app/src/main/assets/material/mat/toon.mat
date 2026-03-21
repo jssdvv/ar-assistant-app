@@ -1,0 +1,41 @@
+material {
+    name : Toon,
+    shadingModel : lit,
+    parameters : [
+        {
+            type : float3,
+            name : baseColor
+        }
+    ],
+    customSurfaceShading : true
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor.rgb = materialParams.baseColor;
+    }
+
+    vec3 surfaceShading(
+            const MaterialInputs materialInputs,
+            const ShadingData shadingData,
+            const LightData lightData
+    ) {
+        // Number of visible shade transitions
+        const float shades = 5.0;
+        // Ambient intensity
+        const float ambient = 0.1;
+
+        float toon = max(ceil(lightData.NdotL * shades) / shades, ambient);
+
+        // Shadowing and attenuation
+        toon *= lightData.visibility * lightData.attenuation;
+
+        // Color and intensity
+        vec3 light = lightData.colorIntensity.rgb * lightData.colorIntensity.w;
+
+        return shadingData.diffuseColor * light * toon;
+    }
+}
+
+// I lost the original file of toon3.filamat and I don't know if it's the same

@@ -1,0 +1,22 @@
+material {
+    name : "transparent_color",
+    shadingModel : unlit,
+    parameters : [
+        {
+            type : float4,
+            name : baseColor
+        }
+    ],
+    blending : transparent,
+    depthWrite : false,
+    culling : back,
+    transparency : twoPassesOneSide
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor = vec4(1.0, 0.0, 0.0, 0.0);
+        //materialParams.baseColor;
+    }
+}
