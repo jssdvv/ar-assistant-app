@@ -163,7 +163,7 @@ class ModelsCalibrationViewModel @Inject constructor(
         markersDataManager.select(machineId).onEach { markers.value = it }.launchIn(viewModelScope)
 
     private fun getModels(machineId: Int) =
-        modelsDataManager.select.selectModelsByMachineId(machineId).onEach { models.value = it }
+        modelsDataManager.select(machineId).onEach { models.value = it }
             .launchIn(viewModelScope)
 
     private fun calibrateOriginToMarker(

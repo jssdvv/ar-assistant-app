@@ -16,7 +16,7 @@ class CountModels(private val repository: ModelRepository) {
 }
 
 class SelectModels(private val repository: ModelRepository) {
-    fun selectModelsByMachineId(machineId: Int): Flow<List<Model>> =
+    operator fun invoke(machineId: Int): Flow<List<Model>> =
         repository.selectModelsByMachineId(machineId)
 }
 
