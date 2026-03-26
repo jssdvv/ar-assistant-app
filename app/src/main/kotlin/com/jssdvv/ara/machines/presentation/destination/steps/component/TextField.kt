@@ -21,65 +21,18 @@ import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.core.presentation.common.ArrowPreviousItemIcon
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.RotationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.TranslationState
 
-enum class Axis(
-    val rotationName: String
-) {
-    X(
-        rotationName = "ROLL"
-    ),
-
-    Y(
-        rotationName = "PITCH"
-    ),
-
-    Z(
-        rotationName = "YAW"
-    )
-}
 
 @Composable
 fun TranslationTextField(
-    axis: Axis,
-    value: String,
-    onValueChange: (String) -> Unit,
-    measurement: Measurement,
-    onMeasurementChange: (Measurement) -> Unit,
-    modifier: Modifier = Modifier,
-) = OutlinedTextField(
-    value = value,
-    onValueChange = onValueChange,
-    modifier = modifier,
-    shape = MaterialTheme.shapes.small,
-    keyboardOptions = KeyboardOptions(
-        keyboardType = KeyboardType.Number,
-        imeAction = ImeAction.Done
-    ),
-    leadingIcon = {
-        Text(
-            text = "${axis.name} = ",
-            modifier = Modifier.padding(start = 24.dp)
-        )
-    },
-    trailingIcon = {
-        TranslationMeasurementMenu(
-            measurement = measurement,
-            onMeasurementChange = onMeasurementChange
-        )
-    }
-)
-
-@Composable
-fun DistanceTextField(
     name: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    measurement: Measurement,
-    onMeasurementChange: (Measurement) -> Unit,
+    state: TranslationState,
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
-    value = value,
-    onValueChange = onValueChange,
+    value = state.units,
+    onValueChange = { state.updateUnits(it) },
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
@@ -94,48 +47,76 @@ fun DistanceTextField(
     },
     trailingIcon = {
         TranslationMeasurementMenu(
-            measurement = measurement,
-            onMeasurementChange = onMeasurementChange
+            measurement = state.measurement,
+            onMeasurementChange = { state.updateMeasurement(it) }
         )
     }
 )
 
 @Composable
-fun RotationTextField(
-    axis: Axis,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        leadingIcon = {
-            Text(
-                text = "${axis.rotationName} = ",
-                modifier = Modifier.padding(start = 24.dp)
-            )
-        },
-        trailingIcon = {
-            TextButton(
-                onClick = {},
-                modifier = Modifier.padding(end = 8.dp),
-                content = { Text("deg") }
+fun PitchTextField(
+    name: String,
+    state: TranslationState,
+    isPitch: Boolean,
+    modifier: Modifier = Modifier
+) = OutlinedTextField(
+    value = state.units,
+    onValueChange = { state.updateUnits(it) },
+    modifier = modifier,
+    shape = MaterialTheme.shapes.small,
+    keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Number,
+        imeAction = ImeAction.Done
+    ),
+    leadingIcon = {
+        Text(
+            text = "$name = ",
+            modifier = Modifier.padding(start = 24.dp)
+        )
+    },
+    trailingIcon = if (isPitch) {
+        {
+            TranslationMeasurementMenu(
+                measurement = state.measurement,
+                onMeasurementChange = { state.updateMeasurement(it) }
             )
         }
-    )
-}
+    } else null
+)
+
+@Composable
+fun RotationTextField(
+    name: String,
+    state: RotationState,
+    modifier: Modifier = Modifier,
+) = OutlinedTextField(
+    value = state.units,
+    onValueChange = { state.updateUnits(it) },
+    modifier = modifier,
+    shape = MaterialTheme.shapes.small,
+    keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Number,
+        imeAction = ImeAction.Done
+    ),
+    leadingIcon = {
+        Text(
+            text = "$name = ",
+            modifier = Modifier.padding(start = 24.dp)
+        )
+    },
+    trailingIcon = {
+        TextButton(
+            onClick = {},
+            modifier = Modifier.padding(end = 8.dp),
+            content = { Text("deg") }
+        )
+    }
+)
 
 @Composable
 fun EntitiesTextField(
     selectedItemsCount: Int,
-    onScreenChange: (BottomSheetScreen) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource? = null
 ) = OutlinedTextField(
@@ -150,7 +131,7 @@ fun EntitiesTextField(
     readOnly = true,
     trailingIcon = {
         IconButton(
-            onClick = { onScreenChange(BottomSheetScreen.Entities) },
+            onClick = onClick,
             content = { ArrowPreviousItemIcon(Modifier.rotate(180F)) }
         )
     },
@@ -161,7 +142,7 @@ fun EntitiesTextField(
 @Composable
 fun OperationsTextField(
     currentOperationType: OperationType?,
-    onScreenChange: (BottomSheetScreen) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource? = null,
 ) = OutlinedTextField(
@@ -169,9 +150,10 @@ fun OperationsTextField(
         .clickable(
             interactionSource = interactionSource,
             indication = null,
-            onClick = { onScreenChange(BottomSheetScreen.Operations) }
+            onClick = onClick
         ),
-    value = currentOperationType?.let { stringResource(it.labelResId) } ?: "No selected operation",  //todo create string
+    value = currentOperationType?.let { stringResource(it.labelResId) }
+        ?: "No selected operation",  //todo create string
     onValueChange = {},
     label = { Text("Selected operation") }, //todo create string
     readOnly = true,
@@ -185,7 +167,7 @@ fun OperationsTextField(
     },
     trailingIcon = {
         IconButton(
-            onClick = { onScreenChange(BottomSheetScreen.Operations) },
+            onClick = onClick,
             content = { ArrowPreviousItemIcon(Modifier.rotate(180F)) }
         )
     },

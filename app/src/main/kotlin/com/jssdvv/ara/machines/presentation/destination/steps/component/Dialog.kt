@@ -1,6 +1,5 @@
 package com.jssdvv.ara.machines.presentation.destination.steps.component
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,11 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -39,20 +33,17 @@ import com.jssdvv.ara.machines.domain.model.Step
 
 @Composable
 fun StepDialog(
-    step: Step? = null,
+    currentStep: Step,
+    onUpdateStep: (Step) -> Unit,
     onDismissRequest: () -> Unit,
-    onSaveChanges: (id: Int, name: String, desc: String, imageUri: Uri?) -> Unit,
+    onSaveStep: (Step) -> Unit,
 ) {
-    var id by remember { mutableIntStateOf(step?.id ?: 0) }
-    var name by remember { mutableStateOf(step?.name ?: "") }
-    var desc by remember { mutableStateOf(step?.description ?: "") }
-    var imageUri by remember { mutableStateOf(step?.imageUri) }
+    val isNewStep = currentStep.id == 0
     val noImageBgColor = MaterialTheme.colorScheme.surface
-
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { contentUri ->
-            if (contentUri != null) imageUri = contentUri
+            if (contentUri != null) onUpdateStep(currentStep.copy(imageUri = contentUri))
         }
     )
 
@@ -65,7 +56,7 @@ fun StepDialog(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = if (step == null) "Create New Step" else "Edit Step",
+                text = if (isNewStep) "Create New Step" else "Edit Step",
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -76,7 +67,7 @@ fun StepDialog(
                     .background(noImageBgColor, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
-                imageUri?.let{
+                currentStep.imageUri?.let {
                     AsyncImage(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -92,25 +83,27 @@ fun StepDialog(
                 }
 
                 ChangeImageButton(
-                    onClick = { launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                    onClick = {
+                        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = MaterialTheme.spacing.small),
-                    isOutlined = imageUri == null
+                    isOutlined = currentStep.imageUri == null
                 )
             }
 
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = currentStep.name,
+                onValueChange = { onUpdateStep(currentStep.copy(name = it)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 label = { Text("Name") } // todo string
             )
 
             OutlinedTextField(
-                value = desc,
-                onValueChange = { desc = it },
+                value = currentStep.description ?: "",
+                onValueChange = { onUpdateStep(currentStep.copy(description = it)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 6,
@@ -130,13 +123,13 @@ fun StepDialog(
 
                 ButtonWithIcon(
                     onClick = {
-                        onSaveChanges(id, name, desc, imageUri)
+                        onSaveStep(currentStep)
                         onDismissRequest()
                     },
                     colors = ButtonDefaults.buttonColors(),
                     leadingIcon = { AddIcon() },
                     content = {
-                        Text(if (step == null) "Create" else "Save")
+                        Text(if (isNewStep) "Create" else "Save")
                     } //todo create string
                 )
             }

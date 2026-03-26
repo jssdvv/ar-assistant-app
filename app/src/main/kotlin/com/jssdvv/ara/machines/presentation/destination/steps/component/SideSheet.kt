@@ -1,6 +1,5 @@
 package com.jssdvv.ara.machines.presentation.destination.steps.component
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,11 +30,13 @@ fun StepsSideSheet(
     onDismiss: () -> Unit,
     steps: List<Step>,
     selectedStep: Step?,
-    onAddStep: (id: Int, name: String, desc: String, imageUri: Uri?) -> Unit,
-    onSelectStep: (Int) -> Unit,
+    onNewStep: () -> Unit,
+    onSaveStep: (Step) -> Unit,
+    onSelectStep: (Int?) -> Unit,
+    onUpdateStep: (Step) -> Unit,
     operations: List<Operation>,
     selectedOperation: Operation?,
-    onAddOperation: () -> Unit,
+    onNewOperation: (stepId: Int) -> Unit,
     onEditOperation: (Operation) -> Unit,
     onSelectOperation: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -73,7 +74,8 @@ fun StepsSideSheet(
                 items = steps,
                 key = { it.id }
             ) { step ->
-                val stepOperations = remember(operations) { operations.filter { it.stepId == step.id } }
+                val stepOperations =
+                    remember(operations) { operations.filter { it.stepId == step.id } }
                 StepCard(
                     onClick = { onSelectStep(step.id) },
                     step = step,
@@ -85,22 +87,31 @@ fun StepsSideSheet(
                     operations = stepOperations,
                     selectedOperation = selectedOperation,
                     onSelectOperation = onSelectOperation,
-                    onAddOperation = onAddOperation,
+                    onAddOperation = {
+                        onSelectStep(step.id)
+                        onNewOperation(step.id)
+                    },
                     onEditOperation = onEditOperation
                 )
             }
         }
 
         AddStepButton {
-            onSelectStep(0)
+            onNewStep()
             showStepDialog = true
         }
 
-        if (showStepDialog) {
+        if (showStepDialog && selectedStep != null) {
             StepDialog(
-                step = selectedStep,
-                onDismissRequest = { showStepDialog = false },
-                onSaveChanges = onAddStep
+                currentStep = selectedStep,
+                onUpdateStep = onUpdateStep,
+                onDismissRequest = {
+                    showStepDialog = false
+                    onSelectStep(null)
+                                   },
+                onSaveStep = { onSaveStep(it)
+                    onSelectStep(null)
+                }
             )
         }
     }
