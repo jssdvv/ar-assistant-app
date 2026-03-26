@@ -40,7 +40,7 @@ class OperationRepositoryImpl(
             val operationId =
                 if (opTargets.operation.id == 0) generatedId else opTargets.operation.id
 
-            val targets = opTargets.targetRenderables.map { target ->
+            val targets = opTargets.renderableTargets.map { target ->
                 target.toComposite().copy(operationId = operationId)
             }
             dao.replaceTargets(operationId, targets)

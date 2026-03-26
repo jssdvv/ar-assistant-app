@@ -5,12 +5,10 @@ import com.jssdvv.ara.machines.data.local.entity.operation.TargetRenderableCompo
 import com.jssdvv.ara.machines.data.local.relation.OperationWithTargets
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
-import com.jssdvv.ara.machines.domain.model.TargetRenderable
+import com.jssdvv.ara.machines.domain.model.RenderableTarget
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.math.Position
-import io.github.sceneview.math.Transform
-import io.github.sceneview.math.quaternion
 
 fun OperationEntity.toDomain() = Operation(
     id = id,
@@ -20,31 +18,16 @@ fun OperationEntity.toDomain() = Operation(
     type = type,
     duration = duration,
     delay = delay,
-    initialTransform = Transform(
-        position = Position(
-            x = initialXVector,
-            y = initialYVector,
-            z = initialZVector
-        ),
-        quaternion = Quaternion(
-            x = initialXQuaternion,
-            y = initialYQuaternion,
-            z = initialZQuaternion,
-            w = initialWQuaternion
-        )
+    offsetPosition = Position(
+        x = offsetXVector,
+        y = offsetYVector,
+        z = offsetZVector
     ),
-    finalTransform = Transform(
-        position = Position(
-            x = finalXVector,
-            y = finalYVector,
-            z = finalZVector
-        ),
-        quaternion = Quaternion(
-            x = finalXQuaternion,
-            y = finalYQuaternion,
-            z = finalZQuaternion,
-            w = finalWQuaternion
-        )
+    offsetQuaternion = Quaternion(
+        x = offsetXQuaternion,
+        y = offsetYQuaternion,
+        z = offsetZQuaternion,
+        w = offsetWQuaternion
     ),
     screwPitch = screwPitch,
     axis = Float3(axisX, axisY, axisZ),
@@ -59,20 +42,13 @@ fun Operation.toEntity() = OperationEntity(
     type = type,
     duration = duration,
     delay = delay,
-    initialXVector = initialTransform.position.x,
-    initialYVector = initialTransform.position.y,
-    initialZVector = initialTransform.position.z,
-    initialXQuaternion = initialTransform.quaternion.x,
-    initialYQuaternion = initialTransform.quaternion.y,
-    initialZQuaternion = initialTransform.quaternion.z,
-    initialWQuaternion = initialTransform.quaternion.w,
-    finalXVector = finalTransform.position.x,
-    finalYVector = finalTransform.position.y,
-    finalZVector = finalTransform.position.z,
-    finalXQuaternion = finalTransform.quaternion.x,
-    finalYQuaternion = finalTransform.quaternion.y,
-    finalZQuaternion = finalTransform.quaternion.z,
-    finalWQuaternion = finalTransform.quaternion.w,
+    offsetXVector = offsetPosition.x,
+    offsetYVector = offsetPosition.y,
+    offsetZVector = offsetPosition.z,
+    offsetXQuaternion = offsetQuaternion.x,
+    offsetYQuaternion = offsetQuaternion.y,
+    offsetZQuaternion = offsetQuaternion.z,
+    offsetWQuaternion = offsetQuaternion.w,
     screwPitch = screwPitch,
     axisX = axis.x,
     axisY = axis.y,
@@ -84,10 +60,10 @@ fun Operation.toEntity() = OperationEntity(
 
 fun OperationWithTargets.toDomain() = OperationTargets(
     operation = operation.toDomain(),
-    targetRenderables = targets.map(TargetRenderableComposite::toDomain)
+    renderableTargets = targets.map(TargetRenderableComposite::toDomain)
 )
 
 fun OperationTargets.toComposite() = OperationWithTargets(
     operation = operation.toEntity(),
-    targets = targetRenderables.map(TargetRenderable::toComposite)
+    targets = renderableTargets.map(RenderableTarget::toComposite)
 )

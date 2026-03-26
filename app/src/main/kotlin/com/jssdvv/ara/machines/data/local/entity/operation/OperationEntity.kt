@@ -49,47 +49,26 @@ data class OperationEntity(
     @ColumnInfo(name = COLUMN_DELAY)
     val delay: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_X_VECTOR)
-    val initialXVector: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_X_VECTOR)
+    val offsetXVector: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_Y_VECTOR)
-    val initialYVector: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_Y_VECTOR)
+    val offsetYVector: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_Z_VECTOR)
-    val initialZVector: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_Z_VECTOR)
+    val offsetZVector: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_X_QUATERNION)
-    val initialXQuaternion: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_X_QUATERNION)
+    val offsetXQuaternion: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_Y_QUATERNION)
-    val initialYQuaternion: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_Y_QUATERNION)
+    val offsetYQuaternion: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_Z_QUATERNION)
-    val initialZQuaternion: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_Z_QUATERNION)
+    val offsetZQuaternion: Float,
 
-    @ColumnInfo(name = COLUMN_INITIAL_W_QUATERNION)
-    val initialWQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_X_VECTOR)
-    val finalXVector: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_Y_VECTOR)
-    val finalYVector: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_Z_VECTOR)
-    val finalZVector: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_X_QUATERNION)
-    val finalXQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_Y_QUATERNION)
-    val finalYQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_Z_QUATERNION)
-    val finalZQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_FINAL_W_QUATERNION)
-    val finalWQuaternion: Float,
+    @ColumnInfo(name = COLUMN_OFFSET_W_QUATERNION)
+    val offsetWQuaternion: Float,
 
     @ColumnInfo(name = COLUMN_SCREW_PITCH)
     val screwPitch: Float,
@@ -124,23 +103,14 @@ data class OperationEntity(
         const val COLUMN_DELAY = "delay"
 
         // On local coordinates
-        const val COLUMN_INITIAL_X_VECTOR = "initial_x_vector"
-        const val COLUMN_INITIAL_Y_VECTOR = "initial_y_vector"
-        const val COLUMN_INITIAL_Z_VECTOR = "initial_z_vector"
+        const val COLUMN_OFFSET_X_VECTOR = "offset_x_vector"
+        const val COLUMN_OFFSET_Y_VECTOR = "offset_y_vector"
+        const val COLUMN_OFFSET_Z_VECTOR = "offset_z_vector"
 
-        const val COLUMN_INITIAL_X_QUATERNION = "initial_x_quaternion"
-        const val COLUMN_INITIAL_Y_QUATERNION = "initial_y_quaternion"
-        const val COLUMN_INITIAL_Z_QUATERNION = "initial_z_quaternion"
-        const val COLUMN_INITIAL_W_QUATERNION = "initial_w_quaternion"
-
-        const val COLUMN_FINAL_X_VECTOR = "final_x_vector"
-        const val COLUMN_FINAL_Y_VECTOR = "final_y_vector"
-        const val COLUMN_FINAL_Z_VECTOR = "final_z_vector"
-
-        const val COLUMN_FINAL_X_QUATERNION = "final_x_quaternion"
-        const val COLUMN_FINAL_Y_QUATERNION = "final_y_quaternion"
-        const val COLUMN_FINAL_Z_QUATERNION = "final_z_quaternion"
-        const val COLUMN_FINAL_W_QUATERNION = "final_w_quaternion"
+        const val COLUMN_OFFSET_X_QUATERNION = "offset_x_quaternion"
+        const val COLUMN_OFFSET_Y_QUATERNION = "offset_y_quaternion"
+        const val COLUMN_OFFSET_Z_QUATERNION = "offset_z_quaternion"
+        const val COLUMN_OFFSET_W_QUATERNION = "offset_w_quaternion"
 
         const val COLUMN_SCREW_PITCH = "screw_pitch"
 
