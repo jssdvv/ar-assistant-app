@@ -14,7 +14,15 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.machines.presentation.destination.steps.component.SquareButton
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
+import dev.romainguy.kotlin.math.abs
+import dev.romainguy.kotlin.math.dot
 import io.github.sceneview.math.Position
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+
+private val translationFormat = DecimalFormat("0.######", DecimalFormatSymbols(Locale.US))
+private val rotationFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
 
 enum class Axis(
     val rotationName: String,
@@ -33,7 +41,18 @@ enum class Axis(
     Z(
         rotationName = "Yaw",
         unitVector = Float3(z = 1F)
-    ),
+    );
+
+    companion object {
+        fun fromVector(vector: Float3): Axis {
+            val abs3 = abs(vector)
+            return when {
+                abs3.x >= abs3.y && abs3.x >= abs3.z -> X
+                abs3.y >= abs3.x && abs3.y >= abs3.z -> Y
+                else -> Z
+            }
+        }
+    }
 }
 
 enum class Measurement(
@@ -99,7 +118,7 @@ class TranslationState(
     val measurement: Measurement
         get() = _measurement
 
-    val numeric : Float
+    val numeric: Float
         get() = _units.toFloatOrNull() ?: 0f
 
     val meters: Float
@@ -119,9 +138,14 @@ class TranslationState(
 
 @Composable
 fun rememberTranslationState(
-    initialUnits: String = "0",
+    initialMeters: Float = 0F,
     initialMeasurement: Measurement = Measurement.CENTIMETERS
-): TranslationState = remember { TranslationState(initialUnits, initialMeasurement) }
+): TranslationState = remember {
+    TranslationState(
+        translationFormat.format(initialMeters.toDouble() / initialMeasurement.metersPerUnit),
+        initialMeasurement
+    )
+}
 
 @Stable
 class RotationState(
@@ -145,8 +169,12 @@ class RotationState(
 
 @Composable
 fun rememberRotationState(
-    units: String = "0"
-): RotationState = remember { RotationState(units) }
+    initialDegrees: Float = 0F
+): RotationState = remember {
+    RotationState(
+        rotationFormat.format(initialDegrees)
+    )
+}
 
 @Stable
 class MultiAxisTranslationState(
@@ -166,8 +194,23 @@ class MultiAxisTranslationState(
 }
 
 @Composable
-fun rememberMultiTranslationState(): MultiAxisTranslationState =
-    remember { MultiAxisTranslationState() }
+fun rememberMultiTranslationState(
+    initialXMeters: Float = 0F,
+    initialYMeters: Float = 0F,
+    initialZMeters: Float = 0F,
+    initialXMeasurement: Measurement = Measurement.CENTIMETERS,
+    initialYMeasurement: Measurement = Measurement.CENTIMETERS,
+    initialZMeasurement: Measurement = Measurement.CENTIMETERS,
+): MultiAxisTranslationState = remember {
+    MultiAxisTranslationState(
+        translationFormat.format(initialXMeters.toDouble() / initialXMeasurement.metersPerUnit),
+        translationFormat.format(initialYMeters.toDouble() / initialYMeasurement.metersPerUnit),
+        translationFormat.format(initialZMeters.toDouble() / initialZMeasurement.metersPerUnit),
+        initialXMeasurement,
+        initialYMeasurement,
+        initialZMeasurement
+    )
+}
 
 @Stable
 class MultiAxisRotationState(
@@ -185,10 +228,14 @@ class MultiAxisRotationState(
 
 @Composable
 fun rememberMultiRotationState(
-    initialXUnits: String = "0",
-    initialYUnits: String = "0",
-    initialZUnits: String = "0",
-): MultiAxisRotationState = remember { MultiAxisRotationState(initialXUnits, initialYUnits, initialZUnits) }
+    initialEulerDegrees: Float3 = Float3(),
+): MultiAxisRotationState = remember {
+    MultiAxisRotationState(
+        rotationFormat.format(initialEulerDegrees.x),
+        rotationFormat.format(initialEulerDegrees.y),
+        rotationFormat.format(initialEulerDegrees.z)
+    )
+}
 
 fun unidirectionalTransformPair(
     axis: Axis,
@@ -200,3 +247,11 @@ fun unidirectionalTransformPair(
 fun unidirectionalTranslation(axis: Axis, meters: Float) = axis.unitVector * meters
 fun unidirectionalRotation(axis: Axis, degrees: Float) =
     Quaternion.fromEuler(axis.unitVector * degrees)
+
+fun Quaternion.extractSingleAxisDegrees(axis: Axis): Float {
+    val imaginaryQ = this.xyz
+    val sinHalfTheta = dot(imaginaryQ, axis.unitVector)
+    val radians = 2.0 * kotlin.math.atan2(sinHalfTheta.toDouble(), this.w.toDouble())
+    val degrees = Math.toDegrees(radians).toFloat()
+    return degrees
+}

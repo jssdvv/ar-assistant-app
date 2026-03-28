@@ -38,7 +38,7 @@ fun StepsSideSheet(
     selectedOperation: Operation?,
     onNewOperation: (stepId: Int) -> Unit,
     onEditOperation: (Operation) -> Unit,
-    onSelectOperation: (Int) -> Unit,
+    onSelectOperation: (Int?) -> Unit,
     modifier: Modifier = Modifier,
 ) = SideSheet(
     isVisible = isVisible,
@@ -108,7 +108,8 @@ fun StepsSideSheet(
                 onDismissRequest = {
                     showStepDialog = false
                     onSelectStep(null)
-                                   },
+                    onSelectOperation(null)
+                },
                 onSaveStep = { onSaveStep(it)
                     onSelectStep(null)
                 }

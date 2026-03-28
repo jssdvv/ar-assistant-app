@@ -245,11 +245,12 @@ fun SelectableRenderablesCard(
                 ) {
                     items(
                         items = items,
-                        key = { "${it.modelId}_${it.index}" }
+                        key = { "${it.modelId}_${it.xxh3}" }
                     ) {
+                        // todo fix this
                         RemovableRenderableItem(
-                            name = it.name,
-                            onRemoveClick = { onDeleteItem(it) },
+                            name = "it.xxh3",
+                            onRemoveClick = { /*onDeleteItem(it)*/ },
                         )
                     }
                 }

@@ -44,15 +44,18 @@ import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.destination.steps.Renderable
+import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.Axis
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.AxisSelector
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiTranslationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.extractSingleAxisDegrees
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiRotationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiTranslationState
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberRotationState
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberTranslationState
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalRotation
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTransformPair
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTranslation
+import dev.romainguy.kotlin.math.max
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 sealed interface BottomSheetScreen {
@@ -64,7 +67,7 @@ sealed interface BottomSheetScreen {
 @Composable
 fun OperationBottomSheet(
     isVisible: Boolean,
-    selectedRenderables: List<Renderable>,
+    selectedRenderablesStates: Map<Renderable, RenderableState>,
     onUnselectItem: (Renderable) -> Unit,
     onSelectionChange: (isActive: Boolean) -> Unit,
     onSaveClick: (Operation) -> Unit,
@@ -155,7 +158,7 @@ fun OperationBottomSheet(
                             modifier = Modifier.fillMaxWidth()
                         )
                         EntitiesTextField(
-                            selectedItemsCount = selectedRenderables.count(),
+                            selectedItemsCount = selectedRenderablesStates.count(),
                             onClick = { currentSheetScreen = BottomSheetScreen.Entities },
                             modifier = Modifier.fillMaxWidth(),
                             interactionSource = interactionSource
@@ -192,7 +195,7 @@ fun OperationBottomSheet(
                     }
 
                     is BottomSheetScreen.Entities -> {
-                        selectedRenderables.forEachIndexed { index, renderable ->
+                        selectedRenderablesStates.entries.forEachIndexed { index, (renderable, state) ->
                             if (index > 0) HorizontalDivider()
                             Row(
                                 modifier = Modifier
@@ -206,7 +209,7 @@ fun OperationBottomSheet(
                                     contentDescription = null
                                 )
                                 Text(
-                                    text = renderable.name,
+                                    text = state.name,
                                     modifier = Modifier.weight(1F)
                                 )
                                 IconButton(
@@ -254,8 +257,14 @@ fun FreeOperationSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
 ) {
-    val multiTranslationState = rememberMultiTranslationState()
-    val multiRotationState = rememberMultiRotationState()
+    val multiTranslationState = rememberMultiTranslationState(
+        initialXMeters = currentOperation.offsetPosition.x,
+        initialYMeters = currentOperation.offsetPosition.y,
+        initialZMeters = currentOperation.offsetPosition.z
+    )
+    val multiRotationState = rememberMultiRotationState(
+        initialEulerDegrees = currentOperation.offsetQuaternion.toEulerAngles()
+    )
     val updatedCurrentOperation = rememberUpdatedState(currentOperation)
 
     LaunchedEffect(Unit) {
@@ -300,15 +309,18 @@ fun FreeOperationSettings(
     }
 }
 
-
 @Composable
 fun ScrewOperationSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
 ) {
-    var selectedAxis by remember { mutableStateOf(Axis.X) }
-    val translationState = rememberTranslationState()
-    val pitchOrTurnsState = rememberTranslationState()
+    var selectedAxis by remember { mutableStateOf(Axis.fromVector(currentOperation.axis)) }
+    val translationState = rememberTranslationState(
+        initialMeters = max(currentOperation.offsetPosition),
+    )
+    val pitchOrTurnsState = rememberTranslationState(
+        initialMeters = currentOperation.screwPitch
+    )
     var useTurns by remember { mutableStateOf(false) }
     val updatedUseTurns by rememberUpdatedState(useTurns)
     val updatedCurrentOperation by rememberUpdatedState(currentOperation)
@@ -329,7 +341,8 @@ fun ScrewOperationSettings(
                     updatedCurrentOperation.copy(
                         offsetPosition = unidirectionalTranslation(selectedAxis, distance),
                         offsetQuaternion = unidirectionalRotation(selectedAxis, turns * 360F),
-                        screwPitch = pitch
+                        screwPitch = pitch,
+                        axis = selectedAxis.unitVector
                     )
                 )
             }
@@ -349,7 +362,8 @@ fun ScrewOperationSettings(
             onOperationChange(
                 updatedCurrentOperation.copy(
                     offsetPosition = newPosition,
-                    offsetQuaternion = newRotation
+                    offsetQuaternion = newRotation,
+                    axis = axis.unitVector
                 )
             )
         },
@@ -386,9 +400,13 @@ fun CylindricalOperationSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
 ) {
-    var selectedAxis by remember { mutableStateOf(Axis.X) }
-    val translationState = rememberTranslationState()
-    val rotationState = rememberRotationState()
+    var selectedAxis by remember { mutableStateOf(Axis.fromVector(currentOperation.axis)) }
+    val translationState = rememberTranslationState(
+        initialMeters = max(currentOperation.offsetPosition)
+    )
+    val rotationState = rememberRotationState(
+        initialDegrees = currentOperation.offsetQuaternion.extractSingleAxisDegrees(selectedAxis)
+    )
     val updatedCurrentOperation by rememberUpdatedState(currentOperation)
 
     LaunchedEffect(Unit) {
@@ -398,7 +416,8 @@ fun CylindricalOperationSettings(
                 onOperationChange(
                     updatedCurrentOperation.copy(
                         offsetPosition = unidirectionalTranslation(selectedAxis, meters),
-                        offsetQuaternion = unidirectionalRotation(selectedAxis, degrees)
+                        offsetQuaternion = unidirectionalRotation(selectedAxis, degrees),
+                        axis = selectedAxis.unitVector
                     )
                 )
             }
@@ -416,7 +435,8 @@ fun CylindricalOperationSettings(
             onOperationChange(
                 updatedCurrentOperation.copy(
                     offsetPosition = newPosition,
-                    offsetQuaternion = newRotation
+                    offsetQuaternion = newRotation,
+                    axis = axis.unitVector
                 )
             )
         },
@@ -441,7 +461,9 @@ fun JointOperationSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
 ) {
-    val multiRotationState = rememberMultiRotationState()
+    val multiRotationState = rememberMultiRotationState(
+        initialEulerDegrees = currentOperation.offsetQuaternion.toEulerAngles()
+    )
     val updatedCurrentOperation by rememberUpdatedState(currentOperation)
 
     LaunchedEffect(Unit) {
@@ -469,6 +491,7 @@ fun JointOperationSettings(
     }
 }
 
+// todo fix this implementation
 @Composable
 fun VisibilityOperationSettings(
     modifier: Modifier = Modifier

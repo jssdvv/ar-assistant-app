@@ -1,6 +1,7 @@
 package com.jssdvv.ara.machines.presentation.destination.steps
 
-import android.util.Log
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -76,11 +77,14 @@ import com.jssdvv.ara.machines.presentation.destination.steps.component.remember
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.CustomCameraGestureDetector
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberCustomCameraManipulator
 import dev.romainguy.kotlin.math.Float3
+import dev.romainguy.kotlin.math.Quaternion
+import dev.romainguy.kotlin.math.normalize
 import io.github.sceneview.Scene
 import io.github.sceneview.SceneView.Companion.DEFAULT_MAIN_LIGHT_COLOR
 import io.github.sceneview.SceneView.Companion.DEFAULT_MAIN_LIGHT_COLOR_INTENSITY
 import io.github.sceneview.gesture.GestureDetector
 import io.github.sceneview.managers.color
+import io.github.sceneview.math.Position
 import io.github.sceneview.math.halfExtentSize
 import io.github.sceneview.math.toFloat3
 import io.github.sceneview.node.CubeNode
@@ -97,6 +101,7 @@ import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import net.openhft.hashing.LongHashFunction
 
 @Composable
 fun StepsDestination(
@@ -182,6 +187,9 @@ fun StepsContent(
     // Nodes
     val nodes = rememberNodes()
     val modelNodes by remember { derivedStateOf { nodes.filterIsInstance<ModelNode>() } }
+    val modelNodeMap by remember {
+        derivedStateOf { nodes.filterIsInstance<ModelNode>().associateBy { it.name } }
+    }
     val cameraNode = rememberCameraNode(engine)
     val mainLightNode = rememberNode {
         LightNode(
@@ -259,20 +267,27 @@ fun StepsContent(
             val isSelectionEnabledState = rememberUpdatedState(isSelectionEnabled)
             val showBottomSheetState = rememberUpdatedState(showBottomSheet)
 
-            modelNode.renderableNodes.forEachIndexed { index, renderableNode ->
+            modelNode.renderableNodes.forEachIndexed { tempIndex, renderableNode ->
 
-                val renderable = remember(model.id, index) {
-                    Renderable(
-                        modelId = model.id,
-                        index = index,
-                        name = renderableNode.name ?: "pieza $index",
+                val hash = remember(renderableNode.name) {
+                    LongHashFunction.xx3().hashChars(renderableNode.name ?: "")
+                }
+
+                val renderable = remember(model.id, hash) {
+                    Renderable(model.id, hash)
+                }
+
+                val initialState = remember(model.id, hash) {
+                    RenderableState(
+                        name = renderableNode.name ?: "",
+                        index = tempIndex,
                         initialPosition = renderableNode.position,
                         initialQuaternion = renderableNode.quaternion
                     )
                 }
 
                 LaunchedEffect(renderable) {
-                    onExternalEvent(StepsExternalEvent.OnLoadRenderables(renderable))
+                    onExternalEvent(StepsExternalEvent.OnLoadRenderables(renderable, initialState))
 
                     renderableNode.onSingleTapConfirmed = { _ ->
                         if (showBottomSheetState.value && isSelectionEnabledState.value) {
@@ -283,7 +298,7 @@ fun StepsContent(
                 }
 
                 val state by remember(renderable) {
-                    derivedStateOf { renderableStates[renderable] ?: RenderableState() }
+                    derivedStateOf { renderableStates[renderable] ?: initialState }
                 }
 
                 LaunchedEffect(state.isVisible, state.isSelected) {
@@ -307,52 +322,55 @@ fun StepsContent(
         .collectAsStateWithLifecycle(initialValue = "")
 
     // Derived states of renderables
-    val renderablesItems = renderableStates.keys.toList()
+    val renderablesItems by remember { derivedStateOf { renderableStates.keys.toList() } }
     val selectedRenderableItems by remember(renderableStates) {
-        derivedStateOf { renderableStates.filter { it.value.isSelected }.keys.toList() }
+        derivedStateOf { renderableStates.filter { it.value.isSelected } }
     }
     val filteredRenderableItems by remember(renderablesItems, debouncedQuery) {
         derivedStateOf {
             if (debouncedQuery.isBlank()) {
                 renderablesItems
             } else {
-                renderablesItems.filter { it.name.contains(debouncedQuery, true) }
+                renderablesItems.filter {
+                    renderableStates[it]?.name?.contains(debouncedQuery, true) == true
+                }
             }
         }
     }
 
     val operations = operationTargets.map { it.operation }
 
+    val activeAnimators = remember { mutableListOf<AnimatorSet>() }
+
     fun restoreAndApplyOperationUpTo(
-        targetOperation: Operation?,
+        operation: Operation?,
         renderables: List<Renderable>,
     ) {
+        // Cancel previous animators
+        activeAnimators.forEach { it.cancel() }
+        activeAnimators.clear()
+
         // Restore position and rotation of all renderables of all models
-        val modelNodeMap = modelNodes.associateBy { it.name }
-        renderableStates.keys
-            .groupBy { it.modelId }
-            .forEach { (modelId, renderables) ->
-                val modelNode = modelNodeMap[modelId.toString()] ?: return@forEach
-                renderables.forEach { renderable ->
-                    modelNode.renderableNodes.getOrNull(renderable.index)?.apply {
-                        position = renderable.initialPosition
-                        quaternion = renderable.initialQuaternion
-                    }
-                }
+        renderableStates.forEach { (renderable, state) ->
+            val modelNode = modelNodeMap[renderable.modelId.toString()] ?: return@forEach
+            modelNode.renderableNodes.getOrNull(state.index)?.apply{
+                position = state.initialPosition
+                quaternion = state.initialQuaternion
             }
+        }
 
-        // If there is no operation selected, there is no offsets applied
-        if(targetOperation == null) return
+        // If there is no operation, there is no offsets applied
+        if (operation == null) return
 
-        val isNewOperation = targetOperation.orderNumber == 0
+        val isNewOperation = operation.id == 0
 
         // returns a step orderNumber of given step id
         val stepOrderNumberMap = steps.associate { it.id to it.orderNumber }
 
-        //An operation should have first a step Id
-        val targetStepOrder = stepOrderNumberMap[targetOperation.stepId] ?: return
+        // An operation should have first a step Id
+        val targetStepOrder = stepOrderNumberMap[operation.stepId] ?: return
 
-        val sortedOpTargetsUntilCurrent = operationTargets
+        val operationTargetsBeforeCurrent = operationTargets
             .filter { stepOrderNumberMap[it.operation.stepId] != null }
             .sortedWith(
                 compareBy(
@@ -360,42 +378,98 @@ fun StepsContent(
                     { it.operation.orderNumber }
                 )
             )
-            .takeWhile { opTarget ->
+            .takeWhile { operationTarget ->
                 val stepOrder =
-                    stepOrderNumberMap[opTarget.operation.stepId] ?: return@takeWhile false
+                    stepOrderNumberMap[operationTarget.operation.stepId] ?: return@takeWhile false
 
-                if (opTarget.operation.id == 0) return@takeWhile false
+                if (operationTarget.operation.id == 0) return@takeWhile false
 
                 stepOrder < targetStepOrder ||
                 (stepOrder == targetStepOrder && isNewOperation) ||
-                (stepOrder == targetStepOrder && opTarget.operation.orderNumber < targetOperation.orderNumber)
+                (stepOrder == targetStepOrder && operationTarget.operation.orderNumber < operation.orderNumber)
             }
 
-        // Apply offsets to all renderables until the current operation target
-        sortedOpTargetsUntilCurrent.forEach { opTarget ->
-            opTarget.renderableTargets.forEach { renderableTarget ->
-                val modelNode = modelNodeMap[renderableTarget.modelId.toString()] ?: return@forEach
-                modelNode.renderableNodes[renderableTarget.renderableIndex].apply{
-                    position += opTarget.operation.offsetPosition
-                    quaternion *= opTarget.operation.offsetQuaternion
+        // Apply offsets until current operation
+        operationTargetsBeforeCurrent.forEach { operationTarget ->
+            operationTarget.targets.forEach { target ->
+                val modelNode = modelNodeMap[target.modelId.toString()] ?: return@forEach
+                val renderable = Renderable(target.modelId, target.xxh3)
+                val state = renderableStates[renderable] ?: return@forEach
+
+                modelNode.renderableNodes.getOrNull(state.index)?.apply {
+                    // Rotate with it's local quaternion of rotation
+                    val rotatedOffsetPosition = quaternion * operationTarget.operation.offsetPosition
+                    position += rotatedOffsetPosition
+                    quaternion = normalize(quaternion * operationTarget.operation.offsetQuaternion)
                 }
             }
         }
 
         // Apply offsets to all renderables of the current operation
-        renderables.forEach{ renderable ->
-            val modelNode = modelNodeMap[renderable.modelId.toString()] ?: return@forEach
-            modelNode.renderableNodes[renderable.index].apply {
-                position += targetOperation.offsetPosition
-                quaternion *= targetOperation.offsetQuaternion
+        val currentOperationTargets = operationTargets.find { it.operation.id == operation.id }
+
+        currentOperationTargets?.targets?.forEach { target ->
+            val modelNode = modelNodeMap[target.modelId.toString()] ?: return@forEach
+            val renderable = Renderable(target.modelId, target.xxh3)
+            val state = renderableStates[renderable] ?: return@forEach
+
+            modelNode.renderableNodes.getOrNull(state.index)?.apply {
+
+                val initialPosition = position
+                val initialQuaternion = quaternion
+                val rotatedOffsetPosition = initialQuaternion * operation.offsetPosition
+
+                val finalPosition = initialPosition + rotatedOffsetPosition
+                val finalQuaternion = normalize(initialQuaternion * operation.offsetQuaternion)
+
+                val positionAnimator = animatePositions(
+                    initialPosition,
+                    finalPosition
+                ).apply{
+                    repeatCount = ObjectAnimator.INFINITE
+                    repeatMode = ObjectAnimator.REVERSE
+                    addUpdateListener {
+                        val x = it.getAnimatedValue("x") as Float
+                        val y = it.getAnimatedValue("y") as Float
+                        val z = it.getAnimatedValue("z") as Float
+                        position = Position(x, y, z)
+                    }
+                }
+                val quaternionAnimator = animateQuaternions(
+                    initialQuaternion,
+                    finalQuaternion
+                ).apply {
+                    repeatCount = ObjectAnimator.INFINITE
+                    repeatMode = ObjectAnimator.REVERSE
+                    addUpdateListener {
+                        val x = it.getAnimatedValue("x") as Float
+                        val y = it.getAnimatedValue("y") as Float
+                        val z = it.getAnimatedValue("z") as Float
+                        val w = it.getAnimatedValue("w") as Float
+                        quaternion = Quaternion(x, y, z, w)
+                    }
+                }
+
+                val animatorSet = AnimatorSet().apply {
+                    playTogether(positionAnimator, quaternionAnimator)
+                    startDelay = operation.delay.toLong() * 1_000L
+                    duration = operation.duration.toLong() * 1_000L
+                    start()
+                }
+                activeAnimators.add(animatorSet)
             }
         }
     }
 
     LaunchedEffect(selectedOperation, selectedRenderableItems) {
-        Log.d("currentOperation", selectedOperation.toString())
-        Log.d("currentOperation", selectedRenderableItems.toString())
-        restoreAndApplyOperationUpTo(selectedOperation, selectedRenderableItems)
+        restoreAndApplyOperationUpTo(selectedOperation, selectedRenderableItems.keys.toList())
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            activeAnimators.forEach { it.cancel() }
+            activeAnimators.clear()
+        }
     }
 
     Scaffold(
@@ -518,18 +592,15 @@ fun StepsContent(
                     LazyColumn {
                         items(
                             items = filteredRenderableItems,
-                            key = { "${it.modelId}_${it.index}" }
+                            key = { "${it.modelId}_${it.xxh3}" }
                         ) { renderable ->
 
-                            val renderableState by remember(renderable, renderableStates) {
-                                derivedStateOf {
-                                    renderableStates[renderable]
-                                        ?: RenderableState(isVisible = true)
-                                }
+                            val renderableState by remember(renderable) {
+                                derivedStateOf { renderableStates[renderable] ?: RenderableState() }
                             }
 
                             RenderableItem(
-                                name = renderable.name,
+                                name = renderableState.name,
                                 isVisible = renderableState.isVisible,
                                 isSelected = false,
                                 onVisibilityChange = {
@@ -561,8 +632,16 @@ fun StepsContent(
                     onEvent(StepsEvent.OnNewOperation(stepId))
                     showSideSheet = false
                 },
-                onEditOperation = {
+                onEditOperation = { operationToEdit ->
+                    showBottomSheet = true
+                    onEvent(StepsEvent.OnSelectOperation(operationToEdit.id))
+                    val targets = operationTargets
+                        .find { it.operation.id == operationToEdit.id }
+                        ?.targets
+                        ?: emptyList()
 
+                    onExternalEvent(StepsExternalEvent.OnSelectExistingRenderables(targets))
+                    showSideSheet = false
                 },
                 onSelectOperation = { onEvent(StepsEvent.OnSelectOperation(it)) }
             )
@@ -592,18 +671,18 @@ fun StepsContent(
                 )
             }
 
-            if(selectedStep != null && selectedOperation != null) {
+            if (selectedStep != null && selectedOperation != null) {
                 OperationBottomSheet(
                     isVisible = showBottomSheet,
-                    selectedRenderables = selectedRenderableItems,
+                    selectedRenderablesStates = selectedRenderableItems,
                     onUnselectItem = { onExternalEvent(StepsExternalEvent.OnUnselectRenderable(it)) },
                     onSelectionChange = {
                         onExternalEvent(StepsExternalEvent.OnToggleSelection(it))
                     },
                     onSaveClick = {
-                        showBottomSheet = false
-                        onExternalEvent(StepsExternalEvent.OnUnselectAllRenderables)
                         onEvent(StepsEvent.OnSaveOperation(it))
+                        onExternalEvent(StepsExternalEvent.OnUnselectAllRenderables)
+                        showBottomSheet = false
                     },
                     onCancelClick = {
                         showBottomSheet = false
@@ -617,678 +696,3 @@ fun StepsContent(
         }
     }
 }
-
-//@Composable
-//fun EditActivityContent2(
-//    models: List<Model>,
-//    markers: List<Marker>,
-//    currentMarker: Marker?,
-//    currentBitmap: Bitmap?,
-//    listsUiState: ListsUiState,
-//    selectionsUiState: SelectionsUiState,
-//    onNavigateBack: () -> Unit,
-//    onEvent: (EditActivityEvent) -> Unit,
-//    modifier: Modifier = Modifier,
-//) {
-//    val context = LocalContext.current
-//
-//    val engine = rememberEngine()
-//    val modelLoader = rememberModelLoader(engine)
-//    val materialLoader = rememberMaterialLoader(engine)
-//    val view = rememberView(engine).apply { isStencilBufferEnabled = true }
-//
-//    val cameraNode = rememberARCameraNode(engine)
-//    val sceneNodes = rememberNodes()
-//
-//    var frame by remember { mutableStateOf<Frame?>(null) }
-//
-//    // For edition bar
-//    var isEditionBarVisible by remember { mutableStateOf(true) }
-//    var trackingMethod by remember { mutableStateOf(AugmentedImage.TrackingMethod.NOT_TRACKING) }
-//
-//    // For displaying augmented images
-//    var firstTimeDetected by remember { mutableStateOf(false) }
-//    var previousMarkerId by remember { mutableStateOf(0) }
-//
-//    // Dialogs
-//    var showMarkersDialog by remember { mutableStateOf(true) }
-//
-//    var currentLabel by remember { mutableStateOf<LabelDialogState?>(null) }
-//
-//    val coroutineScope = rememberCoroutineScope()
-//    val scaffoldState = rememberBottomSheetScaffoldState(
-//        bottomSheetState = rememberStandardBottomSheetState(
-//            initialValue = SheetValue.Hidden,
-//            skipHiddenState = false
-//        )
-//    )
-//
-//    val unselectedMaterial = getModelMaterialInstance(
-//        materialLoader = materialLoader,
-//        modelColor = MODEL_UNSELECTED_COLOR
-//    )
-//
-//    val validMaterialInstance = getModelMaterialInstance(
-//        materialLoader = materialLoader,
-//        modelColor = MODEL_VALID_COLOR
-//    )
-//
-//    val invalidMaterialInstance = getModelMaterialInstance(
-//        materialLoader = materialLoader,
-//        modelColor = MODEL_INVALID_COLOR
-//    )
-//
-//    val repositionModels = {
-//        if (currentMarker != null) {
-//
-//            val originNode = sceneNodes
-//                .filterIsInstance<PoseNode>()
-//                .firstOrNull()
-//
-//            val markerNode = sceneNodes
-//                .filterIsInstance<AugmentedImageNode>()
-//                .firstOrNull()
-//
-//            if (originNode != null && markerNode != null) {
-//
-//                val modelNodes = sceneNodes.filterIsInstance<ModelNode>()
-//
-//                originNode.worldPosition = markerNode
-//                    .getWorldPosition(currentMarker.originPosition)
-//
-//                originNode.worldQuaternion = markerNode
-//                    .getWorldQuaternion(currentMarker.originRotation)
-//
-////                modelNodes.forEachApply {
-////                    val model = models
-////                        .find { it.id == this.name!!.toInt() }
-////                        ?: return@forEachApply
-////
-////                    worldPosition = originNode
-////                        .getWorldPosition(model.positionFromOrigin)
-////
-////                    worldQuaternion = originNode
-////                        .getWorldQuaternion(model.rotationFromOrigin)
-////                }
-//
-//                Toast.makeText(
-//                    context,
-//                    "Models repositioned to marker successfully",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
-//        }
-//    }
-//
-//    val repositionLabels = {
-//        val originNode = sceneNodes
-//            .filterIsInstance<PoseNode>()
-//            .firstOrNull()
-//
-//        if (originNode != null) {
-//            val labelNodes = sceneNodes
-//                .filterIsInstance<ImageNode>() //todo change to imagenode
-//
-////            labelNodes.forEachApply {
-////
-////                val label = listsUiState.labels
-////                    .find { it.id == this.name!!.toInt() }
-////                    ?: return@forEachApply
-////
-////                worldPosition = originNode
-////                    .getWorldPosition(label.position)
-////                worldQuaternion = originNode
-////                    .getWorldQuaternion(label.rotation)
-////            }
-//        }
-//
-//    }
-//
-//    val bottomSheetBackStack =
-//        remember { mutableStateListOf<BottomSheetPage>(BottomSheetPage.StepPage) }
-//
-//    fun popBottomSheetPage() {
-//        if (bottomSheetBackStack.size <= 2) onEvent(EditActivityEvent.OnSelectStep(null))
-//        if (bottomSheetBackStack.size > 1) bottomSheetBackStack.removeLast()
-//    }
-//
-//    LaunchedEffect(models, listsUiState.labels, firstTimeDetected) {
-//
-//        if (!firstTimeDetected) return@LaunchedEffect
-//
-//        val modelIds = models
-//            .map { it.id }
-//        val modelNodesIds = sceneNodes
-//            .filterIsInstance<ModelNode>()
-//            .map { it.name!!.toInt() }
-//
-//        // If there exist a ModelNode that is not in the model list, we remove it
-//        modelNodesIds.forEach { modelId ->
-//            if (modelIds.none { it == modelId }) {
-//                sceneNodes.removeIf { it is ModelNode && it.name!!.toInt() == modelId }
-//            }
-//        }
-//
-//        // By the other hand, if there exist a model that is not in the scene, we add it
-//        models.forEach { model ->
-//            if (modelNodesIds.none { it == model.id }) {
-//                sceneNodes.add(
-//                    createModelNode(
-//                        engine = engine,
-//                        modelLoader = modelLoader,
-//                        materialLoader = materialLoader,
-//                        modelFile = model.fileUri.toFile(),
-//                        modelId = model.id,
-//                    )
-//                )
-//            }
-//        }
-//
-//        val labelIds = listsUiState.labels
-//            .map { it.id }
-//
-//        val labelNodesIds = sceneNodes
-//            .filterIsInstance<ImageNode>() //todo change to imagenode
-//            .map { it.name!!.toInt() }
-//
-//        labelNodesIds.forEach { labelId ->
-//            if (labelIds.none { it == labelId }) { //todo change to imagenode
-//                sceneNodes.removeIf { it is ImageNode && it.name!!.toInt() == labelId }
-//            }
-//        }
-//
-//        listsUiState.labels.forEach { label ->
-//            if (labelNodesIds.none { it == label.id }) {
-//
-//                val inputStream = context.contentResolver.openInputStream(label.fileUri)
-//                val bitmapFromUri = inputStream.use {
-//                    BitmapFactory.decodeStream(it)
-//                }
-//
-//                sceneNodes.add(
-//                    createLabelNode(
-//                        labelId = label.id,
-//                        materialLoader = materialLoader,
-//                        bitmap = bitmapFromUri,
-//                        widthCentimeters = label.sizeCentimeters
-//                    )
-//                )
-//            }
-//        }
-//
-//        if (selectionsUiState.currentStep != null) {
-//            repositionLabels()
-//        }
-//    }
-//
-//    LaunchedEffect(
-//        bottomSheetBackStack.lastOrNull(),
-//        selectionsUiState.currentAnimationsIds.size,
-//        selectionsUiState.currentRenderablesIds.size
-//    ) {
-//
-//        if (selectionsUiState.currentStep == null) return@LaunchedEffect
-//
-//        val modelNodes = sceneNodes.filterIsInstance<ModelNode>()
-//
-//
-//        when (bottomSheetBackStack.lastOrNull()) {
-//
-//            is BottomSheetPage.RenderablesPage -> {
-////                modelNodes.forEachApply {
-////                    listsUiState.renderables.forEach { renderable ->
-////                        if (renderable.index in selectionsUiState.currentRenderablesIds.map { it.index }) {
-////                            renderableNodes[renderable.index].materialInstance =
-////                                validMaterialInstance
-////                        } else {
-////                            renderableNodes[renderable.index].materialInstance =
-////                                invalidMaterialInstance
-////                        }
-////                    }
-////                }
-//            }
-//
-//            is BottomSheetPage.AnimationsPage -> {
-////                modelNodes.forEachApply {
-////                    selectionsUiState.currentAnimationsIds.forEach { animationId ->
-////                        listsUiState.animations
-////                            .find { it.index == animationId.index }
-////                            ?.let {
-////                                playAnimation(
-////                                    animationIndex = it.index,
-////                                    loop = false
-////                                )
-////                            }
-////                    }
-////                }
-//            }
-//
-//            else -> {
-//                modelNodes.forEach { modelNode ->
-//                    modelNode.setMaterialInstance(unselectedMaterial)
-//                    for (animation in modelNode.animationCount - 1 until 0) {
-//                        modelNode.stopAnimation(animation)
-//                        modelNode.animator.applyAnimation(animation, 0F)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    // When we detect a marker for the first time if there exist models in the
-//    // scene, we set their position and rotation from the previous calibration.
-//    LaunchedEffect(firstTimeDetected) {
-//
-//        if (firstTimeDetected) {
-//            val originNode = PoseNode(engine).apply { name = "origin" }
-//            sceneNodes.add(originNode)
-//            repositionModels()
-//        }
-//    }
-//
-//    BackHandler(
-//        enabled = bottomSheetBackStack.size > 1 ||
-//                scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
-//    ) {
-//        if (bottomSheetBackStack.size > 1) {
-//            bottomSheetBackStack.removeLast()
-//        } else {
-//            coroutineScope.launch { scaffoldState.bottomSheetState.hide() }
-//        }
-//    }
-//
-////    Scaffold (
-////        modifier = Modifier.fillMaxSize(),
-////    ) { paddingValues ->
-////        Box (
-////            modifier = Modifier
-////                .padding(paddingValues)
-////                .fillMaxSize()
-////                .clip(RoundedCornerShape(28.dp))
-////                .background(Color.Black)
-////        ){
-////            ARScene(
-////                engine = engine,
-////                view = view,
-////                modelLoader = modelLoader,
-////                materialLoader = materialLoader,
-////                childNodes = nodes,
-////                planeRenderer = false, // Turns off the dots on detected flat surfaces
-////                sessionConfiguration = { session: Session, config: Config ->
-////                    config.setFocusMode(Config.FocusMode.AUTO)
-////                    config.setLightEstimationMode(Config.LightEstimationMode.DISABLED)
-////                    config.setInstantPlacementMode(Config.InstantPlacementMode.DISABLED)
-////                    config.setDepthMode(
-////                        when (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-////                            true -> Config.DepthMode.AUTOMATIC
-////                            else -> Config.DepthMode.DISABLED
-////                        }
-////                    )
-////                },
-////                onSessionUpdated = { session, frame ->
-////
-////                },
-////                onGestureListener = rememberOnGestureListener()
-////            )
-////        }
-////    }
-//
-//    BottomSheetScaffold(
-//        modifier = modifier
-//            .fillMaxHeight()
-//            .imePadding(),
-//        scaffoldState = scaffoldState,
-//        sheetPeekHeight = 0.dp,
-//        sheetShape = TubShapes().extraLarge,
-//        sheetDragHandle = {
-//            BottomSheetTopBar(
-//                bottomSheetPage = bottomSheetBackStack.lastOrNull() ?: BottomSheetPage.StepPage,
-//                onHideBottomSheet = { coroutineScope.launch { scaffoldState.bottomSheetState.hide() } },
-//                onNavigateBack = { popBottomSheetPage() }
-//            )
-//        },
-//        sheetContent = {
-//            EditActivitySheetContent(
-//                currentPage = bottomSheetBackStack.lastOrNull() ?: BottomSheetPage.StepPage,
-//                currentStep = selectionsUiState.currentStep,
-//                steps = listsUiState.steps,
-//                labels = listsUiState.labels,
-//                renderables = listsUiState.renderables,
-//                animations = listsUiState.animations,
-//                visibleRenderableIds = selectionsUiState.currentRenderablesIds,
-//                visibleAnimationIds = selectionsUiState.currentAnimationsIds,
-//                onClickRenderable = { onEvent(EditActivityEvent.OnClickRenderable(it)) },
-//                onClickAnimation = { onEvent(EditActivityEvent.OnClickAnimation(it)) },
-//                onCreateStep = { onEvent(EditActivityEvent.OnCreateStep(it)) },
-//                onUpdateStep = { step, uri -> onEvent(EditActivityEvent.OnUpdateStep(step, uri)) },
-//                onSelectStep = { onEvent(EditActivityEvent.OnSelectStep(it)) },
-//                onClickPositionLabel = {
-//                    currentLabel = it
-//                    coroutineScope.launch { scaffoldState.bottomSheetState.hide() }
-//                },
-//                onChangeStepsOrder = { steps ->
-//                    steps.forEach { onEvent(EditActivityEvent.OnUpdateStep(it)) }
-//                },
-//                onNavigateForward = { bottomSheetBackStack.add(it) }
-//            )
-//        },
-//        sheetSwipeEnabled = false,
-//        topBar = {
-//            TopAppBar(
-//                title = { Text("Edit Activity") },
-//                navigationIcon = {
-//                    IconButton(onClick = onNavigateBack) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
-//                            contentDescription = null
-//                        )
-//                    }
-//                },
-//                actions = {
-//                    IconButton(
-//                        onClick = {
-//                            coroutineScope.launch {
-//                                if (scaffoldState.bottomSheetState.currentValue != SheetValue.Expanded) {
-//                                    scaffoldState.bottomSheetState.expand()
-//                                } else {
-//                                    scaffoldState.bottomSheetState.hide()
-//                                }
-//                            }
-//                        },
-//                        content = { EditIcon() }
-//                    )
-//                }
-//            )
-//        }
-//    ) {
-//        ARScene(
-//            engine = engine,
-//            modelLoader = modelLoader,
-//            materialLoader = materialLoader,
-//            view = view,
-//            cameraNode = cameraNode,
-//            sessionConfiguration = { session, config ->
-//                config.setFocusMode(Config.FocusMode.AUTO)
-//                config.setLightEstimationMode(Config.LightEstimationMode.DISABLED)
-//                config.setInstantPlacementMode(Config.InstantPlacementMode.LOCAL_Y_UP)
-//                config.setDepthMode(
-//                    when (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-//                        true -> Config.DepthMode.AUTOMATIC
-//                        else -> Config.DepthMode.DISABLED
-//                    }
-//                )
-//            },
-//            childNodes = sceneNodes,
-//            onSessionUpdated = { session, updatedFrame ->
-//
-//                frame = updatedFrame
-//
-//                currentBitmap?.let { bitmap ->
-//                    if ((currentMarker?.id ?: return@let) != previousMarkerId) {
-//
-//                        sceneNodes
-//                            .filterIsInstance<AugmentedImageNode>()
-//                            .forEach { augmentedImageNode ->
-//                                augmentedImageNode.clearChildNodes()
-//                                sceneNodes.remove(augmentedImageNode)
-//                            }
-//
-//                        previousMarkerId = currentMarker.id
-//                        // Configures a single augmented image database each time
-//                        // the selected marker changes. Avoiding problems like
-//                        // markers being mixed up. Thank you google :)
-//                        session.configure(
-//                            session.config.setAugmentedImageDatabase(
-//                                AugmentedImageDatabase(session).apply {
-//                                    addImage(currentMarker.id.toString(), bitmap)
-//                                }
-//                            )
-//                        )
-//                    }
-//                }
-//
-//                // Gets the last detected trackables in any previous frame.
-//                val markerTrackables = updatedFrame.getUpdatedTrackables(AugmentedImage::class.java)
-//
-//                // The marker trackables are basically the markers QRs detected
-//                // in the camera frame but as AugmentedImages in the scene.
-//                markerTrackables.forEach { trackable ->
-//
-//                    // Checks if exists an augmentedImageNode of the actual trackable.
-//                    if (sceneNodes
-//                            .filterIsInstance<AugmentedImageNode>()
-//                            .none { it.imageName == trackable.name }
-//                    ) {
-//
-//                        sceneNodes
-//                            .filterIsInstance<AugmentedImageNode>()
-//                            .forEach { augmentedImageNode ->
-//                                augmentedImageNode.clearChildNodes()
-//                                sceneNodes.remove(augmentedImageNode)
-//                            }
-//
-//                        detectMarker(
-//                            engine = engine,
-//                            trackable = trackable,
-//                            materialLoader = materialLoader,
-//                            onTrackingMethodChanged = { trackingMethod = it },
-//                            onMarkerDetected = { augmentedImageNode ->
-//                                sceneNodes.add(augmentedImageNode)
-//                                if (currentMarker != null && !firstTimeDetected)
-//                                    firstTimeDetected = true
-//                            }
-//                        )
-//                    }
-//                }
-//            },
-//            onGestureListener = rememberOnGestureListener(
-//                onSingleTapConfirmed = { motionEvent, node ->
-//
-//                    if (currentLabel != null) {
-//
-//                        val hitResults = frame?.hitTest(motionEvent.x, motionEvent.y)
-//                        val hitPose = hitResults?.firstOrNull()?.hitPose
-//                            ?: return@rememberOnGestureListener
-//
-//                        // This gets the location where the user taps
-//                        val labelPosition = hitPose.position.copy(
-//                            y = hitPose.position.y + 0.05F
-//                        )
-//
-//                        val lookDirection = normalize(
-//                            Float3(
-//                                x = labelPosition.x - cameraNode.worldPosition.x,
-//                                y = 0F,
-//                                z = labelPosition.z - cameraNode.worldPosition.z
-//                            )
-//                        )
-//
-//                        // This gets the rotation of the label, vertically looking at the user
-//                        val labelQuaternion = lookTowards(
-//                            eye = labelPosition,
-//                            forward = lookDirection,
-//                            up = Float3(0F, 1F, 0F)
-//                        ).toQuaternion()
-//
-//                        val originNode = sceneNodes
-//                            .filterIsInstance<PoseNode>()
-//                            .firstOrNull() ?: return@rememberOnGestureListener
-//
-//                        val labelPositionFromOriginLocal = originNode
-//                            .getLocalPosition(labelPosition)
-//
-//                        val labelQuaternionFromOriginLocal = originNode
-//                            .getLocalQuaternion(labelQuaternion)
-//
-//                        onEvent(
-//                            EditActivityEvent.OnCreateLabel(
-//                                label = currentLabel!!,
-//                                position = labelPositionFromOriginLocal,
-//                                rotation = labelQuaternionFromOriginLocal,
-//                                contentUri = currentLabel!!.imageContentUri
-//                            )
-//                        )
-//
-//                        currentLabel = null
-//                    }
-//                }
-//            ),
-//        )
-//
-//        Box(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(8.dp),
-//            contentAlignment = Alignment.CenterEnd
-//        ) {
-//            AnimatedVisibility(
-//                visible = isEditionBarVisible,
-//                enter = slideInHorizontally(animationSpec = tween(300)) { it } +
-//                        fadeIn(animationSpec = tween(200)),
-//                exit = slideOutHorizontally(animationSpec = tween(300)) { it } +
-//                        fadeOut(animationSpec = tween(200))
-//            ) {
-//                Column(
-//                    modifier = Modifier
-//                        .width(48.dp)
-//                        .background(
-//                            MaterialTheme.colorScheme.surfaceVariant,
-//                            RoundedCornerShape(50)
-//                        ),
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                    verticalArrangement = Arrangement.spacedBy(4.dp)
-//                ) {
-//                    FilledIconButton(
-//                        enabled = isEditionBarVisible,
-//                        onClick = { showMarkersDialog = true }
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(id = R.drawable.ic_markers),
-//                            contentDescription = null
-//                        )
-//                    }
-//                    HorizontalDivider(
-//                        modifier = Modifier.padding(horizontal = 8.dp),
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//                    PositionButton(
-//                        enabled = sceneNodes
-//                            .filterIsInstance<AugmentedImageNode>()
-//                            .isNotEmpty() && isEditionBarVisible,
-//                        trackingMethod = trackingMethod,
-//                        onTimeout = {
-//                            Toast.makeText(
-//                                context,
-//                                "No marker found to reposition the models",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        },
-//                        onSuccess = {
-//                            repositionModels()
-//                            repositionLabels()
-//                        }
-//                    )
-//
-//                    CalibrationButton(
-//                        enabled = sceneNodes
-//                            .filterIsInstance<AugmentedImageNode>()
-//                            .isNotEmpty() && isEditionBarVisible,
-//                        trackingMethod = trackingMethod,
-//                        onTimeout = {
-//                            Toast.makeText(
-//                                context,
-//                                "No marker found to calibrate the models",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        },
-//                        onSuccess = {
-//                        }
-//                    )
-//                }
-//            }
-//        }
-//
-//        if (showMarkersDialog) {
-//            SelectedMarkerDialog(
-//                currentMarker = currentMarker,
-//                markers = markers,
-//                onDismissRequest = { showMarkersDialog = false },
-//                onMarkerClick = {
-//                    onEvent(EditActivityEvent.OnSelectMarker(it))
-//                    showMarkersDialog = false
-//                }
-//            )
-//        }
-//    }
-//}
-//
-//@Composable
-//fun EditActivitySheetContent(
-//    currentPage: BottomSheetPage,
-//    currentStep: Step?,
-//    steps: List<Step>,
-//    labels: List<Label>,
-//    renderables: List<Renderable>,
-//    animations: List<Animation>,
-//    visibleRenderableIds: List<StepRenderableId>,
-//    visibleAnimationIds: List<StepAnimationId>,
-//    onClickRenderable: (Renderable) -> Unit,
-//    onClickAnimation: (Animation) -> Unit,
-//    onCreateStep: (Step) -> Unit,
-//    onUpdateStep: (Step, Uri?) -> Unit,
-//    onSelectStep: (Step?) -> Unit,
-//    onClickPositionLabel: (LabelDialogState) -> Unit,
-//    onChangeStepsOrder: (steps: List<Step>) -> Unit,
-//    onNavigateForward: (BottomSheetPage) -> Unit,
-//) {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(300.dp)
-//    ) {
-//        when (currentPage) {
-//            BottomSheetPage.StepPage -> {
-//                StepPage(
-//                    step = currentStep,
-//                    steps = steps.sortedByDescending { it.orderNumber },
-//                    onCreateStep = onCreateStep,
-//                    onUpdateSteps = onChangeStepsOrder,
-//                    onSelectStep = onSelectStep,
-//                    onNavigateForward = onNavigateForward
-//                )
-//            }
-//
-//            is BottomSheetPage.StepDetailsPage -> {
-//                StepDetailsPage(
-//                    step = currentStep,
-//                    onUpdateStep = onUpdateStep,
-//                    onNavigateForward = onNavigateForward
-//                )
-//            }
-//
-//            is BottomSheetPage.LabelsPage -> {
-//                LabelsPage(
-//                    labels = labels,
-//                    onAddPlaneModel = {},
-//                    onClickPositionLabel = onClickPositionLabel
-//                )
-//            }
-//
-//            is BottomSheetPage.RenderablesPage -> {
-//                RenderablesPage(
-//                    renderables = renderables,
-//                    visibleRenderableIds = visibleRenderableIds,
-//                    onClickRenderable = onClickRenderable
-//                )
-//            }
-//
-//            is BottomSheetPage.AnimationsPage -> {
-//                AnimationsPage(
-//                    animations = animations,
-//                    visibleAnimationIds = visibleAnimationIds,
-//                    onClickAnimation = onClickAnimation
-//                )
-//            }
-//        }
-//    }
-//}

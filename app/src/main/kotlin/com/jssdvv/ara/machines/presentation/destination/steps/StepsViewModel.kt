@@ -1,7 +1,6 @@
 package com.jssdvv.ara.machines.presentation.destination.steps
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.core.net.toUri
@@ -14,6 +13,7 @@ import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
+import com.jssdvv.ara.machines.domain.model.RenderableTarget
 import com.jssdvv.ara.machines.domain.model.Step
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.domain.usecase.ModelsDataManager
@@ -51,8 +51,8 @@ class StepsViewModel @Inject constructor(
     private val machineId = savedStateHandle.toRoute<MachinesGraph.StepsRoute>().machineId
     private val activityId = savedStateHandle.toRoute<MachinesGraph.StepsRoute>().activityId
 
-    private val edittingStep = MutableStateFlow<Step?>(null)
-    private val edittingOperation = MutableStateFlow<Operation?>(null)
+    private val editingStep = MutableStateFlow<Step?>(null)
+    private val editingOperation = MutableStateFlow<Operation?>(null)
 
     private val models: StateFlow<List<Model>> = modelsDataManager
         .select(machineId)
@@ -72,9 +72,9 @@ class StepsViewModel @Inject constructor(
 
     private val selectedStep: StateFlow<Step?> = combine(
         steps,
-        edittingStep
-    ) { steps, selectedStep ->
-        selectedStep ?: steps.maxByOrNull { it.orderNumber }
+        editingStep
+    ) { steps, editingStep ->
+        editingStep ?: steps.maxByOrNull { it.orderNumber }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
@@ -105,11 +105,12 @@ class StepsViewModel @Inject constructor(
 
     private val selectedOperation: StateFlow<Operation?> = combine(
         operationsTargets,
-        edittingOperation,
+        editingOperation,
         selectedStep
-    ) { operationsTargets, selectedOperation, currentStep ->
-        selectedOperation
-            ?: operationsTargets.find { it.operation.stepId == currentStep?.id }?.operation
+    ) { operationsTargets, editingOperation, selectedStep ->
+        editingOperation ?: operationsTargets
+            .filter { it.operation.stepId == selectedStep?.id }
+            .maxByOrNull { it.operation.orderNumber }?.operation
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
@@ -148,7 +149,6 @@ class StepsViewModel @Inject constructor(
         when (event) {
             StepsEvent.OnNewStep -> newStep()
             is StepsEvent.OnSelectStep -> selectStep(event.stepId)
-            StepsEvent.OnDeselectStep -> { edittingStep.value = null }
             StepsEvent.OnSelectNextStep -> selectNextStep()
             StepsEvent.OnSelectPreviousStep -> selectPreviousStep()
             is StepsEvent.OnUpdateStep -> updateStep(event.step)
@@ -157,9 +157,8 @@ class StepsViewModel @Inject constructor(
 
             is StepsEvent.OnNewOperation -> newOperation(stepId = event.stepId)
             is StepsEvent.OnSelectOperation -> selectOperation(operationId = event.operationId)
-            StepsEvent.OnDeselectOperation -> { edittingOperation.value = null }
             is StepsEvent.OnUpdateOperation -> updateOperation(operation = event.operation)
-            is StepsEvent.OnSaveOperation -> {}
+            is StepsEvent.OnSaveOperation -> saveOperation(event.operation)
             is StepsEvent.OnDeleteOperation -> {}
         }
     }
@@ -170,8 +169,9 @@ class StepsViewModel @Inject constructor(
                 _isSelectionEnabled.value = event.isEnabled
             }
 
-            is StepsExternalEvent.OnLoadRenderables -> loadRenderable(event.renderable)
+            is StepsExternalEvent.OnLoadRenderables -> loadRenderable(event.renderable, event.state)
             is StepsExternalEvent.OnSelectRenderable -> selectRenderable(event.renderable)
+            is StepsExternalEvent.OnSelectExistingRenderables -> selectExistingRenderables(event.targets)
             is StepsExternalEvent.OnUnselectRenderable -> unselectRenderable(event.renderable)
             is StepsExternalEvent.OnToggleRenderableVisibility -> toggleRenderableVisibility(event.renderable)
             StepsExternalEvent.OnUnselectAllRenderables -> unselectAllRenderables()
@@ -183,37 +183,38 @@ class StepsViewModel @Inject constructor(
     private fun newStep() {
         // Caches a new step in the state
         // holder with step.id = 0
-        edittingStep.value = Step(
+        editingStep.value = Step(
             activityId = activityId,
             name = "",
             orderNumber = 0
         )
+        editingOperation.value = null
     }
 
     private fun selectStep(stepId: Int?) {
-        edittingStep.value = steps.value.find { it.id == stepId }
+        editingStep.value = steps.value.find { it.id == stepId }
     }
 
     private fun selectNextStep() {
-        val current = edittingStep.value ?: selectedStep.value ?: return
+        val current = editingStep.value ?: selectedStep.value ?: return
         val sorted = steps.value.sortedBy { it.orderNumber }
         val currentIndex = sorted.indexOfFirst { it.id == current.id }
         val next = sorted.getOrNull(currentIndex + 1) ?: return
-        edittingStep.value = next
+        editingStep.value = next
     }
 
     private fun selectPreviousStep() {
-        val current = edittingStep.value ?: selectedStep.value ?: return
+        val current = editingStep.value ?: selectedStep.value ?: return
         val sorted = steps.value.sortedBy { it.orderNumber }
         val currentIndex = sorted.indexOfFirst { it.id == current.id }
         val previous = sorted.getOrNull(currentIndex - 1) ?: return
-        edittingStep.value = previous
+        editingStep.value = previous
     }
 
     private fun updateStep(step: Step) {
-        val current = edittingStep.value ?: return
+        val current = editingStep.value ?: return
         if (step.id != current.id) return
-        edittingStep.value = step
+        editingStep.value = step
     }
 
     private fun saveStep(step: Step) {
@@ -240,7 +241,8 @@ class StepsViewModel @Inject constructor(
                     orderNumber = maxOrderNumber + 1,
                     imageUri = imageUri
                 )
-                stepsDataManager.upsert(newStep)
+                val generatedStepId = stepsDataManager.upsert(newStep).lastOrNull()
+                editingStep.value = steps.value.find { it.id == generatedStepId?.toInt() }
             } else {
                 // Existing step
                 val newOrderNumber = step.orderNumber.coerceIn(1, sorted.size)
@@ -268,8 +270,8 @@ class StepsViewModel @Inject constructor(
                     }
                 }
                 stepsDataManager.upsert(*updatedList.toTypedArray())
+                editingStep.value = steps.value.find { it.id == existingStep.id }
             }
-            edittingStep.value = null
         }
     }
 
@@ -292,7 +294,7 @@ class StepsViewModel @Inject constructor(
     }
 
     private fun newOperation(stepId: Int) {
-        edittingOperation.value = Operation(
+        editingOperation.value = Operation(
             stepId = stepId,
             orderNumber = 0,
             title = "",
@@ -300,26 +302,85 @@ class StepsViewModel @Inject constructor(
         )
     }
 
-    private fun selectOperation(operationId: Int) {
-        edittingOperation.value = operationsTargets.value.find { it.operation.id == operationId }?.operation
+    private fun selectOperation(operationId: Int?) {
+        editingOperation.value =
+            operationsTargets.value.find { it.operation.id == operationId }?.operation
     }
 
     private fun updateOperation(operation: Operation) {
-        Log.d("TEST_UPDATE", operation.toString())
-        val current = edittingOperation.value ?: return
+        val current = editingOperation.value ?: return
         if (operation.id != current.id) return
-        edittingOperation.value = operation
+        editingOperation.value = operation
     }
 
-
-
-
-
-
-
-    private fun upsertOperation(opTargets: OperationTargets) {
+    private fun saveOperation(operation: Operation) {
         viewModelScope.launch {
-            opsDataManager.upsert(opTargets)
+            val currentOperations = operationsTargets.value
+                .filter { it.operation.stepId == operation.stepId }
+                .map { it.operation }
+                .sortedBy { it.orderNumber }
+
+            val renderablesTargets = renderableStates
+                .filter { it.value.isSelected }
+                .map { (renderable, _) ->
+                    val state = renderableStates[renderable]
+
+                    RenderableTarget(
+                        operationId = operation.id,
+                        modelId = renderable.modelId,
+                        xxh3 = renderable.xxh3,
+                        name = state?.name ?: "",
+                    )
+                }
+
+            val existingOperation = currentOperations.find { it.id == operation.id }
+
+            if (existingOperation == null) {
+                // New Operation
+                val maxOrderNumber = currentOperations.maxOfOrNull { it.orderNumber } ?: 0
+
+                val operationTargets = OperationTargets(
+                    operation = operation.copy(orderNumber = maxOrderNumber + 1),
+                    targets = renderablesTargets
+                )
+
+                opsDataManager.upsert(operationTargets)
+
+                editingOperation.value = null
+            } else {
+                // Existing Operation
+                val ReorderNumber = operation.orderNumber.coerceIn(1, currentOperations.size)
+                val updatedList = currentOperations.toMutableList().apply {
+                    val currentIndex = indexOfFirst { it.id == operation.id }
+                    if (currentIndex != -1) removeAt(currentIndex)
+
+                    add(
+                        index = ReorderNumber - 1,
+                        element = operation.copy(
+                            id = existingOperation.id,
+                            stepId = existingOperation.stepId,
+                            orderNumber = ReorderNumber
+                        )
+                    )
+
+                    forEachIndexed { index, operation ->
+                        this[index] = operation.copy(orderNumber = index + 1)
+                    }
+                }
+
+                val (editedOperations, reorderedOperations) =
+                    updatedList.partition { it.id == operation.id }
+
+                if(reorderedOperations.isNotEmpty()) opsDataManager.upsert(*reorderedOperations.toTypedArray())
+                opsDataManager.upsert(
+                    OperationTargets(
+                        operation = editedOperations.first(),
+                        targets = renderablesTargets
+                    )
+                )
+
+                editingOperation.value = editedOperations.first()
+            }
         }
     }
 
@@ -329,13 +390,23 @@ class StepsViewModel @Inject constructor(
         }
     }
 
-    private fun loadRenderable(renderable: Renderable) {
-        _renderableStates.putIfAbsent(renderable, RenderableState())
+    private fun loadRenderable(renderable: Renderable, state: RenderableState) {
+        _renderableStates.putIfAbsent(renderable, state)
     }
 
-    private fun selectRenderable(renderable: Renderable) {
-        val currentState = _renderableStates[renderable] ?: RenderableState()
-        _renderableStates[renderable] = currentState.copy(isSelected = true)
+    private fun selectRenderable(vararg renderable: Renderable) {
+        renderable.forEach {
+            val currentState = _renderableStates[it] ?: RenderableState()
+            _renderableStates[it] = currentState.copy(isSelected = true)
+        }
+    }
+
+    private fun selectExistingRenderables(renderableTargets: List<RenderableTarget>) {
+        renderableTargets.forEach { target ->
+            val renderable = Renderable(target.modelId, target.xxh3)
+            val currentState = _renderableStates[renderable] ?: RenderableState()
+            _renderableStates[renderable] = currentState.copy(isSelected = true)
+        }
     }
 
     private fun unselectRenderable(renderable: Renderable) {
@@ -349,49 +420,29 @@ class StepsViewModel @Inject constructor(
     }
 
     private fun unselectAllRenderables() {
-        _renderableStates.keys.forEach {
-            _renderableStates[it] = _renderableStates[it]
-                ?.copy(isSelected = false) ?: RenderableState()
-        }
+        _renderableStates.putAll(_renderableStates.mapValues { it.value.copy(isSelected = false) })
     }
 
     private fun showAllRenderables() {
-        _renderableStates.keys.forEach {
-            _renderableStates[it] = _renderableStates[it]
-                ?.copy(isVisible = true) ?: RenderableState()
-        }
+        _renderableStates.putAll(_renderableStates.mapValues { it.value.copy(isVisible = true) })
     }
 
     private fun hideAllRenderables() {
-        _renderableStates.keys.forEach {
-            _renderableStates[it] = _renderableStates[it]
-                ?.copy(isVisible = false) ?: RenderableState()
-        }
+        _renderableStates.putAll(_renderableStates.mapValues { it.value.copy(isVisible = false) })
     }
 }
 
 sealed interface StepsEvent {
-
-//    data class OnUpsertStep(
-//        val id: Int,
-//        val orderNumber: Int = 0,
-//        val name: String,
-//        val desc: String? = null,
-//        val imageUri: Uri? = null
-//    ) : StepsEvent
-
     data object OnNewStep : StepsEvent
     data class OnSelectStep(val stepId: Int?) : StepsEvent
     data object OnSelectNextStep : StepsEvent
-    data object OnDeselectStep: StepsEvent
     data object OnSelectPreviousStep : StepsEvent
     data class OnUpdateStep(val step: Step) : StepsEvent
     data class OnSaveStep(val step: Step) : StepsEvent
     data class OnDeleteStep(val step: Step) : StepsEvent
 
     data class OnNewOperation(val stepId: Int) : StepsEvent
-    data class OnSelectOperation(val operationId: Int) : StepsEvent
-    data object OnDeselectOperation : StepsEvent
+    data class OnSelectOperation(val operationId: Int?) : StepsEvent
     data class OnUpdateOperation(val operation: Operation) : StepsEvent
     data class OnSaveOperation(val operation: Operation) : StepsEvent
     data class OnDeleteOperation(val operationId: Int) : StepsEvent
@@ -399,10 +450,15 @@ sealed interface StepsEvent {
 
 sealed interface StepsExternalEvent {
     data class OnToggleSelection(val isEnabled: Boolean) : StepsExternalEvent
-    data class OnLoadRenderables(val renderable: Renderable) : StepsExternalEvent
+    data class OnLoadRenderables(
+        val renderable: Renderable,
+        val state: RenderableState
+    ) : StepsExternalEvent
+
     data class OnSelectRenderable(val renderable: Renderable) : StepsExternalEvent
     data class OnToggleRenderableVisibility(val renderable: Renderable) : StepsExternalEvent
     data class OnUnselectRenderable(val renderable: Renderable) : StepsExternalEvent
+    data class OnSelectExistingRenderables(val targets: List<RenderableTarget>) : StepsExternalEvent
     data object OnUnselectAllRenderables : StepsExternalEvent
     data object OnShowAllRenderables : StepsExternalEvent
     data object OnHideAllRenderables : StepsExternalEvent
@@ -420,15 +476,22 @@ sealed interface StepsUiState {
     ) : StepsUiState
 }
 
+/**
+ * Renderable identifier holder
+ */
 data class Renderable(
     val modelId: Int,
-    val index: Int,
-    val name: String,
-    val initialPosition: Position = Position(),
-    val initialQuaternion: Quaternion = Quaternion()
+    val xxh3: Long
 )
 
+/**
+ * Temporal state holder that initializes at nodes loading
+ */
 data class RenderableState(
+    val name: String = "",
+    val index: Int = 0,
     val isVisible: Boolean = true,
-    val isSelected: Boolean = false
+    val isSelected: Boolean = false,
+    val initialPosition: Position = Position(),
+    val initialQuaternion: Quaternion = Quaternion()
 )
