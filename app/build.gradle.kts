@@ -114,6 +114,9 @@ dependencies {
 
     // Augmented Reality
     implementation(libs.sceneview.arsceneview)
+
+    // Hashing
+    implementation(libs.openhft.zero.allocation.hashing)
 }
 
 kapt {

@@ -29,6 +29,7 @@ coilCompose = "2.7.0"
 material3AdaptiveNavigationSuiteAndroid = "1.4.0"
 mlkit = "17.3.0"
 zxing = "3.5.4"
+hashing = "0.27ea1"
 
 # Plugins
 gradle-plugin = "8.13.2"
@@ -106,6 +107,9 @@ sceneview-arsceneview = { module = "io.github.sceneview:arsceneview", version.re
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+
+# Hashing
+openhft-zero-allocation-hashing = { module = "net.openhft:zero-allocation-hashing", version.ref = "hashing"}
 
 [bundles]
 
