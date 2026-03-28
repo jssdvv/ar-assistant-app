@@ -18,8 +18,11 @@ class SelectOperation(private val repository: OperationRepository) {
 }
 
 class UpsertOperation(private val repository: OperationRepository) {
-    suspend operator fun invoke(vararg operations: OperationTargets) =
-        repository.upsertOperation(*operations)
+    suspend operator fun invoke(vararg operation: Operation) =
+        repository.upsertOperation(*operation)
+
+    suspend operator fun invoke(vararg operationsTargets: OperationTargets) =
+        repository.upsertOperationTargets(*operationsTargets)
 }
 
 class DeleteOperation(private val repository: OperationRepository) {

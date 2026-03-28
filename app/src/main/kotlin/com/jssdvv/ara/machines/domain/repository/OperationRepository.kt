@@ -10,6 +10,7 @@ interface OperationRepository {
         stepsIds: List<Int>,
         orderType: OrderType
     ) : Flow<List<OperationTargets>>
-    suspend fun upsertOperation(vararg model: OperationTargets)
+    suspend fun upsertOperationTargets(vararg model: OperationTargets)
+    suspend fun upsertOperation(vararg model: Operation)
     suspend fun deleteOperation(vararg model: Operation)
 }

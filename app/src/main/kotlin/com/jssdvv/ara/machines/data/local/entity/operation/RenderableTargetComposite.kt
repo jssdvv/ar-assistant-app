@@ -7,50 +7,50 @@ import androidx.room.Index
 import com.jssdvv.ara.machines.data.local.entity.ModelEntity
 
 @Entity(
-    tableName = TargetRenderableComposite.TABLE_NAME,
+    tableName = RenderableTargetComposite.TABLE_NAME,
     primaryKeys = [
-        TargetRenderableComposite.COLUMN_OPERATION_ID,
-        TargetRenderableComposite.COLUMN_MODEL_ID,
-        TargetRenderableComposite.COLUMN_RENDERABLE_INDEX
+        RenderableTargetComposite.COLUMN_OPERATION_ID,
+        RenderableTargetComposite.COLUMN_MODEL_ID,
+        RenderableTargetComposite.COLUMN_XXH3
     ],
     foreignKeys = [
         ForeignKey(
             entity = OperationEntity::class,
             parentColumns = [OperationEntity.COLUMN_ID],
-            childColumns = [TargetRenderableComposite.COLUMN_OPERATION_ID],
+            childColumns = [RenderableTargetComposite.COLUMN_OPERATION_ID],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = ModelEntity::class,
             parentColumns = [ModelEntity.COLUMN_ID],
-            childColumns = [TargetRenderableComposite.COLUMN_MODEL_ID],
+            childColumns = [RenderableTargetComposite.COLUMN_MODEL_ID],
             onDelete = ForeignKey.NO_ACTION,
             onUpdate = ForeignKey.NO_ACTION
         )
     ],
     indices = [
-        Index(value = [TargetRenderableComposite.COLUMN_OPERATION_ID]),
-        Index(value = [TargetRenderableComposite.COLUMN_MODEL_ID])
+        Index(value = [RenderableTargetComposite.COLUMN_OPERATION_ID]),
+        Index(value = [RenderableTargetComposite.COLUMN_MODEL_ID])
     ]
 )
-data class TargetRenderableComposite(
+data class RenderableTargetComposite(
     @ColumnInfo(name = COLUMN_OPERATION_ID)
     val operationId: Int,
 
     @ColumnInfo(name = COLUMN_MODEL_ID)
     val modelId: Int,
 
-    @ColumnInfo(name = COLUMN_RENDERABLE_INDEX)
-    val renderableIndex: Int,
+    @ColumnInfo(name = COLUMN_XXH3)
+    val xxh3: Long,
 
-    @ColumnInfo(name = COLUMN_RENDERABLE_NAME)
-    val renderableName: String
+    @ColumnInfo(name = COLUMN_NAME)
+    val name: String
 ) {
     companion object {
-        const val TABLE_NAME = "target_renderable_composite"
+        const val TABLE_NAME = "renderable_target_composite"
         const val COLUMN_OPERATION_ID = "operation_id"
         const val COLUMN_MODEL_ID = "model_id"
-        const val COLUMN_RENDERABLE_INDEX = "renderable_index"
-        const val COLUMN_RENDERABLE_NAME = "renderable_name"
+        const val COLUMN_XXH3 = "xxh3"
+        const val COLUMN_NAME = "name"
     }
 }

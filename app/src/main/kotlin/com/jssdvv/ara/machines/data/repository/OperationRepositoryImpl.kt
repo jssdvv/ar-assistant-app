@@ -1,5 +1,6 @@
 package com.jssdvv.ara.machines.data.repository
 
+import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.core.domain.type.getOrderTypeAsString
@@ -14,6 +15,8 @@ import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.repository.OperationRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.collections.map
+import kotlin.collections.toTypedArray
 
 class OperationRepositoryImpl(
     private val dao: OperationDao
@@ -34,17 +37,37 @@ class OperationRepositoryImpl(
             .map { it.map(OperationWithTargets::toDomain) }
     }
 
-    override suspend fun upsertOperation(vararg model: OperationTargets) {
-        model.forEach { opTargets ->
-            val generatedId = dao.upsertOperation(opTargets.operation.toEntity()).toInt()
-            val operationId =
-                if (opTargets.operation.id == 0) generatedId else opTargets.operation.id
+    override suspend fun upsertOperationTargets(vararg model: OperationTargets) {
+        model.forEach { operationTargets ->
+            val entity = operationTargets.operation.toEntity()
+            val result = dao.upsertOperation(entity)[0].toInt()
+            val generatedOperationId = if (result == -1) entity.id else result
 
-            val targets = opTargets.renderableTargets.map { target ->
-                target.toComposite().copy(operationId = operationId)
+            val newTargets = operationTargets.targets.map {
+                it.toComposite().copy(operationId = generatedOperationId)
             }
-            dao.replaceTargets(operationId, targets)
+
+            val existingTargets = dao.selectTargetsByOperationId(generatedOperationId)
+            val targetsToDelete = existingTargets.filter { existingTarget ->
+                newTargets.none { newTarget ->
+                    newTarget.modelId == existingTarget.modelId &&
+                            newTarget.xxh3 == existingTarget.xxh3
+                }
+            }
+
+            if (targetsToDelete.isNotEmpty()) {
+                dao.deleteTargets(targetsToDelete)
+            }
+
+            dao.upsertTargets(newTargets)
         }
+    }
+
+    override suspend fun upsertOperation(vararg model: Operation) {
+
+        Log.d("UPSERT_CHECK", "CHECK 6")
+        dao.upsertOperation(*model.map { it.toEntity() }.toTypedArray())
+        Log.d("UPSERT_CHECK", "CHECK 7")
     }
 
     override suspend fun deleteOperation(vararg model: Operation) =

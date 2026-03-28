@@ -1,18 +1,18 @@
 package com.jssdvv.ara.machines.data.local.mapper.operation
 
-import com.jssdvv.ara.machines.data.local.entity.operation.TargetRenderableComposite
+import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
 import com.jssdvv.ara.machines.domain.model.RenderableTarget
 
-fun TargetRenderableComposite.toDomain() = RenderableTarget(
+fun RenderableTargetComposite.toDomain() = RenderableTarget(
     operationId = operationId,
     modelId = modelId,
-    renderableIndex = renderableIndex,
-    renderableName = renderableName
+    xxh3 = xxh3,
+    name = name
 )
 
-fun RenderableTarget.toComposite() = TargetRenderableComposite(
+fun RenderableTarget.toComposite() = RenderableTargetComposite(
     operationId = operationId,
     modelId = modelId,
-    renderableIndex = renderableIndex,
-    renderableName = renderableName
+    xxh3 = xxh3,
+    name = name
 )

@@ -24,11 +24,11 @@ data class Operation(
 data class RenderableTarget(
     val operationId: Int,
     val modelId: Int,
-    val renderableIndex: Int,
-    val renderableName: String = ""
+    val xxh3: Long,
+    val name: String
 )
 
 data class OperationTargets(
     val operation: Operation,
-    val renderableTargets: List<RenderableTarget>
+    val targets: List<RenderableTarget>
 )

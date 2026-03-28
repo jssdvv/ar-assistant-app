@@ -8,47 +8,44 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
-import com.jssdvv.ara.machines.data.local.entity.operation.TargetRenderableComposite
+import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
 import com.jssdvv.ara.machines.data.local.relation.OperationWithTargets
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface OperationDao {
     @Transaction
-    @RawQuery(observedEntities = [OperationEntity::class, TargetRenderableComposite::class])
+    @RawQuery(observedEntities = [OperationEntity::class, RenderableTargetComposite::class])
     fun selectOperationsWithTargetsByStepsIdsOrdered(
         query: SupportSQLiteQuery
     ) : Flow<List<OperationWithTargets>>
 
     @Upsert
-    suspend fun upsertOperation(entity: OperationEntity) : Long
+    suspend fun upsertOperation(vararg entity: OperationEntity) : List<Long>
 
     @Delete
     suspend fun deleteOperation(vararg entity: OperationEntity)
 
     @Upsert
-    suspend fun upsertTargets(composites: List<TargetRenderableComposite>)
+    suspend fun upsertTargets(composites: List<RenderableTargetComposite>)
+
+    @Delete
+    suspend fun deleteTargets(composites: List<RenderableTargetComposite>)
 
     @Transaction
     @Query(
         """
-        SELECT * FROM ${TargetRenderableComposite.TABLE_NAME}
-        WHERE ${TargetRenderableComposite.COLUMN_OPERATION_ID} = :operationId
+        SELECT * FROM ${RenderableTargetComposite.TABLE_NAME}
+        WHERE ${RenderableTargetComposite.COLUMN_OPERATION_ID} = :operationId
         """
     )
-    suspend fun selectTargetsByOperationId(operationId: Int): List<TargetRenderableComposite>
+    suspend fun selectTargetsByOperationId(operationId: Int): List<RenderableTargetComposite>
 
     @Query(
         """
-        DELETE FROM ${TargetRenderableComposite.TABLE_NAME} WHERE
-        ${TargetRenderableComposite.COLUMN_OPERATION_ID} = :operationId
+        DELETE FROM ${RenderableTargetComposite.TABLE_NAME} WHERE
+        ${RenderableTargetComposite.COLUMN_OPERATION_ID} = :operationId
         """
     )
     suspend fun deleteTargetsByOperationId(operationId: Int)
-
-    @Transaction
-    suspend fun replaceTargets(operationId: Int, targets: List<TargetRenderableComposite>) {
-        deleteTargetsByOperationId(operationId)
-        upsertTargets(targets)
-    }
 }

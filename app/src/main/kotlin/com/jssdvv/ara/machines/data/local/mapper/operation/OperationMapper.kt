@@ -1,7 +1,7 @@
 package com.jssdvv.ara.machines.data.local.mapper.operation
 
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
-import com.jssdvv.ara.machines.data.local.entity.operation.TargetRenderableComposite
+import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
 import com.jssdvv.ara.machines.data.local.relation.OperationWithTargets
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
@@ -60,10 +60,10 @@ fun Operation.toEntity() = OperationEntity(
 
 fun OperationWithTargets.toDomain() = OperationTargets(
     operation = operation.toDomain(),
-    renderableTargets = targets.map(TargetRenderableComposite::toDomain)
+    targets = targets.map(RenderableTargetComposite::toDomain)
 )
 
 fun OperationTargets.toComposite() = OperationWithTargets(
     operation = operation.toEntity(),
-    targets = renderableTargets.map(RenderableTarget::toComposite)
+    targets = targets.map(RenderableTarget::toComposite)
 )
