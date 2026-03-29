@@ -59,6 +59,7 @@ import com.jssdvv.ara.core.presentation.navigation.MarkerIcon
 import com.jssdvv.ara.core.presentation.theme.tubShapes
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
+import com.jssdvv.ara.machines.domain.utility.configureARSession
 import com.jssdvv.ara.machines.presentation.component.ShutterButton
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.EditorOptions
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.SelectedMarkerDialog
@@ -357,17 +358,7 @@ fun SuccessModelsCalibrationScreen(
                 materialLoader = materialLoader,
                 childNodes = nodes,
                 planeRenderer = false, // Turns off the dots on detected flat surfaces
-                sessionConfiguration = { session: Session, config: Config ->
-                    config.setFocusMode(Config.FocusMode.AUTO)
-                    config.setLightEstimationMode(Config.LightEstimationMode.DISABLED)
-                    config.setInstantPlacementMode(Config.InstantPlacementMode.DISABLED)
-                    config.setDepthMode(
-                        when (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-                            true -> Config.DepthMode.AUTOMATIC
-                            else -> Config.DepthMode.DISABLED
-                        }
-                    )
-                },
+                sessionConfiguration = ::configureARSession,
                 onSessionUpdated = { session, frame ->
 
                     if (currentBitmapInfo != null &&
