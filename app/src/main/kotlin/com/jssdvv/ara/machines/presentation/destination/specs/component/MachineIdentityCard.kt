@@ -359,9 +359,7 @@ fun MachineIdentityCard(
             } ?: Box(
                 Modifier.fillMaxSize()
             ) {
-                Text(
-                    text = "No hay información de la máquina disponible", // todo crear string
-                )
+                Text(stringResource(id = R.string.card_machine_identity_not_available_message))
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.jssdvv.ara.machines.presentation.destination.steps.functions
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.runtime.Composable
@@ -9,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
 import com.jssdvv.ara.machines.presentation.destination.steps.component.SquareButton
@@ -25,21 +27,21 @@ private val translationFormat = DecimalFormat("0.######", DecimalFormatSymbols(L
 private val rotationFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
 
 enum class Axis(
-    val rotationName: String,
+    @param:StringRes val rotationNameId: Int,
     val unitVector: Float3
 ) {
     X(
-        rotationName = "Roll",
+        rotationNameId = R.string.enum_axis_x_name,
         unitVector = Float3(x = 1F)
-    ), // todo create strings
+    ),
 
     Y(
-        rotationName = "Pitch",
+        rotationNameId = R.string.enum_axis_y_name,
         unitVector = Float3(y = 1F)
     ),
 
     Z(
-        rotationName = "Yaw",
+        rotationNameId = R.string.enum_axis_z_name,
         unitVector = Float3(z = 1F)
     );
 
@@ -98,7 +100,7 @@ fun AxisSelector(
             SquareButton(
                 selected = it == axis,
                 onClick = { onAxisChange(it) },
-                text = if (isRotation) it.rotationName else it.name
+                text = if (isRotation) stringResource(it.rotationNameId) else it.name
             )
         }
     }

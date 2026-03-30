@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -141,12 +142,18 @@ fun OperationItem(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "Duración: ${operation.duration}s", // todo create string
+                text = LocalContext.current.getString(
+                    R.string.operation_item_duration_label,
+                    operation.duration
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Starting Delay: ${operation.delay}s", // todo create string
+                text = LocalContext.current.getString(
+                    R.string.operation_item_starting_delay_label,
+                    operation.delay
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

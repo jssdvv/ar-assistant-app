@@ -72,6 +72,10 @@
 
     <string name="app_name">AR Assistant</string>
 
+    <!--COMMON ACTIONS-->
+
+    <string name="text_search_action">Search</string>
+
     <!--COMMON BUTTON [COMPONENT]-->
 
     <string name="button_check_action">Confirm</string>
@@ -149,5 +153,10 @@
         This app requires access to read media images. Go to settings to allow access.</string>
     <string name="permission_permanently_denied_write_external_storage_rationale">
         This app requires access to save files in this device. Go to settings to allow access.</string>
+
+    <!--PERMISSIONS BUTTON [COMPONENT]-->
+
+    <string name="button_permissions_grant_action">Grant permissions</string>
+    <string name="button_permissions_request_again_action">Request again</string>
 
 </resources>

@@ -302,7 +302,7 @@ fun FreeOperationSettings(
         Axis.Z to multiRotationState.z
     ).forEach { (axis, state) ->
         RotationTextField(
-            name = axis.rotationName,
+            name = stringResource(axis.rotationNameId),
             state = state,
             modifier = Modifier.fillMaxWidth()
         )
@@ -391,7 +391,7 @@ fun ScrewOperationSettings(
             checked = useTurns,
             onCheckedChange = { useTurns = it }
         )
-        Text("Use turns instead of pitch") // todo create string res
+        Text(stringResource(R.string.operation_checkbox_use_turns_supporting_text))
     }
 }
 
@@ -450,7 +450,7 @@ fun CylindricalOperationSettings(
     )
 
     RotationTextField(
-        name = selectedAxis.rotationName,
+        name = stringResource(selectedAxis.rotationNameId),
         state = rotationState,
         modifier = Modifier.fillMaxWidth()
     )

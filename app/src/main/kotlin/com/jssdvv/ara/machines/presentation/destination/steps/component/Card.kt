@@ -43,9 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.ArrowDownIcon
 import com.jssdvv.ara.core.presentation.common.WarningIcon
 import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
@@ -158,7 +160,7 @@ fun StepCard(
                         ) {
                             WarningIcon()
                             Text(
-                                text = "No operations yet", //TODO create string res
+                                text = stringResource(R.string.card_step_operations_empty_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -233,7 +235,7 @@ fun SelectableRenderablesCard(
                 contentAlignment = Alignment.CenterStart,
             ){
                 Text(
-                    text = "Select a part...", // todo create string res
+                    text = "Select a part...", // todo create string res??
                     style = MaterialTheme.typography.labelLarge
                 )
             }

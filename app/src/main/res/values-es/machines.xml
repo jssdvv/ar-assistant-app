@@ -67,6 +67,8 @@
     <string name="icon_motor_price_content_desc">Ingrese el Precio del Motor</string>
     <string name="icon_motor_acquisition_date_content_desc">Ingrese el Año de Adquisición del Motor</string>
 
+    <string name="card_machine_identity_not_available_message">No hay información de la máquina disponible</string>
+
     <!--MACHINE SPECIFICATIONS CARDS [COMPONENT]-->
     
     <string name="text_field_machine_service_capacity_label">Capacidad de servicio</string>
@@ -120,5 +122,75 @@
     <string name="text_field_motor_insulation_class_label">Clase de aislamiento</string>
     <string name="text_field_motor_insulation_class_temp_label">Temperatura de clase de aislamiento</string>
     <string name="text_field_motor_weight_label">Peso del motor</string>
+
+    <!--CONFIRMATION TOAST [TEXT]-->
+
+    <string name="toast_marker_calibration_success">Marcador M%1$sP%2$d calibrado</string>
+
+    <!--EDITOR OPTIONS [COMPONENT]-->
+
+    <string name="button_editor_restore_defaults_action">Restaurar valores</string>
+
+    <!--MARKER DIALOG [COMPONENT]-->
+
+    <string name="dialog_selected_marker_calibrate_title">Calibrar marcador</string>
+
+    <!--MARKER BUTTON [COMPONENT]-->
+
+    <string name="button_image_change_select_action">Seleccionar imagen</string>
+    <string name="button_editor_add_step_action">Añadir paso</string>
+
+    <!--ACTIVITY'S EDITOR INSIDE STEPS[COMPONENT]-->
+
+    <string name="screen_editor_activity_title">Editor de actividades</string>
+
+    <string name="button_editor_no_steps_label">Sin pasos</string>
+    <string name="button_editor_step_count_label">Paso: %1$d / %2$d</string>
+
+    <string name="button_editor_no_operations_label">Sin operaciones</string>
+    <string name="button_editor_operation_count_label">Operación: %1$d / %2$d</string>
+
+    <!--AXIS [ENUM]-->
+
+    <string name="enum_axis_x_name">X</string>
+    <string name="enum_axis_y_name">Y</string>
+    <string name="enum_axis_z_name">Z</string>
+
+    <!--STEPS CARD [COMPONENT]-->
+
+    <string name="card_step_operations_empty_message">Aún no hay operaciones</string>
+
+    <!--STEPS DIALOG [COMPONENT]-->
+
+    <string name="step_dialog_create_title">Nuevo paso</string>
+    <string name="step_dialog_edit_title">Editar paso</string>
+    <string name="text_field_step_dialog_name_label">Nombre</string>
+    <string name="text_field_step_dialog_description_label">Descripción</string>
+    <string name="button_step_dialog_cancel_action">Cancelar</string>
+    <string name="button_step_dialog_create_action">Crear</string>
+    <string name="button_step_dialog_save_action">Guardar cambios</string>
+
+    <!--STEPS SIDE SHEET [COMPONENT]-->
+
+    <string name="steps_side_sheet_title">Pasos y operaciones</string>
+
+    <!--STEPS TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_entities_selected_label">Entidades seleccionadas</string>
+
+    <plurals name="text_field_entities_count_value">
+        <item quantity="zero">Sin entidades seleccionadas</item>
+        <item quantity="one">%1$d entidad</item>
+        <item quantity="other">%1$d entidades</item>
+    </plurals>
+
+    <!--OPERATION SETTINGS [COMPONENT]-->
+
+    <string name="operation_checkbox_use_turns_supporting_text">Use turns instead of pitch</string>
+
+    <!--OPERATION TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_operation_selected_label">Operación seleccionada</string>
+    <string name="text_field_operation_empty_message">Ninguna operación seleccionada</string>
 
 </resources>

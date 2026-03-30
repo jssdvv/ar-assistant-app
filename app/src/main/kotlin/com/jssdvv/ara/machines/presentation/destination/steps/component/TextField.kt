@@ -14,10 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.ArrowPreviousItemIcon
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
@@ -121,13 +123,12 @@ fun EntitiesTextField(
     interactionSource: MutableInteractionSource? = null
 ) = OutlinedTextField(
     modifier = modifier,
-    value = when (selectedItemsCount) {
-        0 -> "No selected entities"
-        1 -> "$selectedItemsCount entity"
-        else -> "$selectedItemsCount entities" // todo create strings
-    },
+    value = pluralStringResource(
+        count = selectedItemsCount,
+        id = R.plurals.text_field_entities_count_value,
+    ),
     onValueChange = {},
-    label = { Text("Selected entities") },
+    label = { Text(stringResource(R.string.text_field_entities_selected_label)) },
     readOnly = true,
     trailingIcon = {
         IconButton(
@@ -137,7 +138,6 @@ fun EntitiesTextField(
     },
     interactionSource = interactionSource
 )
-
 
 @Composable
 fun OperationsTextField(
@@ -153,9 +153,9 @@ fun OperationsTextField(
             onClick = onClick
         ),
     value = currentOperationType?.let { stringResource(it.labelResId) }
-        ?: "No selected operation",  //todo create string
+        ?: stringResource(R.string.text_field_operation_empty_message),
     onValueChange = {},
-    label = { Text("Selected operation") }, //todo create string
+    label = { Text(stringResource(R.string.text_field_operation_selected_label)) },
     readOnly = true,
     leadingIcon = currentOperationType?.let {
         {

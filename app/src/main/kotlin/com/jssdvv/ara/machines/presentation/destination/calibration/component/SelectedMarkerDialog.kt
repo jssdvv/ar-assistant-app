@@ -33,7 +33,7 @@ fun SelectedMarkerDialog(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 MarkerIcon()
-                Text(text = "Calibrar Marcador") // todo create string
+                Text(stringResource(R.string.dialog_selected_marker_calibrate_title))
             }
         },
         text = {

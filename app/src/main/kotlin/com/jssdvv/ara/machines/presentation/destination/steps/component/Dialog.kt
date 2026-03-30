@@ -21,9 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.AddIcon
 import com.jssdvv.ara.core.presentation.common.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
@@ -56,7 +58,7 @@ fun StepDialog(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = if (isNewStep) "Create New Step" else "Edit Step",
+                text = stringResource(if (isNewStep) R.string.step_dialog_create_title else R.string.step_dialog_edit_title),
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -98,7 +100,7 @@ fun StepDialog(
                 onValueChange = { onUpdateStep(currentStep.copy(name = it)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                label = { Text("Name") } // todo string
+                label = { Text(stringResource(R.string.text_field_step_dialog_name_label)) }
             )
 
             OutlinedTextField(
@@ -107,7 +109,7 @@ fun StepDialog(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 6,
-                label = { Text("Description") } // todo string
+                label = { Text(stringResource(R.string.text_field_step_dialog_description_label)) }
             )
 
             FlowRow(
@@ -118,7 +120,7 @@ fun StepDialog(
                     onClick = onDismissRequest,
                     colors = ButtonDefaults.outlinedButtonColors(),
                     leadingIcon = { CloseIcon() },
-                    content = { Text("Cancel") } //todo create string
+                    content = { Text(stringResource(R.string.button_step_dialog_cancel_action)) }
                 )
 
                 ButtonWithIcon(
@@ -129,8 +131,13 @@ fun StepDialog(
                     colors = ButtonDefaults.buttonColors(),
                     leadingIcon = { AddIcon() },
                     content = {
-                        Text(if (isNewStep) "Create" else "Save")
-                    } //todo create string
+                        Text(
+                            stringResource(
+                                if (isNewStep) R.string.button_step_dialog_create_action
+                                else R.string.button_step_dialog_save_action
+                            )
+                        )
+                    }
                 )
             }
         }

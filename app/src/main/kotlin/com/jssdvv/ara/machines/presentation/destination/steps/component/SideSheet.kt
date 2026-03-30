@@ -18,6 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.SideSheet
 import com.jssdvv.ara.core.presentation.theme.spacing
@@ -57,7 +59,7 @@ fun StepsSideSheet(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Pasos & operaciones", // TODO create string res
+                text = stringResource(R.string.steps_side_sheet_title),
                 modifier = Modifier.weight(1F),
                 style = MaterialTheme.typography.titleLarge
             )

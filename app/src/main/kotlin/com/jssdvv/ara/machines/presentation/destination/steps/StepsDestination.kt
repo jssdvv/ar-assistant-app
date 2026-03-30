@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toFile
@@ -51,6 +52,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.filament.LightManager
 import com.google.android.filament.Skybox
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.ArrowBackIcon
 import com.jssdvv.ara.core.presentation.common.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.common.SearchIcon
@@ -476,7 +478,7 @@ fun StepsContent(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Activity's Editor") }, // todo create string
+                title = { Text(stringResource(R.string.screen_editor_activity_title)) },
                 navigationIcon = { NavigationUpIconButton(onNavigateUp) }
             )
         }
@@ -524,12 +526,18 @@ fun StepsContent(
                     onClick = { showSideSheet = true },
                     leadingIcon = { StepIcon() },
                     content = {
+                        val stepText = if (steps.isEmpty()) {
+                            stringResource(R.string.button_editor_no_steps_label)
+                        } else {
+                            stringResource(
+                                R.string.button_editor_step_count_label,
+                                selectedStep?.orderNumber ?: 0,
+                                steps.size
+                            )
+                        }
+
                         Text(
-                            text = if (steps.isEmpty()) {
-                                "No steps"
-                            } else {
-                                "Step: ${selectedStep?.orderNumber} / ${steps.size}"
-                            }, // todo add string
+                            text = stepText,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -562,12 +570,17 @@ fun StepsContent(
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     leadingIcon = { AnimationIcon() },
                     content = {
+                        val opText = if (operations.isEmpty()) {
+                            stringResource(R.string.button_editor_no_operations_label)
+                        } else {
+                            stringResource(
+                                R.string.button_editor_operation_count_label,
+                                selectedOperation?.orderNumber ?: 0,
+                                operations.size
+                            )
+                        }
                         Text(
-                            text = if (operations.isEmpty()) {
-                                "No operations"
-                            } else {
-                                "Operation: ${selectedOperation?.orderNumber} / ${operations.size}"
-                            }, // todo fix the count of ops (5)
+                            text = opText,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )

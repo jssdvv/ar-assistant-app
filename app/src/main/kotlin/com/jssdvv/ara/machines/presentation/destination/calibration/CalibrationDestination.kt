@@ -47,8 +47,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.ar.core.AugmentedImage
 import com.google.ar.core.AugmentedImageDatabase
-import com.google.ar.core.Config
-import com.google.ar.core.Session
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.PermissionState
 import com.jssdvv.ara.core.domain.utility.forEachApply
 import com.jssdvv.ara.core.presentation.common.AddIcon
@@ -178,9 +177,9 @@ internal fun ModelsCalibrationScreen(
                                 Uri.fromParts("package", context.packageName, null)
                             )
                         )
-                    }) {
-                    Text("GRANT PERMISSIONS") // todo create strings
-                }
+                    },
+                    content = { Text(stringResource(R.string.button_permissions_grant_action)) }
+                )
             }
         }
 
@@ -204,7 +203,7 @@ internal fun ModelsCalibrationScreen(
 
                 Button(
                     onClick = { permissionLauncher.launch(permissionsToRequest) }) {
-                    Text("Request again") // todo create strings
+                    Text(stringResource(R.string.button_permissions_request_again_action))
                 }
             }
         }
@@ -478,11 +477,17 @@ fun SuccessModelsCalibrationScreen(
                         },
                         onPress = {
                             calibrateOriginToMarker()
-                            val infoToast = Toast.makeText(
-                                context,
-                                "Marker M${selectedMarker?.machineId}P${selectedMarker?.index} calibrated", // TODO Create string
-                                Toast.LENGTH_SHORT
+
+                            val machineId = selectedMarker?.machineId ?: return@ShutterButton
+                            val markerIndex = selectedMarker.index
+
+                            val message = context.getString(
+                                R.string.toast_marker_calibration_success,
+                                machineId,
+                                markerIndex
                             )
+
+                            val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
                             infoToast.show()
                         },
                         enabled = isShutterEnabled

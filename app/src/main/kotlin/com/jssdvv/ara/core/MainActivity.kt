@@ -30,9 +30,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-// TODO: Fix all strings in the app
-// TODO: Create common icons for the app and fix the use of them
-// TODO: Fix colors
-// TODO: normalize spacings
-// TODO: normalize shapes

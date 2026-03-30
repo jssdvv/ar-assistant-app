@@ -116,7 +116,7 @@ fun ScannerScreen(
                         )
                     }
                 ) {
-                    Text("Request camera") // todo create string
+                    Text(stringResource(R.string.button_permissions_grant_action))
                 }
             }
         }
@@ -134,7 +134,7 @@ fun ScannerScreen(
                 Button(
                     onClick = { permissionLauncher.launch(cameraPermission) }
                 ) {
-                    Text("Request again") //todo create string
+                    Text(stringResource(R.string.button_permissions_grant_action))
                 }
             }
         }

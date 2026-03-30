@@ -92,7 +92,7 @@ fun EditorOptions(
         }
 
         Button(onClick = onRestoreDefaults) {
-            Text(text = "Restaurar valor predeterminado") // TODO create string
+            Text(stringResource(id = R.string.button_editor_restore_defaults_action))
         }
 
         SingleChoiceSegmentedButtonRow(

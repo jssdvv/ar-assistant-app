@@ -18,8 +18,10 @@ import androidx.compose.material3.TextFieldLabelPosition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.CloseIcon
 import com.jssdvv.ara.core.presentation.common.SearchIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
@@ -47,7 +49,7 @@ fun SearchBar(
     lineLimits = TextFieldLineLimits.SingleLine,
     placeholder = {
         Text(
-            text = "Search", // todo create string
+            text = stringResource(R.string.text_search_action),
             softWrap = false,
             maxLines = 1
         )

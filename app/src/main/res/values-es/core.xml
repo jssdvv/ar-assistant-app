@@ -5,6 +5,10 @@
 
     <string name="app_name">Asistente de RA</string>
 
+    <!--COMMON ACTIONS-->
+
+    <string name="text_search_action">Buscar</string>
+
     <!--COMMON BUTTON [COMPONENT]-->
 
     <string name="button_check_action">Confirmar</string>
@@ -76,5 +80,10 @@
         Esta aplicación requiere acceso de lectura de archivos. Ve a ajustes para permitirlo.</string>
     <string name="permission_permanently_denied_write_external_storage_rationale">
         Esta aplicación requiere acceso para guardar archivos en este dispositivo. Ve a ajustes para permitirlo.</string>
+
+    <!--PERMISSIONS BUTTON [COMPONENT]-->
+
+    <string name="button_permissions_grant_action">Conceder permisos</string>
+    <string name="button_permissions_request_again_action">Solicitar de nuevo</string>
 
 </resources>
