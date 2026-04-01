@@ -1,5 +1,6 @@
 package com.jssdvv.ara.machines.presentation.component
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -39,7 +42,8 @@ fun ShutterButton(
     colorDisabled: Color = Color.DarkGray,
     ringSize: Dp = 72.dp,
     circleSize: Dp = 56.dp,
-    strokeWidth: Dp = 5.dp
+    strokeWidth: Dp = 5.dp,
+    @DrawableRes iconDrawableId: Int? = null,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -92,7 +96,7 @@ fun ShutterButton(
                 .fillMaxSize()
                 .border(
                     strokeWidth,
-                    if(enabled) colorEnabled else colorDisabled,
+                    if (enabled) colorEnabled else colorDisabled,
                     CircleShape
                 )
         )
@@ -101,7 +105,7 @@ fun ShutterButton(
                 .size(circleSize)
                 .graphicsLayer { scaleX = circleScale; scaleY = circleScale }
                 .background(
-                    if(enabled) colorEnabled else colorDisabled,
+                    if (enabled) colorEnabled else colorDisabled,
                     CircleShape
                 )
                 .clip(CircleShape)
@@ -110,5 +114,23 @@ fun ShutterButton(
                     indication = ripple(color = Color.Black)
                 )
         )
+        iconDrawableId?.let { drawableId ->
+            Box(
+                modifier = Modifier
+                    .size(circleSize)
+                    .graphicsLayer {
+                        scaleX = circleScale
+                        scaleY = circleScale
+                        alpha = if (isPressed) 0f else 1f
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = drawableId),
+                    contentDescription = null,
+                    tint = if (enabled) Color.Black else Color.White.copy(alpha = .5F)
+                )
+            }
+        }
     }
 }
