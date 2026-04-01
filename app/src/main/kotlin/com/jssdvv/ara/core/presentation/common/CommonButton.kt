@@ -40,7 +40,7 @@ fun EditButtonWithIcon(
     modifier = modifier,
     colors = if (isOutlined) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors(),
     border = if (isOutlined) ButtonDefaults.outlinedButtonBorder() else null,
-    leadingIcon = { EditIcon() },
+    icon = { EditIcon() },
     content = { Text(stringResource(R.string.button_edit_action)) }
 )
 

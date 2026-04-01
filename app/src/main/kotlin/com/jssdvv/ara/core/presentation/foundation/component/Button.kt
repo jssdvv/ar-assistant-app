@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.jssdvv.ara.core.domain.utility.horizontalMirrored
 import com.jssdvv.ara.core.presentation.theme.cornerRadius
 import com.jssdvv.ara.core.presentation.theme.spacing
 
@@ -94,7 +95,8 @@ fun ButtonWithIcon(
     enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     border: BorderStroke? = null,
-    leadingIcon: @Composable () -> Unit = {},
+    iconInFront: Boolean = true,
+    icon: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     Button(
@@ -103,10 +105,21 @@ fun ButtonWithIcon(
         enabled = enabled,
         colors = colors,
         border = border,
-        contentPadding = ButtonDefaults.ButtonWithIconContentPadding
-    ) {
-        leadingIcon()
-        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-        content()
-    }
+        contentPadding = if (iconInFront) {
+            ButtonDefaults.ButtonWithIconContentPadding
+        } else {
+            ButtonDefaults.ButtonWithIconContentPadding.horizontalMirrored()
+        },
+        content = {
+            if (iconInFront) {
+                icon()
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                content()
+            } else {
+                content()
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                icon()
+            }
+        }
+    )
 }

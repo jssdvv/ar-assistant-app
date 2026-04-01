@@ -9,88 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.AddIcon
 import com.jssdvv.ara.core.presentation.common.EditIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
-
-@Composable
-fun PlayIconButton(
-    onClick : () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled : Boolean = true
-) = IconButton(
-    onClick = onClick,
-    modifier = modifier,
-    enabled = enabled,
-    content = { PlayIcon() }
-)
-
-@Composable
-fun LoopIconButton(
-    onClick : () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled : Boolean = true
-) = IconButton(
-    onClick = onClick,
-    modifier = modifier,
-    enabled = enabled,
-    content = { LoopIcon() }
-)
-
-@Composable
-fun SkipNextOperationIconButton(
-    onClick : () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled : Boolean = true
-) = IconButton(
-    onClick = onClick,
-    modifier = modifier,
-    enabled = enabled,
-    content = { SkipNextOperationIcon() }
-)
-
-@Composable
-fun SkipPreviousOperationIconButton(
-    onClick : () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled : Boolean = true
-) = IconButton(
-    onClick = onClick,
-    modifier = modifier,
-    enabled = enabled,
-    content = { SkipPreviousOperationIcon() }
-)
-
-@Composable
-fun SkipNextStepIconButton(
-    onClick : () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled : Boolean = true
-) = IconButton(
-    onClick = onClick,
-    modifier = modifier,
-    enabled = enabled,
-    content = { SkipNextStepIcon() }
-)
-
-@Composable
-fun SkipPreviousStepIconButton(
-    onClick : () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled : Boolean = true
-) = IconButton(
-    onClick = onClick,
-    modifier = modifier,
-    enabled = enabled,
-    content = { SkipPreviousStepIcon() }
-)
 
 @Composable
 fun ChangeImageButton(
@@ -103,8 +32,8 @@ fun ChangeImageButton(
         modifier = modifier,
         colors = if (isOutlined) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors(),
         border = if (isOutlined) ButtonDefaults.outlinedButtonBorder() else null,
-        leadingIcon = { ChangeIcon() },
-        content = { Text("Select Image") } // todo create string
+        icon = { ChangeIcon() },
+        content = { Text(stringResource(R.string.button_image_change_select_action)) }
     )
 }
 
@@ -123,10 +52,10 @@ fun AddStepButton(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-        leadingIcon = { AddIcon() },
+        icon = { AddIcon() },
         content = {
             Text(
-                text = "Add Step", // TODO create string res
+                text = stringResource(R.string.button_editor_add_step_action),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -145,7 +74,7 @@ fun AddOperationButton(
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
     ),
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
-    leadingIcon = { AddIcon() },
+    icon = { AddIcon() },
     content = {
         Text(
             text = "Add Operation",
@@ -166,7 +95,7 @@ fun EditStepButton(
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
     ),
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
-    leadingIcon = { EditIcon() },
+    icon = { EditIcon() },
     content = {
         Text(
             text = "Edit Step",
@@ -188,7 +117,7 @@ fun SquareButton(
         .clickable(onClick = onClick)
         .background(
             shape = MaterialTheme.shapes.small,
-            color = if(selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant
+            color = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant
         ),
     contentAlignment = Alignment.Center,
     content = { Text(text) }

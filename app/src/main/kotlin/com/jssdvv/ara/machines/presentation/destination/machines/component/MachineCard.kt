@@ -131,7 +131,7 @@ fun MachineCard(
                     onNavigateToDetails(machine.id)
                 },
                 modifier = Modifier.align(Alignment.End),
-                leadingIcon = {
+                icon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_specs),
                         contentDescription = stringResource(R.string.icon_navigate_to_specs_from_machines_content_desc)

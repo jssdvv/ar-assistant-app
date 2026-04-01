@@ -103,7 +103,7 @@ fun ActivityCard(
                 )
                 ButtonWithIcon(
                     onClick = onNavigateToARSession,
-                    leadingIcon = {
+                    icon = {
                         Icon(
                             painter = painterResource(R.drawable.ic_augmented_reality_outlined),
                             contentDescription = stringResource(R.string.icon_navigate_to_ar_session_from_activities_content_desc)

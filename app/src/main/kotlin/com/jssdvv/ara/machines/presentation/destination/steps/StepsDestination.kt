@@ -524,7 +524,7 @@ fun StepsContent(
             ) {
                 ButtonWithIcon(
                     onClick = { showSideSheet = true },
-                    leadingIcon = { StepIcon() },
+                    icon = { StepIcon() },
                     content = {
                         val stepText = if (steps.isEmpty()) {
                             stringResource(R.string.button_editor_no_steps_label)
@@ -568,7 +568,7 @@ fun StepsContent(
                         // todo add expand current step to op
                     },
                     colors = ButtonDefaults.filledTonalButtonColors(),
-                    leadingIcon = { AnimationIcon() },
+                    icon = { AnimationIcon() },
                     content = {
                         val opText = if (operations.isEmpty()) {
                             stringResource(R.string.button_editor_no_operations_label)

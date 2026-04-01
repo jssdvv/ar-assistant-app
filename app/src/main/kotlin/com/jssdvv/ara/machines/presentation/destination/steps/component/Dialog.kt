@@ -119,7 +119,7 @@ fun StepDialog(
                 ButtonWithIcon(
                     onClick = onDismissRequest,
                     colors = ButtonDefaults.outlinedButtonColors(),
-                    leadingIcon = { CloseIcon() },
+                    icon = { CloseIcon() },
                     content = { Text(stringResource(R.string.button_step_dialog_cancel_action)) }
                 )
 
@@ -129,7 +129,7 @@ fun StepDialog(
                         onDismissRequest()
                     },
                     colors = ButtonDefaults.buttonColors(),
-                    leadingIcon = { AddIcon() },
+                    icon = { AddIcon() },
                     content = {
                         Text(
                             stringResource(
