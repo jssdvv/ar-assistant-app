@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machines.presentation.destination.steps.functions
+package com.jssdvv.ara.machines.domain.utility
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +22,7 @@ import io.github.sceneview.math.Position
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
+import kotlin.math.atan2
 
 private val translationFormat = DecimalFormat("0.######", DecimalFormatSymbols(Locale.US))
 private val rotationFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
@@ -253,7 +254,7 @@ fun unidirectionalRotation(axis: Axis, degrees: Float) =
 fun Quaternion.extractSingleAxisDegrees(axis: Axis): Float {
     val imaginaryQ = this.xyz
     val sinHalfTheta = dot(imaginaryQ, axis.unitVector)
-    val radians = 2.0 * kotlin.math.atan2(sinHalfTheta.toDouble(), this.w.toDouble())
+    val radians = 2.0 * atan2(sinHalfTheta.toDouble(), this.w.toDouble())
     val degrees = Math.toDegrees(radians).toFloat()
     return degrees
 }
