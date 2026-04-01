@@ -30,10 +30,13 @@ fun SceneSurface(
     modifier: Modifier = Modifier,
     containerColor: Color = Color.Black,
     onNavigationUp: () -> Unit = {},
-    actions: @Composable RowScope.(rowHeight: Dp) -> Unit = {},
+    trailingAction: @Composable BoxScope.(size: DpSize) -> Unit = {},
+    optionsRow: @Composable RowScope.(rowHeight: Dp) -> Unit = {},
+    notificationChip: @Composable BoxScope.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit
 ) {
-    val topItemsSize = DpSize(48.dp,48.dp)
+    val trailingActionSize = DpSize(48.dp,48.dp)
+    val optionsRowHeight = 40.dp
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -42,34 +45,42 @@ fun SceneSurface(
         Box(
             modifier = Modifier
                 .padding(paddingValues)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = MaterialTheme.cornerRadius.large,
-                        topEnd = MaterialTheme.cornerRadius.large
-                    )
-                )
+                .clip(RoundedCornerShape(MaterialTheme.cornerRadius.large))
                 .fillMaxSize(),
         ){
             content()
-
-            Row(
-                modifier = Modifier
-                    .offset(-MaterialTheme.cornerRadius.small, MaterialTheme.cornerRadius.small)
-                    .height(topItemsSize.height)
-                    .align(Alignment.TopEnd),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.cornerRadius.small),
-                content = { actions(topItemsSize.height) }
-            )
-
             NavigationUpIconButton(
                 modifier = Modifier
                     .offset(MaterialTheme.cornerRadius.small, MaterialTheme.cornerRadius.small)
-                    .size(topItemsSize)
+                    .size(trailingActionSize)
                     .align(Alignment.TopStart),
                 onNavigationUp = onNavigationUp,
-                containerColor = Color.Black.copy(alpha = 0.5F),
+                containerColor = Color.Black.copy(alpha = 0.3F),
                 contentColor = Color.White
+            )
+            Row(
+                modifier = Modifier
+                    .offset(y = 12.dp)
+                    .height(optionsRowHeight)
+                    .align(Alignment.TopCenter),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                content = { optionsRow(optionsRowHeight) }
+            )
+            Box(
+                modifier = Modifier
+                    .offset(y = 60.dp)
+                    .align(Alignment.TopCenter),
+                contentAlignment = Alignment.Center,
+                content = { notificationChip() }
+            )
+            Box(
+                modifier = Modifier
+                    .offset(-MaterialTheme.cornerRadius.small, MaterialTheme.cornerRadius.small)
+                    .size(trailingActionSize)
+                    .align(Alignment.TopEnd),
+                contentAlignment = Alignment.Center,
+                content = { trailingAction(trailingActionSize) }
             )
         }
     }
