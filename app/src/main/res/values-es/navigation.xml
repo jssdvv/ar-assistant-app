@@ -5,13 +5,13 @@
 
     <string name="graph_scanner_label">Escáner</string>
     <string name="graph_machines_label">Máquinas</string>
-    <string name="graph_schedule_label">Eventos</string>
+    <string name="graph_tools_label">Herramientas</string>
 
     <!--NAVIGATION GRAPH ICON [COMPONENT]-->
 
     <string name="icon_scanner_content_desc">Abrir el Escáner de Códigos</string>
     <string name="icon_machines_content_desc">Abrir la Lista de Máquinas</string>
-    <string name="icon_schedule_content_desc">Abrir la Lista de Inventario</string>
+    <string name="icon_tools_content_desc">Abrir la Lista de Herramientas</string>
 
     <!--COUNTER NAVIGATION BUTTON [COMPONENT]-->
 

@@ -1,6 +1,6 @@
 package com.jssdvv.ara.schedule.presentation.navigation
 
-import EventsDestination
+import ToolsDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
@@ -9,10 +9,10 @@ import kotlinx.serialization.Serializable
 
 // Schedule Graph Route
 @Serializable
-data object ScheduleGraph {
+data object ToolsGraph {
 
     @Serializable
-    data object EventsRoute
+    data object ToolsRoute
 }
 
 /**
@@ -21,21 +21,18 @@ data object ScheduleGraph {
  * Navigation Tree:
  * ```
  * ScheduleGraph
- *   └─ EventsRoute
+ *   └─ ToolsRoute
  * ```
- *
- * **Note:** Add/Edit event operations are handled via dialogs within the EventsRoute
- * screen to avoid unnecessary navigation overhead.
  *
  * @param appState Application state containing the NavHostController for navigation.
  */
-fun NavGraphBuilder.scheduleNavGraph(
+fun NavGraphBuilder.toolsNavGraph(
     appState: AppState,
 ) {
     val navHostController = appState.navHostController
-    navigation<ScheduleGraph>(ScheduleGraph.EventsRoute) {
-        composable<ScheduleGraph.EventsRoute> {
-            EventsDestination()
+    navigation<ToolsGraph>(ToolsGraph.ToolsRoute) {
+        composable<ToolsGraph.ToolsRoute> {
+            ToolsDestination()
         }
     }
 }

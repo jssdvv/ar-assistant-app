@@ -5,7 +5,7 @@ import androidx.annotation.StringRes
 import com.jssdvv.ara.R
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
-import com.jssdvv.ara.schedule.presentation.navigation.ScheduleGraph
+import com.jssdvv.ara.schedule.presentation.navigation.ToolsGraph
 import kotlin.reflect.KClass
 
 /**
@@ -40,11 +40,11 @@ enum class AppNavGraphItem(
         iconContentDescId = R.string.icon_machines_content_desc,
         route = MachinesGraph::class
     ),
-    SCHEDULE(
-        selectedIconId = R.drawable.ic_schedule_filled,
-        unselectedIconId = R.drawable.ic_schedule_outlined,
-        labelTextId = R.string.graph_schedule_label,
-        iconContentDescId = R.string.icon_schedule_content_desc,
-        route = ScheduleGraph::class
+    TOOLS(
+        selectedIconId = R.drawable.ic_tools_filled,
+        unselectedIconId = R.drawable.ic_tools_outlined,
+        labelTextId = R.string.graph_tools_label,
+        iconContentDescId = R.string.icon_tools_content_desc,
+        route = ToolsGraph::class
     )
 }

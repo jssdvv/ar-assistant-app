@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class EventsViewModel @Inject constructor(
+class ToolsViewModel @Inject constructor(
     private val filesManager: FilesManager
 ) : ViewModel() {
     private val svgUriList = listOf(

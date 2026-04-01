@@ -12,7 +12,7 @@ import com.jssdvv.ara.core.presentation.AppState
 import com.jssdvv.ara.machines.presentation.navigation.machinesNavGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
 import com.jssdvv.ara.scanner.presentation.navigation.scannerNavGraph
-import com.jssdvv.ara.schedule.presentation.navigation.scheduleNavGraph
+import com.jssdvv.ara.schedule.presentation.navigation.toolsNavGraph
 
 /**
  * Root navigation host for the application.
@@ -22,13 +22,13 @@ import com.jssdvv.ara.schedule.presentation.navigation.scheduleNavGraph
  * AppNavHost
  *   ├─ ScannerGraph (start)
  *   ├─ MachinesGraph
- *   └─ ScheduleGraph
+ *   └─ toolsGraph
  * ```
  *
  * Each graph contains its own navigation tree. See individual graph functions for details:
  * - [scannerNavGraph]
  * - [machinesNavGraph]
- * - [scheduleNavGraph]
+ * - [toolsNavGraph]
  *
  * @param appState Application state containing the NavHostController and UI state.
  * @param modifier Modifier to be applied to the NavHost.
@@ -45,7 +45,7 @@ fun AppNavHost(
     ) {
         scannerNavGraph(appState)
         machinesNavGraph(appState)
-        scheduleNavGraph(appState)
+        toolsNavGraph(appState)
     }
 }
 
