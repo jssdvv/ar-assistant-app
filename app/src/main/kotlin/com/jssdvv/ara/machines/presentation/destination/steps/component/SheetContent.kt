@@ -45,16 +45,16 @@ import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.destination.steps.Renderable
 import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.Axis
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.AxisSelector
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.extractSingleAxisDegrees
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiRotationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiTranslationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberRotationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberTranslationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalRotation
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTransformPair
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTranslation
+import com.jssdvv.ara.machines.domain.utility.Axis
+import com.jssdvv.ara.machines.domain.utility.AxisSelector
+import com.jssdvv.ara.machines.domain.utility.extractSingleAxisDegrees
+import com.jssdvv.ara.machines.domain.utility.rememberMultiRotationState
+import com.jssdvv.ara.machines.domain.utility.rememberMultiTranslationState
+import com.jssdvv.ara.machines.domain.utility.rememberRotationState
+import com.jssdvv.ara.machines.domain.utility.rememberTranslationState
+import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
+import com.jssdvv.ara.machines.domain.utility.unidirectionalTransformPair
+import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
 import dev.romainguy.kotlin.math.max
 import kotlinx.coroutines.flow.distinctUntilChanged
 

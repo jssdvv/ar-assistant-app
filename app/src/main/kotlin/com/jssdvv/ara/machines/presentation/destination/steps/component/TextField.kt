@@ -23,8 +23,8 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.ArrowPreviousItemIcon
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.RotationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.TranslationState
+import com.jssdvv.ara.machines.domain.utility.RotationState
+import com.jssdvv.ara.machines.domain.utility.TranslationState
 
 
 @Composable
