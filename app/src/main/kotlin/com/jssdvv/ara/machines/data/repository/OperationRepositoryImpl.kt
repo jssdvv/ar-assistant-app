@@ -30,7 +30,7 @@ class OperationRepositoryImpl(
             """
             SELECT * FROM ${OperationEntity.TABLE_NAME}
             WHERE ${OperationEntity.COLUMN_STEP_ID} IN ($placeHolders)
-            ORDER BY ${OperationEntity.COLUMN_ORDER_NUMBER} ${getOrderTypeAsString(orderType)}
+            ORDER BY ${OperationEntity.COLUMN_ORDER} ${getOrderTypeAsString(orderType)}
             """.trimIndent()
         val simpleSQLiteQuery = SimpleSQLiteQuery(query, stepsIds.toTypedArray())
         return dao.selectOperationsWithTargetsByStepsIdsOrdered(simpleSQLiteQuery)

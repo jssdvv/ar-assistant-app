@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.core.presentation.foundation.component.MenuTextButton
-import com.jssdvv.ara.machines.domain.utility.Measurement
+import com.jssdvv.ara.machines.domain.type.Measurement
 
 @Composable
 fun TranslationMeasurementMenu(

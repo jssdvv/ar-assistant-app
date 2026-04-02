@@ -173,7 +173,7 @@ fun OperationsTest(modifier: Modifier = Modifier) {
         Operation(
             id = 1,
             stepId = 1,
-            orderNumber = 1,
+            order = 1,
             title = "Operation 1",
             type = OperationType.SCREW,
             duration = 10F,
@@ -181,7 +181,7 @@ fun OperationsTest(modifier: Modifier = Modifier) {
         Operation(
             id = 2,
             stepId = 1,
-            orderNumber = 2,
+            order = 2,
             title = "Operation 2",
             type = OperationType.POINT_TO_POINT,
             duration = 10F,

@@ -98,8 +98,7 @@ class ModelsCalibrationViewModel @Inject constructor(
         )
 
     init {
-        val permissionsPairs = permissions.map { it to true }
-        onCheckPermissionsStates(permissionsPairs)
+        onCheckPermissionsStates(permissions.map { it to true })
         getMarkers(machineId)
         getModels(machineId)
     }
@@ -173,8 +172,8 @@ class ModelsCalibrationViewModel @Inject constructor(
     ) {
         val markerToUpdate = markers.value.find { it.id == markerId }?.copy(
             calibrated = true,
-            originPosition = newOriginPosition,
-            originRotation = newOriginQuaternion
+            originOffsetPosition = newOriginPosition,
+            originOffsetRotation = newOriginQuaternion
         ) ?: return
 
         viewModelScope.launch {
@@ -189,8 +188,8 @@ class ModelsCalibrationViewModel @Inject constructor(
     ) {
         val modelToUpdate = models.value.find { it.id == modelId }?.copy(
             calibrated = true,
-            positionFromOrigin = newModelPosition,
-            rotationFromOrigin = newModelQuaternion
+            offsetPosition = newModelPosition,
+            offsetRotation = newModelQuaternion
         )
 
         if (modelToUpdate == null) return
@@ -251,24 +250,24 @@ class ModelsCalibrationViewModel @Inject constructor(
     }
 }
 
-sealed interface ModelsEvent {
-    data class OnCheckPermissionsStates(val permissions: List<Pair<String, Boolean>>) : ModelsEvent
-    data class OnPermissionInteraction(val permission: String) : ModelsEvent
-    data class OnSelectMarker(val marker: Marker) : ModelsEvent
+sealed class ModelsEvent {
+    data class OnCheckPermissionsStates(val permissions: List<Pair<String, Boolean>>) : ModelsEvent()
+    data class OnPermissionInteraction(val permission: String) : ModelsEvent()
+    data class OnSelectMarker(val marker: Marker) : ModelsEvent()
     data class OnCalibrateOriginToMarker(
         val markerId: Int,
         val newOriginPosition: Position,
         val newOriginQuaternion: Quaternion
-    ) : ModelsEvent
+    ) : ModelsEvent()
 
     data class OnCalibrateModelsToOrigin(
         val modelId: Int,
         val newModelPosition: Position,
         val newModelQuaternion: Quaternion
-    ) : ModelsEvent
+    ) : ModelsEvent()
 
-    data class OnInsertModel(val contentUri: Uri) : ModelsEvent
-    data object OnDeleteModel : ModelsEvent
+    data class OnInsertModel(val contentUri: Uri) : ModelsEvent()
+    data object OnDeleteModel : ModelsEvent()
 }
 
 sealed interface ModelsCalibrationUiState {

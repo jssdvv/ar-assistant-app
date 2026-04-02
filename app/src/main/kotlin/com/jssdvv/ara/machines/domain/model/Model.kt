@@ -12,6 +12,6 @@ data class Model(
     val calibrated: Boolean = false,
 
     // Model's position and rotation in Origin's local space.
-    val positionFromOrigin: Position = Position(0F,0F,0F),
-    val rotationFromOrigin: Quaternion = Quaternion(),
+    val offsetPosition: Position = Position(),
+    val offsetRotation: Quaternion = Quaternion(),
 )

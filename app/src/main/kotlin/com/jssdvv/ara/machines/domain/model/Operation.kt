@@ -1,5 +1,6 @@
 package com.jssdvv.ara.machines.domain.model
 
+import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.OperationType
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
@@ -8,16 +9,23 @@ import io.github.sceneview.math.Position
 data class Operation(
     val id: Int = 0,
     val stepId: Int,
-    val orderNumber: Int = 0,
+    val order: Int = 0,
     val title: String,
+
+    // Animation
     val type: OperationType,
-    val duration: Float = 5F, // Seconds
     val delay: Float = 0F, // Seconds
+    val duration: Float = 5F, // Seconds
+
+    // Renderables
+    val axis: Axis = Axis.X,
+    val pivot: Float3 = Float3(),
+    val alpha: Float = 1F, // Restarts Every Step
+    val pitch: Float = 2F, // Millis
+    val turns: Float = 0F,
+    val isGlobal: Boolean = false,
     val offsetPosition: Position = Position(),
-    val offsetQuaternion: Quaternion = Quaternion(),
-    val screwPitch: Float = 2.0F, // Millimeters
-    val axis: Float3 = Float3(0f, 1f, 0f),
-    val pivot: Float3 = Float3(0f, 0f, 0f),
+    val offsetRotation: Quaternion = Quaternion()
 )
 
 // Cross-Ref table 1-N

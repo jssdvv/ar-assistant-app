@@ -6,7 +6,7 @@ import com.jssdvv.ara.machines.domain.model.Step
 fun StepEntity.toDomain() = Step(
     id = id,
     activityId = activityId,
-    orderNumber = orderNumber,
+    order = order,
     name = title,
     description = description,
     imageUri = imageUri
@@ -15,7 +15,7 @@ fun StepEntity.toDomain() = Step(
 fun Step.toEntity() = StepEntity(
     id = id,
     activityId = activityId,
-    orderNumber = orderNumber,
+    order = order,
     title = name,
     description = description,
     imageUri = imageUri

@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
  *
  * @property [id] Primary key.
  * @property [activityId] Foreign key referencing an [ActivityEntity].
- * @property [orderNumber] Order number of the step.
+ * @property [order] Order number of the step.
  * @property [title] Title of the step.
  * @property [description] Description of the step.
  * @property [imageUri] Image file [Uri] of the step.
@@ -40,8 +40,8 @@ data class StepEntity(
     @ColumnInfo(name = COLUMN_ACTIVITY_ID)
     val activityId: Int,
 
-    @ColumnInfo(name = COLUMN_ORDER_NUMBER)
-    val orderNumber: Int,
+    @ColumnInfo(name = COLUMN_ORDER)
+    val order: Int,
 
     @ColumnInfo(name = COLUMN_TITLE)
     val title: String,
@@ -57,7 +57,7 @@ data class StepEntity(
         const val COLUMN_ID = "id"
         const val COLUMN_ACTIVITY_ID = "activity_id"
         const val COLUMN_TITLE = "title"
-        const val COLUMN_ORDER_NUMBER = "order_number"
+        const val COLUMN_ORDER = "order"
         const val COLUMN_DESCRIPTION = "description"
         const val COLUMN_IMAGE_URI = "image_uri"
     }

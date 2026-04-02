@@ -43,15 +43,14 @@ import com.jssdvv.ara.core.presentation.common.CloseIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.type.OperationType
-import com.jssdvv.ara.machines.presentation.destination.steps.Renderable
 import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
-import com.jssdvv.ara.machines.domain.utility.Axis
-import com.jssdvv.ara.machines.domain.utility.AxisSelector
+import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.domain.utility.RenderableInfo
 import com.jssdvv.ara.machines.domain.utility.extractSingleAxisDegrees
 import com.jssdvv.ara.machines.domain.utility.rememberMultiRotationState
 import com.jssdvv.ara.machines.domain.utility.rememberMultiTranslationState
-import com.jssdvv.ara.machines.domain.utility.rememberRotationState
-import com.jssdvv.ara.machines.domain.utility.rememberTranslationState
+import com.jssdvv.ara.machines.domain.utility.rememberSingleRotationState
+import com.jssdvv.ara.machines.domain.utility.rememberSingleTranslationState
 import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTransformPair
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
@@ -67,8 +66,8 @@ sealed interface BottomSheetScreen {
 @Composable
 fun OperationBottomSheet(
     isVisible: Boolean,
-    selectedRenderablesStates: Map<Renderable, RenderableState>,
-    onUnselectItem: (Renderable) -> Unit,
+    selectedRenderablesStates: Map<RenderableInfo, RenderableState>,
+    onUnselectItem: (RenderableInfo) -> Unit,
     onSelectionChange: (isActive: Boolean) -> Unit,
     onSaveClick: (Operation) -> Unit,
     onCancelClick: () -> Unit,
@@ -263,7 +262,7 @@ fun FreeOperationSettings(
         initialZMeters = currentOperation.offsetPosition.z
     )
     val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = currentOperation.offsetQuaternion.toEulerAngles()
+        initialEulerDegrees = currentOperation.offsetRotation.toEulerAngles()
     )
     val updatedCurrentOperation = rememberUpdatedState(currentOperation)
 
@@ -274,7 +273,7 @@ fun FreeOperationSettings(
                 onOperationChange(
                     updatedCurrentOperation.value.copy(
                         offsetPosition = position,
-                        offsetQuaternion = rotation
+                        offsetRotation = rotation
                     )
                 )
             }
@@ -314,12 +313,12 @@ fun ScrewOperationSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
 ) {
-    var selectedAxis by remember { mutableStateOf(Axis.fromVector(currentOperation.axis)) }
-    val translationState = rememberTranslationState(
+    var selectedAxis by remember { mutableStateOf(currentOperation.axis) }
+    val translationState = rememberSingleTranslationState(
         initialMeters = max(currentOperation.offsetPosition),
     )
-    val pitchOrTurnsState = rememberTranslationState(
-        initialMeters = currentOperation.screwPitch
+    val pitchOrTurnsState = rememberSingleTranslationState(
+        initialMeters = currentOperation.pitch
     )
     var useTurns by remember { mutableStateOf(false) }
     val updatedUseTurns by rememberUpdatedState(useTurns)
@@ -340,9 +339,9 @@ fun ScrewOperationSettings(
                 onOperationChange(
                     updatedCurrentOperation.copy(
                         offsetPosition = unidirectionalTranslation(selectedAxis, distance),
-                        offsetQuaternion = unidirectionalRotation(selectedAxis, turns * 360F),
-                        screwPitch = pitch,
-                        axis = selectedAxis.unitVector
+                        offsetRotation = unidirectionalRotation(selectedAxis, turns * 360F),
+                        pitch = pitch,
+                        axis = selectedAxis
                     )
                 )
             }
@@ -362,8 +361,8 @@ fun ScrewOperationSettings(
             onOperationChange(
                 updatedCurrentOperation.copy(
                     offsetPosition = newPosition,
-                    offsetQuaternion = newRotation,
-                    axis = axis.unitVector
+                    offsetRotation = newRotation,
+                    axis = axis
                 )
             )
         },
@@ -400,12 +399,12 @@ fun CylindricalOperationSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
 ) {
-    var selectedAxis by remember { mutableStateOf(Axis.fromVector(currentOperation.axis)) }
-    val translationState = rememberTranslationState(
+    var selectedAxis by remember { mutableStateOf(currentOperation.axis) }
+    val translationState = rememberSingleTranslationState(
         initialMeters = max(currentOperation.offsetPosition)
     )
-    val rotationState = rememberRotationState(
-        initialDegrees = currentOperation.offsetQuaternion.extractSingleAxisDegrees(selectedAxis)
+    val rotationState = rememberSingleRotationState(
+        initialDegrees = currentOperation.offsetRotation.extractSingleAxisDegrees(selectedAxis)
     )
     val updatedCurrentOperation by rememberUpdatedState(currentOperation)
 
@@ -416,8 +415,8 @@ fun CylindricalOperationSettings(
                 onOperationChange(
                     updatedCurrentOperation.copy(
                         offsetPosition = unidirectionalTranslation(selectedAxis, meters),
-                        offsetQuaternion = unidirectionalRotation(selectedAxis, degrees),
-                        axis = selectedAxis.unitVector
+                        offsetRotation = unidirectionalRotation(selectedAxis, degrees),
+                        axis = selectedAxis
                     )
                 )
             }
@@ -435,8 +434,8 @@ fun CylindricalOperationSettings(
             onOperationChange(
                 updatedCurrentOperation.copy(
                     offsetPosition = newPosition,
-                    offsetQuaternion = newRotation,
-                    axis = axis.unitVector
+                    offsetRotation = newRotation,
+                    axis = axis
                 )
             )
         },
@@ -462,7 +461,7 @@ fun JointOperationSettings(
     onOperationChange: (Operation) -> Unit,
 ) {
     val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = currentOperation.offsetQuaternion.toEulerAngles()
+        initialEulerDegrees = currentOperation.offsetRotation.toEulerAngles()
     )
     val updatedCurrentOperation by rememberUpdatedState(currentOperation)
 
@@ -472,7 +471,7 @@ fun JointOperationSettings(
             .collect { quaternion ->
                 onOperationChange(
                     updatedCurrentOperation.copy(
-                        offsetQuaternion = quaternion
+                        offsetRotation = quaternion
                     )
                 )
             }

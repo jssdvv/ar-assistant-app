@@ -6,7 +6,7 @@ data class Step(
     val id: Int = 0,
     val activityId: Int,
     val name: String,
-    val orderNumber: Int,
+    val order: Int,
     val description: String? = null,
     val imageUri: Uri? = null,
 )

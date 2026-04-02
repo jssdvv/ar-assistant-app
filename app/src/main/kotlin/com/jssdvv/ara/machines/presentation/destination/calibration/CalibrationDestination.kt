@@ -1,5 +1,6 @@
 package com.jssdvv.ara.machines.presentation.destination.calibration
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -14,8 +15,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -46,19 +48,23 @@ import androidx.core.net.toFile
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.ar.core.AugmentedImage
-import com.google.ar.core.AugmentedImageDatabase
+import com.google.ar.core.Session
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.PermissionState
 import com.jssdvv.ara.core.domain.utility.forEachApply
 import com.jssdvv.ara.core.presentation.common.AddIcon
-import com.jssdvv.ara.core.presentation.common.DeleteIcon
+import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
 import com.jssdvv.ara.core.presentation.foundation.component.SceneSurface
 import com.jssdvv.ara.core.presentation.navigation.MarkerIcon
+import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.core.presentation.theme.tubShapes
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
+import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.utility.configureARSession
+import com.jssdvv.ara.machines.domain.utility.setSingleImageDatabase
+import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
 import com.jssdvv.ara.machines.presentation.component.ShutterButton
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.EditorOptions
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.SelectedMarkerDialog
@@ -71,7 +77,6 @@ import com.jssdvv.ara.machines.presentation.destination.calibration.function.cre
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.detectMarker
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.getModelMaterialInstance
 import dev.romainguy.kotlin.math.Quaternion
-import dev.romainguy.kotlin.math.RotationsOrder
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.node.AugmentedImageNode
 import io.github.sceneview.math.Position
@@ -119,7 +124,8 @@ internal fun ModelsCalibrationScreen(
 
     val settingsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { onEvent(ModelsEvent.OnCheckPermissionsStates(permissions.map { it to true })) })
+        onResult = { onEvent(ModelsEvent.OnCheckPermissionsStates(permissions.map { it to true })) }
+    )
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -142,7 +148,7 @@ internal fun ModelsCalibrationScreen(
 
                 is ModelsCalibrationUiState.Success -> {
                     SuccessModelsCalibrationScreen(
-                        modifier = Modifier,
+                        modifier = modifier,
                         markers = uiState.markers,
                         models = uiState.models,
                         selectedMarker = uiState.selectedMarker,
@@ -210,6 +216,7 @@ internal fun ModelsCalibrationScreen(
     }
 }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun SuccessModelsCalibrationScreen(
     markers: List<Marker>,
@@ -228,6 +235,7 @@ fun SuccessModelsCalibrationScreen(
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val view = rememberView(engine).apply { isStencilBufferEnabled = true }
+    var arSession by remember { mutableStateOf<Session?>(null) }
 
     val originNode = remember { Node(engine).apply { worldTransform = Transform() } }
     val nodes = rememberNodes { add(0, originNode) }
@@ -251,12 +259,9 @@ fun SuccessModelsCalibrationScreen(
     var transformMode by remember { mutableStateOf(TransformationMode()) }
 
     var firstTimeDetected by remember { mutableStateOf(false) }
-    var previousMarkerId by remember { mutableStateOf(0) }
 
     var trackingMethod by remember { mutableStateOf(AugmentedImage.TrackingMethod.NOT_TRACKING) }
-    val isShutterEnabled by remember {
-        derivedStateOf { trackingMethod == AugmentedImage.TrackingMethod.FULL_TRACKING }
-    }
+    val isShutterEnabled = trackingMethod == AugmentedImage.TrackingMethod.FULL_TRACKING
 
     // Dialogs
     var showWarningDialog by remember { mutableStateOf(false) }
@@ -276,40 +281,52 @@ fun SuccessModelsCalibrationScreen(
         }
     )
 
-    val repositionOrigin = {
-        if (selectedMarker != null && markerNode != null) {
-            originNode.position = markerNode.getWorldPosition(selectedMarker.originPosition)
-            originNode.quaternion = markerNode.getWorldQuaternion(selectedMarker.originRotation)
+    val repositionOrigin = remember(selectedMarker, markerNode) {
+        {
+            if (selectedMarker != null && markerNode != null) {
+                originNode.position = markerNode.getWorldPosition(selectedMarker.originOffsetPosition)
+                originNode.quaternion = markerNode.getWorldQuaternion(selectedMarker.originOffsetRotation)
+            }
         }
     }
 
-    val calibrateOriginToMarker = {
-        if (selectedMarker != null && markerNode != null) {
-            // Update the position and rotation of the Origin node in the Marker's local space
-            onEvent(
-                ModelsEvent.OnCalibrateOriginToMarker(
-                    markerId = selectedMarker.id,
-                    newOriginPosition = markerNode.getLocalPosition(originNode.worldPosition),
-                    newOriginQuaternion = markerNode.getLocalQuaternion(originNode.worldQuaternion)
+    val calibrateOriginToMarker = remember(selectedMarker, markerNode) {
+        {
+            if (selectedMarker != null && markerNode != null) {
+                // Update the position and rotation of the Origin node in the Marker's local space
+                onEvent(
+                    ModelsEvent.OnCalibrateOriginToMarker(
+                        markerId = selectedMarker.id,
+                        newOriginPosition = markerNode.getLocalPosition(originNode.worldPosition),
+                        newOriginQuaternion = markerNode.getLocalQuaternion(originNode.worldQuaternion)
+                    )
                 )
-            )
+            }
         }
     }
 
-    val calibrateModel = {
-        if (selectedModel != null) {
-            onEvent(
-                ModelsEvent.OnCalibrateModelsToOrigin(
-                    modelId = selectedModel!!.name!!.toInt(),
-                    newModelPosition = selectedModel!!.position,
-                    newModelQuaternion = selectedModel!!.quaternion
+    val calibrateModel = remember(selectedModel) {
+        {
+            if (selectedModel != null) {
+                onEvent(
+                    ModelsEvent.OnCalibrateModelsToOrigin(
+                        modelId = selectedModel!!.name!!.toInt(),
+                        newModelPosition = selectedModel!!.position,
+                        newModelQuaternion = selectedModel!!.quaternion
+                    )
                 )
-            )
-            selectedModel = null
+                selectedModel = null
+            }
         }
     }
 
-    BackHandler(markers.any { !it.calibrated }) { showWarningDialog = true }
+    val applyTranslation = { delta: Position ->
+        selectedModel?.apply { worldPosition += worldQuaternion * delta }
+    }
+
+    val applyRotation = { euler: Float, axis: Axis ->
+        selectedModel?.apply { worldQuaternion *= unidirectionalRotation(axis, euler) }
+    }
 
     if (firstTimeDetected) {
         models.forEach { model ->
@@ -323,8 +340,8 @@ fun SuccessModelsCalibrationScreen(
                         modelId = model.id
                     ).apply {
                         parent = originNode
-                        position = model.positionFromOrigin
-                        quaternion = model.rotationFromOrigin
+                        position = model.offsetPosition
+                        quaternion = model.offsetRotation
                     }
                     repositionOrigin()
                     onDispose { node.destroy() }
@@ -333,21 +350,41 @@ fun SuccessModelsCalibrationScreen(
         }
     }
 
+    BackHandler(markers.any { !it.calibrated }) { showWarningDialog = true }
+
+    LaunchedEffect(currentBitmapInfo) {
+        val bitmapInfo = currentBitmapInfo ?: return@LaunchedEffect
+        val session = arSession ?: return@LaunchedEffect
+        nodes.filterIsInstance<AugmentedImageNode>().forEach { it.destroy() }
+        setSingleImageDatabase(session, bitmapInfo.markerId.toString(), bitmapInfo.bitmap)
+    }
+
     SceneSurface(
         onNavigationUp = onNavigateUp,
-        actions = { rowHeight ->
-            if (isEditionEnabled) {
-                IconButton(
-                    modifier = Modifier.size(rowHeight),
-                    onClick = { },
-                    colors = IconButtonDefaults.filledIconButtonColors().copy(
-                        containerColor = Color.Black.copy(alpha = 0.5F),
-                        contentColor = Color.White
-                    ),
-                    content = { DeleteIcon() }
-                )
-            }
-        }
+        trailingAction = { rowHeight ->
+            IconButton(
+                onClick = { showMarkersDialog = true },
+                modifier = Modifier.size(rowHeight),
+                colors = IconButtonDefaults.filledIconButtonColors().copy(
+                    containerColor = Color.Black.copy(alpha = 0.3F),
+                    contentColor = Color.White
+                ),
+                content = { MarkerIcon() }
+            )
+
+            // todo fix where to locate this button
+//            if (isEditionEnabled) {
+//                IconButton(
+//                    modifier = Modifier.size(rowHeight),
+//                    onClick = { },
+//                    colors = IconButtonDefaults.filledIconButtonColors().copy(
+//                        containerColor = Color.Black.copy(alpha = 0.5F),
+//                        contentColor = Color.White
+//                    ),
+//                    content = { DeleteIcon() }
+//                )
+//            }
+        },
     ) {
         if (markers.isNotEmpty()) {
             ARScene(
@@ -358,34 +395,8 @@ fun SuccessModelsCalibrationScreen(
                 childNodes = nodes,
                 planeRenderer = false, // Turns off the dots on detected flat surfaces
                 sessionConfiguration = ::configureARSession,
-                onSessionUpdated = { session, frame ->
-
-                    if (currentBitmapInfo != null &&
-                        currentBitmapInfo.markerId != previousMarkerId
-                    ) {
-
-                        nodes.filterIsInstance<AugmentedImageNode>().forEach {
-                            it.clearChildNodes()
-                            nodes.remove(it)
-                        }
-
-                        previousMarkerId = currentBitmapInfo.markerId
-
-                        // Configures a single augmented image database each time
-                        // the selected marker changes. Avoiding problems like
-                        // markers being mixed up. Thank you google :)
-                        session.configure(
-                            session.config.setAugmentedImageDatabase(
-                                AugmentedImageDatabase(session).apply {
-                                    addImage(
-                                        currentBitmapInfo.markerId.toString(),
-                                        currentBitmapInfo.bitmap
-                                    )
-                                }
-                            )
-                        )
-                    }
-
+                onSessionCreated = { arSession = it },
+                onSessionUpdated = { _, frame ->
                     // Gets the last detected trackable (QR code) in any
                     // previous frame as AugmentedImages in the scene
                     val trackables = frame.getUpdatedTrackables(AugmentedImage::class.java)
@@ -444,29 +455,28 @@ fun SuccessModelsCalibrationScreen(
                 enter = expandVertically(tween(), Alignment.Top),
                 exit = shrinkVertically(tween(), Alignment.Top)
             ) {
-                Row(
-                    modifier = Modifier.padding(vertical = 32.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(56.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "*/*"
-                            }
-                            pickModel.launch(intent)
-                        },
-                        modifier = Modifier.size(56.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors().copy(
-                            containerColor = Color.DarkGray,
-                            contentColor = Color.White
-                        ),
-                        content = { AddIcon() }
-                    )
-
                     ShutterButton(
                         onClick = {
+                            calibrateOriginToMarker()
+
+                            val machineId = selectedMarker?.machineId ?: return@ShutterButton
+                            val markerIndex = selectedMarker.index
+
+                            val message = context.getString(
+                                R.string.toast_marker_calibration_success,
+                                machineId.toString(),
+                                markerIndex
+                            )
+
+                            val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+                            infoToast.show()
+                        },
+                        onPress = {
                             repositionOrigin()
                             val infoToast = Toast.makeText(
                                 context,
@@ -475,32 +485,29 @@ fun SuccessModelsCalibrationScreen(
                             )
                             infoToast.show()
                         },
-                        onPress = {
-                            calibrateOriginToMarker()
-
-                            val machineId = selectedMarker?.machineId ?: return@ShutterButton
-                            val markerIndex = selectedMarker.index
-
-                            val message = context.getString(
-                                R.string.toast_marker_calibration_success,
-                                machineId,
-                                markerIndex
-                            )
-
-                            val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
-                            infoToast.show()
-                        },
-                        enabled = isShutterEnabled
+                        modifier = Modifier.align(Alignment.Center),
+                        enabled = isShutterEnabled,
+                        iconDrawableId = R.drawable.ic_calibrate_to
                     )
 
-                    IconButton(
-                        onClick = { showMarkersDialog = true },
-                        modifier = Modifier.size(56.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors().copy(
-                            containerColor = Color.DarkGray,
-                            contentColor = Color.White
+                    ButtonWithIcon (
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                            }
+                            pickModel.launch(intent)
+                        },
+                        modifier = Modifier
+                            .padding(end = MaterialTheme.spacing.small)
+                            .align(Alignment.CenterEnd),
+                        colors = ButtonDefaults.buttonColors().copy(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
                         ),
-                        content = { MarkerIcon() }
+                        iconInFront = false,
+                        icon = { AddIcon() },
+                        content = { Text("Agregar") }
                     )
                 }
             }
@@ -540,59 +547,32 @@ fun SuccessModelsCalibrationScreen(
                     onTransformationModeChange = { transformMode = it },
                     onXTickDragged = { xTick ->
                         if (transformation == Transformation.TRANSLATION) {
-                            val deltaX = transformMode.translation.mmPerUnit * xTick / 1000F
-                            selectedModel?.apply {
-                                val localDelta = Position(x = deltaX, y = 0F, z = 0F)
-                                val worldDelta = worldQuaternion * localDelta
-                                worldPosition += worldDelta
-                            }
+                            applyTranslation(Position(x = transformMode.translation.mmPerUnit * xTick / 1000F))
                         } else {
-                            val rollDeg = transformMode.rotation.halfDegPerUnit * xTick / 2F
-                            val qDeltaRoll = Quaternion.fromEuler(
-                                roll = rollDeg * Math.toRadians(1.0).toFloat(),
-                                order = RotationsOrder.ZYX
+                            applyRotation(
+                                transformMode.rotation.halfDegPerUnit * xTick / 2F,
+                                Axis.X
                             )
-                            selectedModel?.apply {
-                                worldQuaternion *= qDeltaRoll
-                            }
                         }
                     },
                     onYTickDragged = { yTick ->
                         if (transformation == Transformation.TRANSLATION) {
-                            val deltaY = transformMode.translation.mmPerUnit * yTick / 1000F
-                            selectedModel?.apply {
-                                val localDelta = Position(x = 0F, y = deltaY, z = 0F)
-                                val worldDelta = worldQuaternion * localDelta
-                                worldPosition += worldDelta
-                            }
+                            applyTranslation(Position(y = transformMode.translation.mmPerUnit * yTick / 1000F))
                         } else {
-                            val pitchDeg = transformMode.rotation.halfDegPerUnit * yTick / 2F
-                            val qDeltaPitch = Quaternion.fromEuler(
-                                pitch = pitchDeg * Math.toRadians(1.0).toFloat(),
-                                order = RotationsOrder.ZYX
+                            applyRotation(
+                                transformMode.rotation.halfDegPerUnit * yTick / 2F,
+                                Axis.Y
                             )
-                            selectedModel?.apply {
-                                worldQuaternion *= qDeltaPitch
-                            }
                         }
                     },
                     onZTickDragged = { zTick ->
                         if (transformation == Transformation.TRANSLATION) {
-                            val deltaZ = transformMode.translation.mmPerUnit * zTick / 1000F
-                            selectedModel?.apply {
-                                val localDelta = Position(x = 0F, y = 0F, z = deltaZ)
-                                val worldDelta = worldQuaternion * localDelta
-                                worldPosition += worldDelta
-                            }
+                            applyTranslation(Position(z = transformMode.translation.mmPerUnit * zTick / 1000F))
                         } else {
-                            val yawDeg = transformMode.rotation.halfDegPerUnit * zTick / 2F
-                            val qDeltaYaw = Quaternion.fromEuler(
-                                yaw = yawDeg * Math.toRadians(1.0).toFloat(),
-                                order = RotationsOrder.ZYX
+                            applyRotation(
+                                transformMode.rotation.halfDegPerUnit * zTick / 2F,
+                                Axis.Z
                             )
-                            selectedModel?.apply {
-                                worldQuaternion *= qDeltaYaw
-                            }
                         }
                     }
                 )

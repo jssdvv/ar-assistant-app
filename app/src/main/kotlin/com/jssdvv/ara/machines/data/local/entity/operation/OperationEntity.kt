@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.jssdvv.ara.machines.data.local.entity.StepEntity
+import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.OperationType
 
 /**
@@ -34,8 +35,8 @@ data class OperationEntity(
     @ColumnInfo(name = COLUMN_STEP_ID)
     val stepId: Int,
 
-    @ColumnInfo(name = COLUMN_ORDER_NUMBER)
-    val orderNumber: Int,
+    @ColumnInfo(name = COLUMN_ORDER)
+    val order: Int,
 
     @ColumnInfo(name = COLUMN_TITLE)
     val title: String,
@@ -43,44 +44,14 @@ data class OperationEntity(
     @ColumnInfo(name = COLUMN_TYPE)
     val type: OperationType,
 
-    @ColumnInfo(name = COLUMN_DURATION)
-    val duration: Float,
-
     @ColumnInfo(name = COLUMN_DELAY)
     val delay: Float,
 
-    @ColumnInfo(name = COLUMN_OFFSET_X_VECTOR)
-    val offsetXVector: Float,
+    @ColumnInfo(name = COLUMN_DURATION)
+    val duration: Float,
 
-    @ColumnInfo(name = COLUMN_OFFSET_Y_VECTOR)
-    val offsetYVector: Float,
-
-    @ColumnInfo(name = COLUMN_OFFSET_Z_VECTOR)
-    val offsetZVector: Float,
-
-    @ColumnInfo(name = COLUMN_OFFSET_X_QUATERNION)
-    val offsetXQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_OFFSET_Y_QUATERNION)
-    val offsetYQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_OFFSET_Z_QUATERNION)
-    val offsetZQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_OFFSET_W_QUATERNION)
-    val offsetWQuaternion: Float,
-
-    @ColumnInfo(name = COLUMN_SCREW_PITCH)
-    val screwPitch: Float,
-
-    @ColumnInfo(name = COLUMN_AXIS_X)
-    val axisX: Float,
-
-    @ColumnInfo(name = COLUMN_AXIS_Y)
-    val axisY: Float,
-
-    @ColumnInfo(name = COLUMN_AXIS_Z)
-    val axisZ: Float,
+    @ColumnInfo(name = COLUMN_AXIS)
+    val axis: Axis,
 
     @ColumnInfo(name = COLUMN_PIVOT_X)
     val pivotX: Float,
@@ -89,37 +60,68 @@ data class OperationEntity(
     val pivotY: Float,
 
     @ColumnInfo(name = COLUMN_PIVOT_Z)
-    val pivotZ: Float
+    val pivotZ: Float,
+
+    @ColumnInfo(name = COLUMN_ALPHA)
+    val alpha: Float,
+
+    @ColumnInfo(name = COLUMN_PITCH)
+    val pitch: Float,
+
+    @ColumnInfo(name = COLUMN_TURNS)
+    val turns: Float,
+
+    @ColumnInfo(name = COLUMN_IS_GLOBAL)
+    val isGlobal: Boolean,
+
+    @ColumnInfo(name = COLUMN_OFFSET_VX)
+    val offsetVx: Float,
+
+    @ColumnInfo(name = COLUMN_OFFSET_VY)
+    val offsetVy: Float,
+
+    @ColumnInfo(name = COLUMN_OFFSET_VZ)
+    val offsetVz: Float,
+
+    @ColumnInfo(name = COLUMN_OFFSET_QX)
+    val offsetQx: Float,
+
+    @ColumnInfo(name = COLUMN_OFFSET_QY)
+    val offsetQy: Float,
+
+    @ColumnInfo(name = COLUMN_OFFSET_QZ)
+    val offsetQz: Float,
+
+    @ColumnInfo(name = COLUMN_OFFSET_QW)
+    val offsetQw: Float
 ) {
     companion object {
         const val TABLE_NAME = "operation"
         const val COLUMN_ID = "id"
         const val COLUMN_STEP_ID = "step_id"
-        const val COLUMN_ORDER_NUMBER = "order_number"
+        const val COLUMN_ORDER = "order"
         const val COLUMN_TITLE = "title"
 
+        // Animation
         const val COLUMN_TYPE = "type"
-        const val COLUMN_DURATION = "duration"
         const val COLUMN_DELAY = "delay"
+        const val COLUMN_DURATION = "duration"
 
-        // On local coordinates
-        const val COLUMN_OFFSET_X_VECTOR = "offset_x_vector"
-        const val COLUMN_OFFSET_Y_VECTOR = "offset_y_vector"
-        const val COLUMN_OFFSET_Z_VECTOR = "offset_z_vector"
-
-        const val COLUMN_OFFSET_X_QUATERNION = "offset_x_quaternion"
-        const val COLUMN_OFFSET_Y_QUATERNION = "offset_y_quaternion"
-        const val COLUMN_OFFSET_Z_QUATERNION = "offset_z_quaternion"
-        const val COLUMN_OFFSET_W_QUATERNION = "offset_w_quaternion"
-
-        const val COLUMN_SCREW_PITCH = "screw_pitch"
-
-        const val COLUMN_AXIS_X = "axis_x"
-        const val COLUMN_AXIS_Y = "axis_y"
-        const val COLUMN_AXIS_Z = "axis_z"
-
+        // Renderables
+        const val COLUMN_AXIS = "axis"
         const val COLUMN_PIVOT_X = "pivot_x"
         const val COLUMN_PIVOT_Y = "pivot_y"
         const val COLUMN_PIVOT_Z = "pivot_z"
+        const val COLUMN_ALPHA = "alpha"
+        const val COLUMN_PITCH = "pitch"
+        const val COLUMN_TURNS = "turns"
+        const val COLUMN_IS_GLOBAL = "is_global"
+        const val COLUMN_OFFSET_VX = "offset_vx"
+        const val COLUMN_OFFSET_VY = "offset_vy"
+        const val COLUMN_OFFSET_VZ = "offset_vz"
+        const val COLUMN_OFFSET_QX = "offset_qx"
+        const val COLUMN_OFFSET_QY = "offset_qy"
+        const val COLUMN_OFFSET_QZ = "offset_qz"
+        const val COLUMN_OFFSET_QW = "offset_qw"
     }
 }

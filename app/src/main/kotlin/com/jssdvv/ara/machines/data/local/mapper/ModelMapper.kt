@@ -11,17 +11,8 @@ fun ModelEntity.toDomain() = Model(
     name = name,
     glbUri = glbUri,
     calibrated = calibrated,
-    positionFromOrigin = Position(
-        x = xOffsetVector,
-        y = yOffsetVector,
-        z = zOffsetVector
-    ),
-    rotationFromOrigin = Quaternion(
-        x = xOffsetQuaternion,
-        y = yOffsetQuaternion,
-        z = zOffsetQuaternion,
-        w = wOffsetQuaternion
-    ),
+    offsetPosition = Position(offsetVx, offsetVy, offsetVz),
+    offsetRotation = Quaternion(offsetQx, offsetQy, offsetQz, offsetQw)
 )
 
 fun Model.toEntity() = ModelEntity(
@@ -30,11 +21,11 @@ fun Model.toEntity() = ModelEntity(
     name = name,
     glbUri = glbUri,
     calibrated = calibrated,
-    xOffsetVector = positionFromOrigin.x,
-    yOffsetVector = positionFromOrigin.y,
-    zOffsetVector = positionFromOrigin.z,
-    xOffsetQuaternion = rotationFromOrigin.x,
-    yOffsetQuaternion = rotationFromOrigin.y,
-    zOffsetQuaternion = rotationFromOrigin.z,
-    wOffsetQuaternion = rotationFromOrigin.w
+    offsetVx = offsetPosition.x,
+    offsetVy = offsetPosition.y,
+    offsetVz = offsetPosition.z,
+    offsetQx = offsetRotation.x,
+    offsetQy = offsetRotation.y,
+    offsetQz = offsetRotation.z,
+    offsetQw = offsetRotation.w
 )

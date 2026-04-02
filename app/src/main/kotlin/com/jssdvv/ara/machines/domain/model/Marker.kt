@@ -13,6 +13,6 @@ data class Marker(
     val calibrated: Boolean = false,
 
     // Origin transform in the current Marker's local space.
-    val originPosition: Position = Position(),
-    val originRotation: Quaternion = Quaternion(),
+    val originOffsetPosition: Position = Position(),
+    val originOffsetRotation: Quaternion = Quaternion(),
 )

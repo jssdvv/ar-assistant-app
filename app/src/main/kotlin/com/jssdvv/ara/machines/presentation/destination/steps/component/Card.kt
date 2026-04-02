@@ -54,7 +54,7 @@ import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.Step
-import com.jssdvv.ara.machines.presentation.destination.steps.Renderable
+import com.jssdvv.ara.machines.domain.utility.RenderableInfo
 import kotlinx.coroutines.launch
 
 @Composable
@@ -121,7 +121,7 @@ fun StepCard(
                     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
                 ) {
                     Text(
-                        text = "${step.orderNumber.toString().padStart(2, '0')}.",
+                        text = "${step.order.toString().padStart(2, '0')}.",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -173,7 +173,7 @@ fun StepCard(
                             style = MaterialTheme.typography.titleMedium
                         )
                         // OperationItem is the only component that doesn't use padding compensation
-                        operations.sortedBy { it.orderNumber }.forEach { operation ->
+                        operations.sortedBy { it.order }.forEach { operation ->
                             OperationItem(
                                 onClick = { onSelectOperation((operation.id)) },
                                 isSelected = selectedOperation?.id == operation.id,
@@ -197,9 +197,9 @@ fun StepCard(
 @Composable
 fun SelectableRenderablesCard(
     modifier: Modifier = Modifier,
-    items: List<Renderable>,
+    items: List<RenderableInfo>,
     onActivateSelection: () -> Unit,
-    onDeleteItem : (Renderable) -> Unit
+    onDeleteItem : (RenderableInfo) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val itemHeight = 56.dp

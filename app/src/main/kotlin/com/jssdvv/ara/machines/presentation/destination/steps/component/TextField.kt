@@ -23,14 +23,14 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.ArrowPreviousItemIcon
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
-import com.jssdvv.ara.machines.domain.utility.RotationState
-import com.jssdvv.ara.machines.domain.utility.TranslationState
+import com.jssdvv.ara.machines.domain.utility.SingleRotationState
+import com.jssdvv.ara.machines.domain.utility.SingleTranslationState
 
 
 @Composable
 fun TranslationTextField(
     name: String,
-    state: TranslationState,
+    state: SingleTranslationState,
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
     value = state.units,
@@ -58,7 +58,7 @@ fun TranslationTextField(
 @Composable
 fun PitchTextField(
     name: String,
-    state: TranslationState,
+    state: SingleTranslationState,
     isPitch: Boolean,
     modifier: Modifier = Modifier
 ) = OutlinedTextField(
@@ -89,7 +89,7 @@ fun PitchTextField(
 @Composable
 fun RotationTextField(
     name: String,
-    state: RotationState,
+    state: SingleRotationState,
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
     value = state.units,
@@ -110,7 +110,7 @@ fun RotationTextField(
         TextButton(
             onClick = {},
             modifier = Modifier.padding(end = 8.dp),
-            content = { Text("deg") }
+            content = { Text("deg") } // todo create string
         )
     }
 )

@@ -2,6 +2,7 @@ package com.jssdvv.ara.core.data.local.converter
 
 import androidx.room.TypeConverter
 import com.jssdvv.ara.machines.domain.type.ActivityType
+import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.MachineType
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.domain.type.ToolType
@@ -34,4 +35,10 @@ class EnumTypeConverter {
 
     @TypeConverter
     fun fromToolType(type: ToolType) = type.ordinal
+
+    @TypeConverter
+    fun toAxis(ordinal: Int): Axis = enumValues<Axis>()[ordinal]
+
+    @TypeConverter
+    fun fromAxis(axis: Axis) = axis.ordinal
 }

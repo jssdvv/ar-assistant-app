@@ -63,6 +63,7 @@ import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Step
+import com.jssdvv.ara.machines.domain.utility.RenderableInfo
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.MODEL_SELECTED_COLOR
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.MODEL_UNSELECTED_COLOR
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.createModelNode
@@ -111,12 +112,12 @@ fun StepsDestination(
     viewModel: StepsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val renderableStates = viewModel.renderableStates
+    val renderableStates = viewModel.renderableInfoStates
     val isSelectionEnabled by viewModel.isSelectionEnabled.collectAsStateWithLifecycle()
 
     StepsScreen(
         uiState = uiState,
-        renderableStates = renderableStates,
+        renderableInfoStates = renderableStates,
         isSelectionEnabled = isSelectionEnabled,
         onEvent = viewModel::onEvent,
         onExternalEvent = viewModel::onExternalEvent,
@@ -127,7 +128,7 @@ fun StepsDestination(
 @Composable
 internal fun StepsScreen(
     uiState: StepsUiState,
-    renderableStates: SnapshotStateMap<Renderable, RenderableState>,
+    renderableInfoStates: SnapshotStateMap<RenderableInfo, RenderableState>,
     isSelectionEnabled: Boolean,
     onEvent: (StepsEvent) -> Unit,
     onExternalEvent: (StepsExternalEvent) -> Unit,
@@ -146,7 +147,7 @@ internal fun StepsScreen(
                 operationTargets = uiState.operationTargets,
                 selectedStep = uiState.selectedStep,
                 selectedOperation = uiState.selectedOp,
-                renderableStates = renderableStates,
+                renderableInfoStates = renderableInfoStates,
                 isSelectionEnabled = isSelectionEnabled,
                 onNavigateUp = onNavigateUp,
                 onEvent = onEvent,
@@ -164,7 +165,7 @@ fun StepsContent(
     operationTargets: List<OperationTargets>,
     selectedStep: Step?,
     selectedOperation: Operation?,
-    renderableStates: SnapshotStateMap<Renderable, RenderableState>,
+    renderableInfoStates: SnapshotStateMap<RenderableInfo, RenderableState>,
     isSelectionEnabled: Boolean,
     onEvent: (StepsEvent) -> Unit,
     onExternalEvent: (StepsExternalEvent) -> Unit,
@@ -234,8 +235,8 @@ fun StepsContent(
                 ).apply {
                     isHittable = false
                     isTouchable = false
-                    position = model.positionFromOrigin
-                    quaternion = model.rotationFromOrigin
+                    position = model.offsetPosition
+                    quaternion = model.offsetRotation
 
                     renderableNodes.forEach { renderableNode ->
                         val boundingBox = renderableNode.axisAlignedBoundingBox
@@ -275,32 +276,32 @@ fun StepsContent(
                     LongHashFunction.xx3().hashChars(renderableNode.name ?: "")
                 }
 
-                val renderable = remember(model.id, hash) {
-                    Renderable(model.id, hash)
+                val renderableInfo = remember(model.id, hash) {
+                    RenderableInfo(model.id, hash)
                 }
 
                 val initialState = remember(model.id, hash) {
                     RenderableState(
                         name = renderableNode.name ?: "",
-                        index = tempIndex,
+                        tempIndex = tempIndex,
                         initialPosition = renderableNode.position,
                         initialQuaternion = renderableNode.quaternion
                     )
                 }
 
-                LaunchedEffect(renderable) {
-                    onExternalEvent(StepsExternalEvent.OnLoadRenderables(renderable, initialState))
+                LaunchedEffect(renderableInfo) {
+                    onExternalEvent(StepsExternalEvent.OnLoadRenderables(renderableInfo, initialState))
 
                     renderableNode.onSingleTapConfirmed = { _ ->
                         if (showBottomSheetState.value && isSelectionEnabledState.value) {
-                            onExternalEvent(StepsExternalEvent.OnSelectRenderable(renderable))
+                            onExternalEvent(StepsExternalEvent.OnSelectRenderable(renderableInfo))
                         }
                         false
                     }
                 }
 
-                val state by remember(renderable) {
-                    derivedStateOf { renderableStates[renderable] ?: initialState }
+                val state by remember(renderableInfo) {
+                    derivedStateOf { renderableInfoStates[renderableInfo] ?: initialState }
                 }
 
                 LaunchedEffect(state.isVisible, state.isSelected) {
@@ -324,9 +325,9 @@ fun StepsContent(
         .collectAsStateWithLifecycle(initialValue = "")
 
     // Derived states of renderables
-    val renderablesItems by remember { derivedStateOf { renderableStates.keys.toList() } }
-    val selectedRenderableItems by remember(renderableStates) {
-        derivedStateOf { renderableStates.filter { it.value.isSelected } }
+    val renderablesItems by remember { derivedStateOf { renderableInfoStates.keys.toList() } }
+    val selectedRenderableItems by remember(renderableInfoStates) {
+        derivedStateOf { renderableInfoStates.filter { it.value.isSelected } }
     }
     val filteredRenderableItems by remember(renderablesItems, debouncedQuery) {
         derivedStateOf {
@@ -334,7 +335,7 @@ fun StepsContent(
                 renderablesItems
             } else {
                 renderablesItems.filter {
-                    renderableStates[it]?.name?.contains(debouncedQuery, true) == true
+                    renderableInfoStates[it]?.name?.contains(debouncedQuery, true) == true
                 }
             }
         }
@@ -346,16 +347,16 @@ fun StepsContent(
 
     fun restoreAndApplyOperationUpTo(
         operation: Operation?,
-        renderables: List<Renderable>,
+        renderableInfos: List<RenderableInfo>,
     ) {
         // Cancel previous animators
         activeAnimators.forEach { it.cancel() }
         activeAnimators.clear()
 
         // Restore position and rotation of all renderables of all models
-        renderableStates.forEach { (renderable, state) ->
+        renderableInfoStates.forEach { (renderable, state) ->
             val modelNode = modelNodeMap[renderable.modelId.toString()] ?: return@forEach
-            modelNode.renderableNodes.getOrNull(state.index)?.apply{
+            modelNode.renderableNodes.getOrNull(state.tempIndex)?.apply{
                 position = state.initialPosition
                 quaternion = state.initialQuaternion
             }
@@ -367,7 +368,7 @@ fun StepsContent(
         val isNewOperation = operation.id == 0
 
         // returns a step orderNumber of given step id
-        val stepOrderNumberMap = steps.associate { it.id to it.orderNumber }
+        val stepOrderNumberMap = steps.associate { it.id to it.order }
 
         // An operation should have first a step Id
         val targetStepOrder = stepOrderNumberMap[operation.stepId] ?: return
@@ -377,7 +378,7 @@ fun StepsContent(
             .sortedWith(
                 compareBy(
                     { stepOrderNumberMap[it.operation.stepId] },
-                    { it.operation.orderNumber }
+                    { it.operation.order }
                 )
             )
             .takeWhile { operationTarget ->
@@ -388,21 +389,21 @@ fun StepsContent(
 
                 stepOrder < targetStepOrder ||
                 (stepOrder == targetStepOrder && isNewOperation) ||
-                (stepOrder == targetStepOrder && operationTarget.operation.orderNumber < operation.orderNumber)
+                (stepOrder == targetStepOrder && operationTarget.operation.order < operation.order)
             }
 
         // Apply offsets until current operation
         operationTargetsBeforeCurrent.forEach { operationTarget ->
             operationTarget.targets.forEach { target ->
                 val modelNode = modelNodeMap[target.modelId.toString()] ?: return@forEach
-                val renderable = Renderable(target.modelId, target.xxh3)
-                val state = renderableStates[renderable] ?: return@forEach
+                val renderableInfo = RenderableInfo(target.modelId, target.xxh3)
+                val state = renderableInfoStates[renderableInfo] ?: return@forEach
 
-                modelNode.renderableNodes.getOrNull(state.index)?.apply {
+                modelNode.renderableNodes.getOrNull(state.tempIndex)?.apply {
                     // Rotate with it's local quaternion of rotation
                     val rotatedOffsetPosition = quaternion * operationTarget.operation.offsetPosition
                     position += rotatedOffsetPosition
-                    quaternion = normalize(quaternion * operationTarget.operation.offsetQuaternion)
+                    quaternion = normalize(quaternion * operationTarget.operation.offsetRotation)
                 }
             }
         }
@@ -412,17 +413,17 @@ fun StepsContent(
 
         currentOperationTargets?.targets?.forEach { target ->
             val modelNode = modelNodeMap[target.modelId.toString()] ?: return@forEach
-            val renderable = Renderable(target.modelId, target.xxh3)
-            val state = renderableStates[renderable] ?: return@forEach
+            val renderableInfo = RenderableInfo(target.modelId, target.xxh3)
+            val state = renderableInfoStates[renderableInfo] ?: return@forEach
 
-            modelNode.renderableNodes.getOrNull(state.index)?.apply {
+            modelNode.renderableNodes.getOrNull(state.tempIndex)?.apply {
 
                 val initialPosition = position
                 val initialQuaternion = quaternion
                 val rotatedOffsetPosition = initialQuaternion * operation.offsetPosition
 
                 val finalPosition = initialPosition + rotatedOffsetPosition
-                val finalQuaternion = normalize(initialQuaternion * operation.offsetQuaternion)
+                val finalQuaternion = normalize(initialQuaternion * operation.offsetRotation)
 
                 val positionAnimator = animatePositions(
                     initialPosition,
@@ -531,7 +532,7 @@ fun StepsContent(
                         } else {
                             stringResource(
                                 R.string.button_editor_step_count_label,
-                                selectedStep?.orderNumber ?: 0,
+                                selectedStep?.order ?: 0,
                                 steps.size
                             )
                         }
@@ -549,7 +550,7 @@ fun StepsContent(
                         onClick = { onEvent(StepsEvent.OnSelectPreviousStep) },
                         modifier = Modifier.size(40.dp),
                         enabled = selectedStep?.let { step ->
-                            step.orderNumber > steps.minOf { it.orderNumber }
+                            step.order > steps.minOf { it.order }
                         } ?: true,
                         content = { ArrowBackIcon() }
                     )
@@ -557,7 +558,7 @@ fun StepsContent(
                     FilledIconButton(
                         onClick = { onEvent(StepsEvent.OnSelectNextStep) },
                         modifier = Modifier.size(40.dp),
-                        enabled = selectedStep != null && selectedStep.orderNumber < steps.maxOf { it.orderNumber },
+                        enabled = selectedStep != null && selectedStep.order < steps.maxOf { it.order },
                         content = { ArrowBackIcon(Modifier.rotate(180F)) }
                     )
                 }
@@ -575,7 +576,7 @@ fun StepsContent(
                         } else {
                             stringResource(
                                 R.string.button_editor_operation_count_label,
-                                selectedOperation?.orderNumber ?: 0,
+                                selectedOperation?.order ?: 0,
                                 operations.size
                             )
                         }
@@ -609,7 +610,7 @@ fun StepsContent(
                         ) { renderable ->
 
                             val renderableState by remember(renderable) {
-                                derivedStateOf { renderableStates[renderable] ?: RenderableState() }
+                                derivedStateOf { renderableInfoStates[renderable] ?: RenderableState() }
                             }
 
                             RenderableItem(
@@ -619,7 +620,7 @@ fun StepsContent(
                                 onVisibilityChange = {
                                     onExternalEvent(
                                         StepsExternalEvent.OnToggleRenderableVisibility(
-                                            renderable = renderable
+                                            renderableInfo = renderable
                                         )
                                     )
                                 },

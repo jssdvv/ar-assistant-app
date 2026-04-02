@@ -12,17 +12,8 @@ fun MarkerEntity.toDomain() = Marker(
     sizeCentimeters = sizeCentimeters,
     imageUri = imageUri,
     calibrated = calibrated,
-    originPosition = Position(
-        x = xOriginVector,
-        y = yOriginVector,
-        z = zOriginVector
-    ),
-    originRotation = Quaternion(
-        x = xOriginQuaternion,
-        y = yOriginQuaternion,
-        z = zOriginQuaternion,
-        w = wOriginQuaternion
-    )
+    originOffsetPosition = Position(originOffsetVx, originOffsetVy, originOffsetVz),
+    originOffsetRotation = Quaternion(originOffsetQx, originOffsetQy, originOffsetQz, originOffsetQw)
 )
 
 fun Marker.toEntity() = MarkerEntity(
@@ -32,11 +23,11 @@ fun Marker.toEntity() = MarkerEntity(
     sizeCentimeters = sizeCentimeters,
     imageUri = imageUri,
     calibrated = calibrated,
-    xOriginVector = originPosition.x,
-    yOriginVector = originPosition.y,
-    zOriginVector = originPosition.z,
-    xOriginQuaternion = originRotation.x,
-    yOriginQuaternion = originRotation.y,
-    zOriginQuaternion = originRotation.z,
-    wOriginQuaternion = originRotation.w
+    originOffsetVx = originOffsetPosition.x,
+    originOffsetVy = originOffsetPosition.y,
+    originOffsetVz = originOffsetPosition.z,
+    originOffsetQx = originOffsetRotation.x,
+    originOffsetQy = originOffsetRotation.y,
+    originOffsetQz = originOffsetRotation.z,
+    originOffsetQw = originOffsetRotation.w
 )

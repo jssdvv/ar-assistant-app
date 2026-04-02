@@ -15,13 +15,13 @@ import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
  * @property [machineId] Foreign key referencing a [MachineEntity].
  * @property [name] Name of the model.
  * @property [glbUri] GLB file [Uri] of the model.
- * @property [xOffsetVector] X offset vector component respective to the origin point.
- * @property [yOffsetVector] Y offset vector component respective to the origin point.
- * @property [zOffsetVector] Z offset vector component respective to the origin point.
- * @property [xOffsetQuaternion] X offset quaternion component respective to the origin point.
- * @property [yOffsetQuaternion] Y offset quaternion component respective to the origin point.
- * @property [zOffsetQuaternion] Z offset quaternion component respective to the origin point.
- * @property [wOffsetQuaternion] W offset quaternion component respective to the origin point.
+ * @property [offsetVx] X offset vector component respective to the origin point.
+ * @property [offsetVy] Y offset vector component respective to the origin point.
+ * @property [offsetVz] Z offset vector component respective to the origin point.
+ * @property [offsetQx] X offset quaternion component respective to the origin point.
+ * @property [offsetQy] Y offset quaternion component respective to the origin point.
+ * @property [offsetQz] Z offset quaternion component respective to the origin point.
+ * @property [offsetQw] W offset quaternion component respective to the origin point.
  */
 @Entity(
     tableName = ModelEntity.TABLE_NAME,
@@ -55,26 +55,26 @@ data class ModelEntity(
     @ColumnInfo(name = COLUMN_CALIBRATED)
     val calibrated: Boolean,
 
-    @ColumnInfo(name = COLUMN_X_OFFSET_VECTOR)
-    val xOffsetVector: Float = 0F,
+    @ColumnInfo(name = COLUMN_OFFSET_VX)
+    val offsetVx: Float = 0F,
 
-    @ColumnInfo(name = COLUMN_Y_OFFSET_VECTOR)
-    val yOffsetVector: Float = 0F,
+    @ColumnInfo(name = COLUMN_OFFSET_VY)
+    val offsetVy: Float = 0F,
 
-    @ColumnInfo(name = COLUMN_Z_OFFSET_VECTOR)
-    val zOffsetVector: Float = 0F,
+    @ColumnInfo(name = COLUMN_OFFSET_VZ)
+    val offsetVz: Float = 0F,
 
-    @ColumnInfo(name = COLUMN_X_OFFSET_QUATERNION)
-    val xOffsetQuaternion: Float = 0F,
+    @ColumnInfo(name = COLUMN_OFFSET_QX)
+    val offsetQx: Float = 0F,
 
-    @ColumnInfo(name = COLUMN_Y_OFFSET_QUATERNION)
-    val yOffsetQuaternion: Float = 0F,
+    @ColumnInfo(name = COLUMN_OFFSET_QY)
+    val offsetQy: Float = 0F,
 
-    @ColumnInfo(name = COLUMN_Z_OFFSET_QUATERNION)
-    val zOffsetQuaternion: Float = 0F,
+    @ColumnInfo(name = COLUMN_OFFSET_QZ)
+    val offsetQz: Float = 0F,
 
-    @ColumnInfo(name = COLUMN_W_OFFSET_QUATERNION)
-    val wOffsetQuaternion: Float = 1F,
+    @ColumnInfo(name = COLUMN_OFFSET_QW)
+    val offsetQw: Float = 1F,
 ) {
     companion object {
         const val TABLE_NAME = "model"
@@ -84,13 +84,12 @@ data class ModelEntity(
         const val COLUMN_GLB_URI = "glb_uri" // glTF Binary File
 
         const val COLUMN_CALIBRATED = "calibrated"
-        const val COLUMN_X_OFFSET_VECTOR = "x_offset_vector"
-        const val COLUMN_Y_OFFSET_VECTOR = "y_offset_vector"
-        const val COLUMN_Z_OFFSET_VECTOR = "z_offset_vector"
-
-        const val COLUMN_X_OFFSET_QUATERNION = "x_offset_quaternion"
-        const val COLUMN_Y_OFFSET_QUATERNION = "y_offset_quaternion"
-        const val COLUMN_Z_OFFSET_QUATERNION = "z_offset_quaternion"
-        const val COLUMN_W_OFFSET_QUATERNION = "w_offset_quaternion"
+        const val COLUMN_OFFSET_VX = "offset_vx"
+        const val COLUMN_OFFSET_VY = "offset_vy"
+        const val COLUMN_OFFSET_VZ = "offset_vz"
+        const val COLUMN_OFFSET_QX = "offset_qx"
+        const val COLUMN_OFFSET_QY = "offset_qy"
+        const val COLUMN_OFFSET_QZ = "offset_qz"
+        const val COLUMN_OFFSET_QW = "offset_qw"
     }
 }

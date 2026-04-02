@@ -43,26 +43,26 @@ data class MarkerEntity(
     @ColumnInfo(name = COLUMN_CALIBRATED)
     val calibrated: Boolean,
 
-    @ColumnInfo(name = COLUMN_X_ORIGIN_VECTOR)
-    val xOriginVector: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_VX)
+    val originOffsetVx: Float,
 
-    @ColumnInfo(name = COLUMN_Y_ORIGIN_VECTOR)
-    val yOriginVector: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_VY)
+    val originOffsetVy: Float,
 
-    @ColumnInfo(name = COLUMN_Z_ORIGIN_VECTOR)
-    val zOriginVector: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_VZ)
+    val originOffsetVz: Float,
 
-    @ColumnInfo(name = COLUMN_X_ORIGIN_QUATERNION)
-    val xOriginQuaternion: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_QX)
+    val originOffsetQx: Float,
 
-    @ColumnInfo(name = COLUMN_Y_ORIGIN_QUATERNION)
-    val yOriginQuaternion: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_QY)
+    val originOffsetQy: Float,
 
-    @ColumnInfo(name = COLUMN_Z_ORIGIN_QUATERNION)
-    val zOriginQuaternion: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_QZ)
+    val originOffsetQz: Float,
 
-    @ColumnInfo(name = COLUMN_W_ORIGIN_QUATERNION)
-    val wOriginQuaternion: Float,
+    @ColumnInfo(name = COLUMN_ORIGIN_OFFSET_QW)
+    val originOffsetQw: Float,
 ) {
     companion object {
         const val TABLE_NAME = "marker"
@@ -73,13 +73,13 @@ data class MarkerEntity(
         const val COLUMN_IMAGE_URI = "image_uri"
 
         const val COLUMN_CALIBRATED = "calibrated"
-        const val COLUMN_X_ORIGIN_VECTOR = "x_origin_vector"
-        const val COLUMN_Y_ORIGIN_VECTOR = "y_origin_vector"
-        const val COLUMN_Z_ORIGIN_VECTOR = "z_origin_vector"
+        const val COLUMN_ORIGIN_OFFSET_VX = "origin_offset_vx"
+        const val COLUMN_ORIGIN_OFFSET_VY = "origin_offset_vy"
+        const val COLUMN_ORIGIN_OFFSET_VZ = "origin_offset_vz"
 
-        const val COLUMN_X_ORIGIN_QUATERNION = "x_origin_quaternion"
-        const val COLUMN_Y_ORIGIN_QUATERNION = "y_origin_quaternion"
-        const val COLUMN_Z_ORIGIN_QUATERNION = "z_origin_quaternion"
-        const val COLUMN_W_ORIGIN_QUATERNION = "w_origin_quaternion"
+        const val COLUMN_ORIGIN_OFFSET_QX = "origin_offset_qx"
+        const val COLUMN_ORIGIN_OFFSET_QY = "origin_offset_qy"
+        const val COLUMN_ORIGIN_OFFSET_QZ = "origin_offset_qz"
+        const val COLUMN_ORIGIN_OFFSET_QW = "origin_offset_qw"
     }
 }
