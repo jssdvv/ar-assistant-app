@@ -12,7 +12,7 @@ import androidx.navigation.navOptions
 import com.jssdvv.ara.core.presentation.navigation.AppNavGraphItem
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
-import com.jssdvv.ara.schedule.presentation.navigation.ToolsGraph
+import com.jssdvv.ara.tools.presentation.navigation.ToolsGraph
 
 @Composable
 fun rememberAppState(

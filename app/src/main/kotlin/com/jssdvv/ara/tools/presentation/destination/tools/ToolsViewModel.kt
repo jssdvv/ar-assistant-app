@@ -1,4 +1,4 @@
-package com.jssdvv.ara.schedule.presentation.destination.events
+package com.jssdvv.ara.tools.presentation.destination.tools
 
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.PathParser

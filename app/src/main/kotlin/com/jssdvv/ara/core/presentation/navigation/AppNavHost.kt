@@ -12,7 +12,7 @@ import com.jssdvv.ara.core.presentation.AppState
 import com.jssdvv.ara.machines.presentation.navigation.machinesNavGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
 import com.jssdvv.ara.scanner.presentation.navigation.scannerNavGraph
-import com.jssdvv.ara.schedule.presentation.navigation.toolsNavGraph
+import com.jssdvv.ara.tools.presentation.navigation.toolsNavGraph
 
 /**
  * Root navigation host for the application.

@@ -1,4 +1,4 @@
-package com.jssdvv.ara.schedule.presentation.navigation
+package com.jssdvv.ara.tools.presentation.navigation
 
 import ToolsDestination
 import androidx.navigation.NavGraphBuilder

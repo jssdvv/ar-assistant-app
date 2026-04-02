@@ -5,7 +5,7 @@ import androidx.annotation.StringRes
 import com.jssdvv.ara.R
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
-import com.jssdvv.ara.schedule.presentation.navigation.ToolsGraph
+import com.jssdvv.ara.tools.presentation.navigation.ToolsGraph
 import kotlin.reflect.KClass
 
 /**

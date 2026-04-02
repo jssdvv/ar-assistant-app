@@ -1,7 +1,7 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.jssdvv.ara.schedule.presentation.destination.events.ToolsViewModel
+import com.jssdvv.ara.tools.presentation.destination.tools.ToolsViewModel
 
 @Composable
 fun ToolsDestination(
