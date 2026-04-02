@@ -23,21 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.core.presentation.theme.spacing
-import com.jssdvv.ara.machines.presentation.destination.steps.component.LoopIconButton
-import com.jssdvv.ara.machines.presentation.destination.steps.component.PlayIconButton
-import com.jssdvv.ara.machines.presentation.destination.steps.component.SkipNextOperationIconButton
-import com.jssdvv.ara.machines.presentation.destination.steps.component.SkipNextStepIconButton
-import com.jssdvv.ara.machines.presentation.destination.steps.component.SkipPreviousOperationIconButton
-import com.jssdvv.ara.machines.presentation.destination.steps.component.SkipPreviousStepIconButton
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PlayerToolbar(
-    isSegmentLooping: Boolean,
+    isOperationPaused: Boolean,
+    isOperationLooping: Boolean,
     modifier: Modifier = Modifier,
     onSkipPreviousStep: () -> Unit = {},
     onSkipPreviousOp: () -> Unit = {},
-    onTogglePlay: () -> Unit = {},
+    onToggleLooping: (isLooping: Boolean) -> Unit = {},
+    onPause: () -> Unit = {},
     onSkipNextOp: () -> Unit = {},
     onSkipNextStep: () -> Unit = {}
 ) {
@@ -51,15 +47,12 @@ fun PlayerToolbar(
         SkipPreviousOperationIconButton(
             onClick = onSkipPreviousOp
         )
-        if (isSegmentLooping) {
-            LoopIconButton(
-                onClick = onTogglePlay
-            )
-        } else {
-            PlayIconButton(
-                onClick = onTogglePlay
-            )
-        }
+        LoopIconButton(
+            isPaused = isOperationPaused,
+            isLooping = isOperationLooping,
+            onClick = onToggleLooping,
+            onLongClick = onPause
+        )
         SkipNextOperationIconButton(
             onClick = onSkipNextOp
         )
@@ -71,23 +64,44 @@ fun PlayerToolbar(
 
 @Preview(showBackground = true, name = "Player Toolbar")
 @Composable
-private fun PlayerToolbarPreview() {
+fun PlayerToolbarPreview(
+    modifier : Modifier = Modifier,
+) {
 
-    var isStepLooping by remember { mutableStateOf(false) }
     var currentStepIndex by remember { mutableStateOf(0) }
     val stepTotalSegments = 8
 
+    var isOperationPaused by remember { mutableStateOf(false) }
     var isOperationLooping by remember { mutableStateOf(false) }
     var currentOperationIndex by remember { mutableStateOf(0) }
     val operationTotalSegments = 15
 
     val opAnimatableProgress = remember { Animatable(0F) }
     val updatedOperationLooping = rememberUpdatedState(isOperationLooping)
-    val updatedStepLooping = rememberUpdatedState(isStepLooping)
 
     val stepAnimatableProgress by remember {
         derivedStateOf {
             (currentOperationIndex + opAnimatableProgress.value) / operationTotalSegments.toFloat()
+        }
+    }
+
+    LaunchedEffect(isOperationPaused) {
+        if (isOperationPaused) {
+            opAnimatableProgress.stop()
+        } else {
+            opAnimatableProgress.animateTo(
+                targetValue = 1F,
+                animationSpec = tween(durationMillis = 3000, easing = LinearEasing)
+            )
+            opAnimatableProgress.snapTo(0f)
+
+            when {
+                currentOperationIndex < operationTotalSegments - 1 -> currentOperationIndex++
+                else -> {
+                    currentOperationIndex = 0
+                    currentStepIndex = (currentStepIndex + 1).coerceAtMost(stepTotalSegments - 1)
+                }
+            }
         }
     }
 
@@ -104,7 +118,6 @@ private fun PlayerToolbarPreview() {
 
         when {
             currentOperationIndex < operationTotalSegments - 1 -> currentOperationIndex++
-            updatedStepLooping.value -> currentOperationIndex = 0
             else -> {
                 currentOperationIndex = 0
                 currentStepIndex = (currentStepIndex + 1).coerceAtMost(stepTotalSegments - 1)
@@ -113,6 +126,7 @@ private fun PlayerToolbarPreview() {
     }
 
     Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -134,7 +148,8 @@ private fun PlayerToolbarPreview() {
         )
 
         PlayerToolbar(
-            isSegmentLooping = isOperationLooping,
+            isOperationPaused = isOperationPaused,
+            isOperationLooping = isOperationLooping,
             modifier = Modifier.padding(16.dp),
             onSkipNextStep = {
                 if (currentStepIndex < stepTotalSegments - 1) {
@@ -151,7 +166,14 @@ private fun PlayerToolbarPreview() {
                     currentOperationIndex = 0
                 }
             },
-            onTogglePlay = { isOperationLooping = !isOperationLooping },
+            onToggleLooping = {
+                if (isOperationPaused) {
+                    isOperationPaused = false
+                } else {
+                    isOperationLooping = !isOperationLooping
+                }
+            },
+            onPause = { isOperationPaused = true },
             onSkipPreviousOp = {
                 if (currentOperationIndex > 0) {
                     currentOperationIndex--
