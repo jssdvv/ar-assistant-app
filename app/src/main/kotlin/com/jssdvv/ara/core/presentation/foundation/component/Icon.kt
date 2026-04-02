@@ -3,7 +3,6 @@ package com.jssdvv.ara.core.presentation.foundation.component
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +19,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.jssdvv.ara.core.presentation.theme.spacing
 
 @Composable
 fun BadgeIcon(
@@ -53,10 +51,33 @@ fun NumberedCircleIcon(
     onPrimaryColor: Color = MaterialTheme.colorScheme.onPrimary,
     textStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
 ) {
-    val containerColor = if (isFilled) primaryColor else Color.Transparent
-    val contentColor = if (isFilled) onPrimaryColor else primaryColor
-    val borderStroke = if (!isFilled) BorderStroke(thickness, primaryColor) else null
+    val (containerColor, contentColor, borderStroke) = if (isFilled) {
+        Triple(primaryColor, onPrimaryColor, null)
+    } else {
+        Triple(Color.Transparent, primaryColor, BorderStroke(thickness, primaryColor))
+    }
+    TextIcon(
+        text = number.toString(),
+        modifier = modifier,
+        size = size,
+        borderStroke = borderStroke,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        textStyle = textStyle
+    )
+}
 
+@Composable
+fun TextIcon(
+    text: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 24.dp,
+    borderStroke: BorderStroke? = null,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+    textStyle: TextStyle = MaterialTheme.typography.labelSmall,
+    fontWeight: FontWeight? = FontWeight.Bold
+) {
     Surface(
         modifier = modifier.size(size),
         shape = CircleShape,
@@ -68,9 +89,9 @@ fun NumberedCircleIcon(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = number.toString(),
+                text = text,
                 style = textStyle,
-                modifier = Modifier.padding(MaterialTheme.spacing.tiny)
+                fontWeight = fontWeight
             )
         }
     }

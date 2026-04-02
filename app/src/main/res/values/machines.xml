@@ -159,7 +159,7 @@
 
     <!--MARKER DIALOG [COMPONENT]-->
 
-    <string name="dialog_selected_marker_calibrate_title">Calibrate Marker</string>
+    <string name="dialog_selected_marker_title">Select a marker</string>
 
     <!--MARKER BUTTON [COMPONENT]-->
 
@@ -225,5 +225,18 @@
 
     <string name="text_field_operation_selected_label">Selected operation</string>
     <string name="text_field_operation_empty_message">No selected operation</string>
+
+    <!--NOTIFICATION CHIP MESSAGE [TEXT]-->
+
+    <string name="notification_chip_message_play">Playing animations</string>
+    <string name="notification_chip_message_pause">Stoping animations</string>
+    <string name="notification_chip_message_torch_enabled">Torch enabled</string>
+    <string name="notification_chip_message_torch_disabled">Torch disabled</string>
+    <string name="notification_chip_message_loop_enabled">Looping playback animation</string>
+    <string name="notification_chip_message_loop_disabled">Linear animation</string>
+
+    <string name="notification_chip_message_speed_half">Speed set to half</string>
+    <string name="notification_chip_message_speed_normal">Speed set to normal</string>
+    <string name="notification_chip_message_speed_double">Speed set to double</string>
 
 </resources>
