@@ -41,7 +41,7 @@ data object MachinesGraph {
     data class CalibrationRoute(val machineId: Int)
 
     @Serializable
-    data class ARSessionRoute(val activityId: Int)
+    data class ARSessionRoute(val machineId: Int, val activityId: Int)
 }
 
 const val baseUri = "https://arassistant.vercel.app"
@@ -141,5 +141,5 @@ internal fun NavController.navigateToMarkers(machineId: Int) =
 internal fun NavController.navigateToCalibration(machineId: Int) =
     navigate(MachinesGraph.CalibrationRoute(machineId))
 
-internal fun NavController.navigateToARSession(activityId: Int) =
-    navigate(MachinesGraph.ARSessionRoute(activityId))
+internal fun NavController.navigateToARSession(machineId: Int, activityId: Int) =
+    navigate(MachinesGraph.ARSessionRoute(machineId, activityId))

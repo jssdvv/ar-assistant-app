@@ -37,7 +37,7 @@ fun ActivitiesDestination(
     onNavigateBack: () -> Unit,
     onNavigateToMarkers: (machineId: Int) -> Unit,
     onNavigateToCalibration: (machineId: Int) -> Unit,
-    onNavigateToARSession: (Int) -> Unit,
+    onNavigateToARSession: (Int, Int) -> Unit,
     onNavigateToAnimations: (Int, Int) -> Unit,
     viewModel: ActivitiesViewModel = hiltViewModel(),
 ) {
@@ -61,7 +61,7 @@ fun ActivitiesScreen(
     onNavigateBack: () -> Unit,
     onNavigateToMarkers: (Int) -> Unit,
     onNavigateToModels: (Int) -> Unit,
-    onNavigateToARCamera: (Int) -> Unit,
+    onNavigateToARCamera: (Int, Int) -> Unit,
     onNavigateToEditActivity: (Int, Int) -> Unit,
 ) {
     Scaffold(
@@ -103,7 +103,7 @@ fun ActivitiesContent(
     onNavigateToMarkers: () -> Unit,
     onNavigateToCalibration: () -> Unit,
     onNavigateToAnimations: (Int, Int) -> Unit,
-    onNavigateToARSession: (Int) -> Unit,
+    onNavigateToARSession: (Int, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedActivityId by remember { mutableStateOf<Int?>(null) }
@@ -151,7 +151,7 @@ fun ActivitiesContent(
                     onClick = { selectedActivityId = activity.id },
                     isSelected = selectedActivityId == activity.id,
                     onNavigateToAnimations = { onNavigateToAnimations(machineId, activity.id) },
-                    onNavigateToARSession = { onNavigateToARSession(activity.id) },
+                    onNavigateToARSession = { onNavigateToARSession(machineId, activity.id) },
                 )
             }
         }
