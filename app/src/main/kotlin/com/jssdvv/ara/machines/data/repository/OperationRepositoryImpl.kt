@@ -30,7 +30,7 @@ class OperationRepositoryImpl(
             """
             SELECT * FROM ${OperationEntity.TABLE_NAME}
             WHERE ${OperationEntity.COLUMN_STEP_ID} IN ($placeHolders)
-            ORDER BY ${OperationEntity.COLUMN_ORDER} ${getOrderTypeAsString(orderType)}
+            ORDER BY `${OperationEntity.COLUMN_ORDER}` ${getOrderTypeAsString(orderType)}
             """.trimIndent()
         val simpleSQLiteQuery = SimpleSQLiteQuery(query, stepsIds.toTypedArray())
         return dao.selectOperationsWithTargetsByStepsIdsOrdered(simpleSQLiteQuery)
@@ -64,10 +64,7 @@ class OperationRepositoryImpl(
     }
 
     override suspend fun upsertOperation(vararg model: Operation) {
-
-        Log.d("UPSERT_CHECK", "CHECK 6")
         dao.upsertOperation(*model.map { it.toEntity() }.toTypedArray())
-        Log.d("UPSERT_CHECK", "CHECK 7")
     }
 
     override suspend fun deleteOperation(vararg model: Operation) =
