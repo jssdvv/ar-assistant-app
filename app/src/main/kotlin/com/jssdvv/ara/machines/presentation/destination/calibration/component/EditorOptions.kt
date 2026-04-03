@@ -55,7 +55,7 @@ fun EditorOptions(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

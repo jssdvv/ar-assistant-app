@@ -15,11 +15,9 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,7 +63,7 @@ import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.utility.configureARSession
 import com.jssdvv.ara.machines.domain.utility.setSingleImageDatabase
 import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
-import com.jssdvv.ara.machines.presentation.component.ShutterButton
+import com.jssdvv.ara.machines.presentation.component.ShutterSection
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.EditorOptions
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.SelectedMarkerDialog
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.UnsavedChangesDialog
@@ -352,7 +350,7 @@ fun SuccessModelsCalibrationScreen(
 
     BackHandler(markers.any { !it.calibrated }) { showWarningDialog = true }
 
-    LaunchedEffect(currentBitmapInfo) {
+    LaunchedEffect(currentBitmapInfo, Unit) {
         val bitmapInfo = currentBitmapInfo ?: return@LaunchedEffect
         val session = arSession ?: return@LaunchedEffect
         nodes.filterIsInstance<AugmentedImageNode>().forEach { it.destroy() }
@@ -443,11 +441,7 @@ fun SuccessModelsCalibrationScreen(
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black, MaterialTheme.tubShapes.extraLarge)
-                .align(Alignment.BottomCenter),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             // Shutter Options
             AnimatedVisibility(
@@ -455,61 +449,52 @@ fun SuccessModelsCalibrationScreen(
                 enter = expandVertically(tween(), Alignment.Top),
                 exit = shrinkVertically(tween(), Alignment.Top)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp)
-                ) {
-                    ShutterButton(
-                        onClick = {
-                            calibrateOriginToMarker()
-
-                            val machineId = selectedMarker?.machineId ?: return@ShutterButton
-                            val markerIndex = selectedMarker.index
-
-                            val message = context.getString(
-                                R.string.toast_marker_calibration_success,
-                                machineId.toString(),
-                                markerIndex
-                            )
-
-                            val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
-                            infoToast.show()
-                        },
-                        onPress = {
-                            repositionOrigin()
-                            val infoToast = Toast.makeText(
-                                context,
-                                "Model repositioned to M${selectedMarker?.machineId}P${selectedMarker?.index}",
-                                Toast.LENGTH_SHORT
-                            )
-                            infoToast.show()
-                        },
-                        modifier = Modifier.align(Alignment.Center),
-                        enabled = isShutterEnabled,
-                        iconDrawableId = R.drawable.ic_calibrate_to
-                    )
-
-                    ButtonWithIcon (
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "*/*"
-                            }
-                            pickModel.launch(intent)
-                        },
-                        modifier = Modifier
-                            .padding(end = MaterialTheme.spacing.small)
-                            .align(Alignment.CenterEnd),
-                        colors = ButtonDefaults.buttonColors().copy(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
-                        ),
-                        iconInFront = false,
-                        icon = { AddIcon() },
-                        content = { Text("Agregar") }
-                    )
-                }
+                ShutterSection(
+                    shutterEnabled = isShutterEnabled,
+                    onClickShutter = {
+                        calibrateOriginToMarker()
+                        val machineId = selectedMarker?.machineId ?: return@ShutterSection
+                        val markerIndex = selectedMarker.index
+                        val message = context.getString(
+                            R.string.toast_marker_calibration_success,
+                            machineId.toString(),
+                            markerIndex
+                        )
+                        val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+                        infoToast.show()
+                    },
+                    onPressShutter = {
+                        repositionOrigin()
+                        val infoToast = Toast.makeText(
+                            context,
+                            "Model repositioned to M${selectedMarker?.machineId}P${selectedMarker?.index}",
+                            Toast.LENGTH_SHORT
+                        )
+                        infoToast.show()
+                    },
+                    rightSection = {
+                        ButtonWithIcon (
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                    addCategory(Intent.CATEGORY_OPENABLE)
+                                    type = "*/*"
+                                }
+                                pickModel.launch(intent)
+                            },
+                            modifier = Modifier
+                                .padding(end = MaterialTheme.spacing.small)
+                                .align(Alignment.CenterEnd),
+                            colors = ButtonDefaults.buttonColors().copy(
+                                containerColor = Color.White,
+                                contentColor = Color.Black
+                            ),
+                            iconInFront = false,
+                            icon = { AddIcon() },
+                            content = { Text("Agregar") } // todo create string
+                        )
+                    },
+                    iconDrawableId = R.drawable.ic_calibrate_to
+                )
             }
 
             // Editor Options
@@ -519,6 +504,7 @@ fun SuccessModelsCalibrationScreen(
                 exit = shrinkVertically(tween(), Alignment.Top)
             ) {
                 EditorOptions(
+                    modifier = Modifier.background(Color.Black, MaterialTheme.tubShapes.extraLarge),
                     onRestoreDefaults = {
                         if (transformation == Transformation.TRANSLATION) {
                             selectedModel?.apply { worldPosition = Position() }

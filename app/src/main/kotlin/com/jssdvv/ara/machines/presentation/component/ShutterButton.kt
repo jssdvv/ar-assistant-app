@@ -11,8 +11,15 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -133,4 +140,40 @@ fun ShutterButton(
             }
         }
     }
+}
+
+@Composable
+fun ShutterSection(
+    shutterEnabled: Boolean,
+    onClickShutter: () -> Unit,
+    onPressShutter: () -> Unit,
+    modifier: Modifier = Modifier,
+    leftModifier: Modifier = Modifier,
+    rightModifier: Modifier = Modifier,
+    rightSection: @Composable BoxScope.() -> Unit = {},
+    leftSection: @Composable BoxScope.() -> Unit = {},
+    containerColor: Color = Color.Black.copy(alpha = 0.4F),
+    @DrawableRes iconDrawableId: Int? = null,
+) = Row(
+    modifier = modifier
+        .fillMaxWidth()
+        .defaultMinSize(minHeight = 136.dp)
+        .background(containerColor),
+    horizontalArrangement = Arrangement.Center,
+    verticalAlignment = Alignment.CenterVertically
+) {
+    Box(
+        modifier = leftModifier.weight(1F),
+        content = leftSection
+    )
+    ShutterButton(
+        onClick = onClickShutter,
+        onPress = onPressShutter,
+        enabled = shutterEnabled,
+        iconDrawableId = iconDrawableId
+    )
+    Box(
+        modifier = rightModifier.weight(1F),
+        content = rightSection
+    )
 }
