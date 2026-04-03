@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
 import com.jssdvv.ara.core.domain.utility.PermissionState
@@ -16,22 +17,23 @@ import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.usecase.MarkersDataManager
 import com.jssdvv.ara.machines.domain.usecase.ModelsDataManager
+import com.jssdvv.ara.machines.presentation.destination.ar_session.NotificationEvent
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.math.Position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -74,12 +76,25 @@ class ModelsCalibrationViewModel @Inject constructor(
 
     // Permissions Pair<Permission string, Permission state>
     private val _permissionsStates = MutableStateFlow(emptyList<Pair<String, PermissionState>>())
+    private val options = MutableStateFlow(CalibrationOptions())
+    private val _notification = MutableSharedFlow<NotificationEvent>(extraBufferCapacity = 1)
 
-    // State holders for data from the database
-    private val markers = MutableStateFlow(emptyList<Marker>())
-    private val models = MutableStateFlow(emptyList<Model>())
+    private val markers: StateFlow<List<Marker>> = markersDataManager
+        .select(machineId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = emptyList()
+        )
 
-    // State holders for marker selection
+    private val models: StateFlow<List<Model>> = modelsDataManager
+        .select(machineId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = emptyList()
+        )
+
     private val selectedMarker = MutableStateFlow<Marker?>(null)
     private val selectedMarkerBitmap: StateFlow<BitmapInfo?> = selectedMarker
         .mapNotNull { it?.let { marker -> marker.id to marker.imageUri } }
@@ -97,19 +112,16 @@ class ModelsCalibrationViewModel @Inject constructor(
             null
         )
 
-    init {
-        onCheckPermissionsStates(permissions.map { it to true })
-        getMarkers(machineId)
-        getModels(machineId)
-    }
+    init { onCheckPermissionsStates(permissions.map { it to true }) }
 
+    val notification = _notification.asSharedFlow()
     val permissionsStates = _permissionsStates.asStateFlow()
-
     val uiState: StateFlow<ModelsCalibrationUiState> = combine(
         markers,
         models,
         selectedMarker,
         selectedMarkerBitmap,
+        options,
         ModelsCalibrationUiState::Success
     ).stateIn(
         scope = viewModelScope,
@@ -121,9 +133,7 @@ class ModelsCalibrationViewModel @Inject constructor(
         when (event) {
             is ModelsEvent.OnCheckPermissionsStates -> onCheckPermissionsStates(event.permissions)
             is ModelsEvent.OnPermissionInteraction -> onPermissionInteraction(event.permission)
-
             is ModelsEvent.OnSelectMarker -> selectedMarker.update { event.marker }
-
             is ModelsEvent.OnCalibrateOriginToMarker -> calibrateOriginToMarker(
                 event.markerId,
                 event.newOriginPosition,
@@ -138,6 +148,8 @@ class ModelsCalibrationViewModel @Inject constructor(
 
             is ModelsEvent.OnInsertModel -> insertModel(event.contentUri)
             ModelsEvent.OnDeleteModel -> deleteSelectedModel()
+            ModelsEvent.OnToggleTorch -> toggleTorch()
+            ModelsEvent.OnTogglePlane -> togglePlane()
         }
     }
 
@@ -157,13 +169,6 @@ class ModelsCalibrationViewModel @Inject constructor(
 
     private fun onPermissionInteraction(permission: String) =
         permissionHandler.onPermissionDialogInteraction(permission)
-
-    private fun getMarkers(machineId: Int) =
-        markersDataManager.select(machineId).onEach { markers.value = it }.launchIn(viewModelScope)
-
-    private fun getModels(machineId: Int) =
-        modelsDataManager.select(machineId).onEach { models.value = it }
-            .launchIn(viewModelScope)
 
     private fun calibrateOriginToMarker(
         markerId: Int,
@@ -248,6 +253,46 @@ class ModelsCalibrationViewModel @Inject constructor(
 //        val modelToDelete = models.value.find { it.id == currentModelPosition.id } ?: return
 //        viewModelScope.launch { modelsDataManager.delete.deleteModels(modelToDelete) }
     }
+
+    private fun toggleTorch() {
+        options.update { it.copy(isTorchEnabled = !it.isTorchEnabled) }
+        emitNotification(
+            if (options.value.isTorchEnabled) {
+                NotificationEvent(
+                    message = R.string.notification_chip_message_torch_enabled,
+                    iconRes = R.drawable.ic_torch_filled
+                )
+            } else {
+                NotificationEvent(
+                    message = R.string.notification_chip_message_torch_disabled,
+                    iconRes = R.drawable.ic_torch_outlined
+                )
+            }
+        )
+    }
+
+    private fun togglePlane() {
+        options.update { it.copy(isPlaneEnabled = !it.isPlaneEnabled) }
+        emitNotification(
+            if (options.value.isPlaneEnabled) {
+                NotificationEvent(
+                    message = R.string.notification_chip_message_plane_enabled,
+                    iconRes = R.drawable.ic_plane_renderer_on
+                )
+            } else {
+                NotificationEvent(
+                    message = R.string.notification_chip_message_plane_disabled,
+                    iconRes = R.drawable.ic_plane_renderer_off
+                )
+            }
+        )
+    }
+
+    private fun emitNotification(event: NotificationEvent) {
+        viewModelScope.launch {
+            _notification.emit(event)
+        }
+    }
 }
 
 sealed class ModelsEvent {
@@ -268,30 +313,27 @@ sealed class ModelsEvent {
 
     data class OnInsertModel(val contentUri: Uri) : ModelsEvent()
     data object OnDeleteModel : ModelsEvent()
+    data object OnToggleTorch: ModelsEvent()
+    data object OnTogglePlane: ModelsEvent()
 }
 
 sealed interface ModelsCalibrationUiState {
-
     data object Loading : ModelsCalibrationUiState
-
-    /**
-     * Data class containing the successfully loaded data of the models screen from
-     * local database.
-     *
-     * @property [markers] the loaded markers from the current machine.
-     * @property [models] the loaded models from the current machine that are modelNodes.
-     * @property [selectedMarker] the current selected marker.
-     * @property [selectedMarkerBitmap] the current selected marker bitmap.
-     */
     data class Success(
         val markers: List<Marker>,
         val models: List<Model>,
         val selectedMarker: Marker? = null,
         val selectedMarkerBitmap: BitmapInfo? = null,
+        val options: CalibrationOptions = CalibrationOptions()
     ) : ModelsCalibrationUiState
 }
 
 data class BitmapInfo(
     val markerId: Int,
     val bitmap: Bitmap
+)
+
+data class CalibrationOptions(
+    val isTorchEnabled: Boolean = false,
+    val isPlaneEnabled: Boolean = false
 )

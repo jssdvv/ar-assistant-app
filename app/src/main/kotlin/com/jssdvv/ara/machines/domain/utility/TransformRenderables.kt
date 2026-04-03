@@ -4,7 +4,6 @@ import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Step
 import dev.romainguy.kotlin.math.Quaternion
-import dev.romainguy.kotlin.math.normalize
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
 
@@ -16,6 +15,9 @@ data class RenderableInfo(
     val xxh3: Long
 )
 
+/**
+ * Renderable base temporal state holder interface
+ */
 interface RestorableState {
     val tempIndex: Int
     val initialPosition: Position
@@ -24,7 +26,7 @@ interface RestorableState {
 
 fun restoreRenderablesTransform(
     renderableInfoStates: Map<RenderableInfo, RestorableState>,
-    modelNodesMap: Map<String?, ModelNode>
+    modelNodesMap: Map<String?, ModelNode> // Map<ModelNode.name, ModelNode>
 ) {
     renderableInfoStates.forEach { (renderable, state) ->
         val modelNode = modelNodesMap[renderable.modelId.toString()] ?: return@forEach
@@ -47,13 +49,13 @@ fun applyOperationOffsets(
             val state = renderableInfoStates[renderableInfo] ?: return@forEach
 
             modelNode.renderableNodes.getOrNull(state.tempIndex)?.apply {
-                val offsetPosition = if (operationTarget.operation.isGlobal) {
-                    operationTarget.operation.offsetPosition
+                if(operationTarget.operation.isGlobal) {
+                    applyGlobalPositionOffset(operationTarget.operation.offsetPosition)
+                    applyGlobalQuaternionOffset(operationTarget.operation.offsetRotation)
                 } else {
-                    quaternion * operationTarget.operation.offsetPosition
+                    applyObjectPositionOffset(operationTarget.operation.offsetPosition)
+                    applyObjectQuaternionOffset(operationTarget.operation.offsetRotation)
                 }
-                position += offsetPosition
-                quaternion = normalize(quaternion * operationTarget.operation.offsetRotation)
             }
         }
     }

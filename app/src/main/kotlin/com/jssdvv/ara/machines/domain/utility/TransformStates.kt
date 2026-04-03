@@ -160,7 +160,7 @@ fun unidirectionalTransformPair(
 ): Pair<Position, Quaternion> = unidirectionalTranslation(axis, translationUnits) to
         unidirectionalRotation(axis, rotationUnits)
 
-fun unidirectionalTranslation(axis: Axis, meters: Float) = axis.unitVector * meters
+fun unidirectionalTranslation(axis: Axis, value: Float) = axis.unitVector * value
 fun unidirectionalRotation(axis: Axis, degrees: Float) =
     Quaternion.fromEuler(axis.unitVector * degrees)
 

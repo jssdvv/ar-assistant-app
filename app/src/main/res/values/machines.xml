@@ -234,7 +234,8 @@
     <string name="notification_chip_message_torch_disabled">Torch disabled</string>
     <string name="notification_chip_message_loop_enabled">Looping playback animation</string>
     <string name="notification_chip_message_loop_disabled">Linear animation</string>
-
+    <string name="notification_chip_message_plane_enabled">Plane renderer enabled</string>
+    <string name="notification_chip_message_plane_disabled">Plane renderer disabled</string>
     <string name="notification_chip_message_speed_half">Speed set to half</string>
     <string name="notification_chip_message_speed_normal">Speed set to normal</string>
     <string name="notification_chip_message_speed_double">Speed set to double</string>

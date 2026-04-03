@@ -13,7 +13,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,8 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,22 +46,29 @@ import com.google.ar.core.AugmentedImage
 import com.google.ar.core.Session
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.PermissionState
-import com.jssdvv.ara.core.domain.utility.forEachApply
 import com.jssdvv.ara.core.presentation.common.AddIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
 import com.jssdvv.ara.core.presentation.foundation.component.SceneSurface
-import com.jssdvv.ara.core.presentation.navigation.MarkerIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
-import com.jssdvv.ara.core.presentation.theme.tubShapes
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
-import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.domain.utility.applyObjectPositionOffset
+import com.jssdvv.ara.machines.domain.utility.applyObjectQuaternionOffset
 import com.jssdvv.ara.machines.domain.utility.configureARSession
-import com.jssdvv.ara.machines.domain.utility.setSingleImageDatabase
+import com.jssdvv.ara.machines.domain.utility.repositionOrigin
+import com.jssdvv.ara.machines.domain.utility.setGizmoVisibility
+import com.jssdvv.ara.machines.domain.utility.safeTerminate
+import com.jssdvv.ara.machines.domain.utility.setImageDatabase
+import com.jssdvv.ara.machines.domain.utility.setTorch
 import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
+import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
+import com.jssdvv.ara.machines.presentation.component.NotificationChip
+import com.jssdvv.ara.machines.presentation.component.SceneMarkerIconButton
 import com.jssdvv.ara.machines.presentation.component.ShutterSection
-import com.jssdvv.ara.machines.presentation.destination.calibration.component.EditorOptions
+import com.jssdvv.ara.machines.presentation.destination.ar_session.NotificationEvent
+import com.jssdvv.ara.machines.presentation.destination.calibration.component.CalibrationBottomSheetContent
+import com.jssdvv.ara.machines.presentation.destination.calibration.component.OptionsRow
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.SelectedMarkerDialog
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.UnsavedChangesDialog
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.MODEL_SELECTED_COLOR
@@ -74,6 +78,8 @@ import com.jssdvv.ara.machines.presentation.destination.calibration.function.Tra
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.createModelNode
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.detectMarker
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.getModelMaterialInstance
+import com.jssdvv.ara.machines.presentation.destination.steps.component.BottomSheetMainHeader
+import com.jssdvv.ara.machines.presentation.destination.steps.component.DraggableBottomSheet
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.node.AugmentedImageNode
@@ -87,6 +93,8 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
 import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CalibrationDestination(
@@ -99,6 +107,7 @@ fun CalibrationDestination(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ModelsCalibrationScreen(
+        notification = viewModel.notification,
         modifier = modifier,
         permissionsStates = permissionsStates,
         uiState = uiState,
@@ -110,6 +119,7 @@ fun CalibrationDestination(
 
 @Composable
 internal fun ModelsCalibrationScreen(
+    notification: SharedFlow<NotificationEvent>,
     permissionsStates: List<Pair<String, PermissionState>>,
     uiState: ModelsCalibrationUiState,
     onEvent: (ModelsEvent) -> Unit,
@@ -146,14 +156,16 @@ internal fun ModelsCalibrationScreen(
 
                 is ModelsCalibrationUiState.Success -> {
                     SuccessModelsCalibrationScreen(
+                        notification = notification,
                         modifier = modifier,
                         markers = uiState.markers,
                         models = uiState.models,
                         selectedMarker = uiState.selectedMarker,
                         currentBitmapInfo = uiState.selectedMarkerBitmap,
+                        options = uiState.options,
+                        onEvent = onEvent,
                         onNavigateUp = onNavigateBack,
-                        onNavigateToMarkers = onNavigateToMarkers,
-                        onEvent = onEvent
+                        onNavigateToMarkers = onNavigateToMarkers
                     )
                 }
             }
@@ -217,34 +229,29 @@ internal fun ModelsCalibrationScreen(
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun SuccessModelsCalibrationScreen(
+    notification: SharedFlow<NotificationEvent>,
     markers: List<Marker>,
     models: List<Model>,
     selectedMarker: Marker?,
     currentBitmapInfo: BitmapInfo?,
+    options: CalibrationOptions,
     onEvent: (ModelsEvent) -> Unit,
     onNavigateUp: () -> Unit,
     onNavigateToMarkers: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-
-    // AR Scene
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val view = rememberView(engine).apply { isStencilBufferEnabled = true }
-    var arSession by remember { mutableStateOf<Session?>(null) }
-
-    val originNode = remember { Node(engine).apply { worldTransform = Transform() } }
-    val nodes = rememberNodes { add(0, originNode) }
+    var session by remember { mutableStateOf<Session?>(null) }
 
     // The Scene Nodes
+    val originNode = remember { Node(engine) }
+    val nodes = rememberNodes { add(0, originNode) }
     val markerNode = remember(nodes.size) {
         nodes.filterIsInstance<AugmentedImageNode>().firstOrNull()
-    }
-
-    val modelNodes = remember(originNode.childNodes.size) {
-        nodes.filterIsInstance<ModelNode>()
     }
 
     // Model Edition
@@ -254,7 +261,7 @@ fun SuccessModelsCalibrationScreen(
 
     // Editor Toggle Options
     var transformation by remember { mutableStateOf(Transformation.TRANSLATION) }
-    var transformMode by remember { mutableStateOf(TransformationMode()) }
+    var mode by remember { mutableStateOf(TransformationMode()) }
 
     var firstTimeDetected by remember { mutableStateOf(false) }
 
@@ -282,8 +289,12 @@ fun SuccessModelsCalibrationScreen(
     val repositionOrigin = remember(selectedMarker, markerNode) {
         {
             if (selectedMarker != null && markerNode != null) {
-                originNode.position = markerNode.getWorldPosition(selectedMarker.originOffsetPosition)
-                originNode.quaternion = markerNode.getWorldQuaternion(selectedMarker.originOffsetRotation)
+                repositionOrigin(
+                    originNode = originNode,
+                    markerNode = markerNode,
+                    originOffsetPosition = selectedMarker.originOffsetPosition,
+                    originOffsetQuaternion = selectedMarker.originOffsetRotation
+                )
             }
         }
     }
@@ -318,14 +329,6 @@ fun SuccessModelsCalibrationScreen(
         }
     }
 
-    val applyTranslation = { delta: Position ->
-        selectedModel?.apply { worldPosition += worldQuaternion * delta }
-    }
-
-    val applyRotation = { euler: Float, axis: Axis ->
-        selectedModel?.apply { worldQuaternion *= unidirectionalRotation(axis, euler) }
-    }
-
     if (firstTimeDetected) {
         models.forEach { model ->
             key(model.id) {
@@ -342,7 +345,7 @@ fun SuccessModelsCalibrationScreen(
                         quaternion = model.offsetRotation
                     }
                     repositionOrigin()
-                    onDispose { node.destroy() }
+                    onDispose { node.safeTerminate() }
                 }
             }
         }
@@ -351,38 +354,98 @@ fun SuccessModelsCalibrationScreen(
     BackHandler(markers.any { !it.calibrated }) { showWarningDialog = true }
 
     LaunchedEffect(currentBitmapInfo, Unit) {
-        val bitmapInfo = currentBitmapInfo ?: return@LaunchedEffect
-        val session = arSession ?: return@LaunchedEffect
-        nodes.filterIsInstance<AugmentedImageNode>().forEach { it.destroy() }
-        setSingleImageDatabase(session, bitmapInfo.markerId.toString(), bitmapInfo.bitmap)
+        val info = currentBitmapInfo ?: return@LaunchedEffect
+        session?.setImageDatabase(info.markerId.toString(), info.bitmap) ?: return@LaunchedEffect
+        nodes.filterIsInstance<AugmentedImageNode>().forEach {
+            it.safeTerminate()
+            nodes.remove(it)
+        }
+    }
+
+    LaunchedEffect(options.isTorchEnabled) {
+        session?.setTorch(options.isTorchEnabled)
     }
 
     SceneSurface(
+        modifier = modifier,
         onNavigationUp = onNavigateUp,
         trailingAction = { rowHeight ->
-            IconButton(
+            SceneMarkerIconButton(
                 onClick = { showMarkersDialog = true },
-                modifier = Modifier.size(rowHeight),
-                colors = IconButtonDefaults.filledIconButtonColors().copy(
-                    containerColor = Color.Black.copy(alpha = 0.3F),
-                    contentColor = Color.White
-                ),
-                content = { MarkerIcon() }
+                modifier = Modifier.size(rowHeight)
             )
-
-            // todo fix where to locate this button
-//            if (isEditionEnabled) {
-//                IconButton(
-//                    modifier = Modifier.size(rowHeight),
-//                    onClick = { },
-//                    colors = IconButtonDefaults.filledIconButtonColors().copy(
-//                        containerColor = Color.Black.copy(alpha = 0.5F),
-//                        contentColor = Color.White
-//                    ),
-//                    content = { DeleteIcon() }
-//                )
-//            }
         },
+        optionsRow = {
+            OptionsRow(
+                rowHeight = it,
+                isPlaneEnabled = options.isPlaneEnabled,
+                isTorchEnabled = options.isTorchEnabled,
+                onToggleTorch = { onEvent(ModelsEvent.OnToggleTorch) },
+                onTogglePlane = { onEvent(ModelsEvent.OnTogglePlane) }
+            )
+        },
+        notificationChip = {
+            var notificationMessage by remember { mutableStateOf<NotificationEvent?>(null) }
+            LaunchedEffect(Unit) { notification.collectLatest { notificationMessage = it } }
+            NotificationChip(
+                event = notificationMessage,
+                onDismiss = { notificationMessage = null }
+            )
+        },
+        bottomSheet = {
+            DraggableBottomSheet(
+                isVisible = isEditionEnabled,
+                header = {
+                    BottomSheetMainHeader(
+                        title = "Edit Model",
+                        onSaveClick = {
+                            selectedModel?.apply {
+                                setMaterialInstance(unselectedMaterialInstance)
+                                setGizmoVisibility(false)
+                            }
+                            calibrateModel()
+                        },
+                        onCancelClick = {
+                            selectedModel?.apply {
+                                setMaterialInstance(unselectedMaterialInstance)
+                                setGizmoVisibility(false)
+                                transform = previousModelTransform
+                            }
+                            selectedModel = null
+                        }
+                    )
+                }
+            ) {
+                CalibrationBottomSheetContent(
+                    onRestoreDefaults = {
+                        when (transformation) {
+                            Transformation.TRANSLATION -> selectedModel?.worldPosition = Position()
+                            Transformation.ROTATION -> selectedModel?.worldQuaternion = Quaternion()
+                        }
+                    },
+                    transformation = transformation,
+                    mode = mode,
+                    onTransformationChange = { transformation = it },
+                    onModeChange = { mode = it },
+                    onDeleteModel = {}, // todo add this
+                    onTickDragged = { axis, tick ->
+                        when (transformation) {
+                            Transformation.TRANSLATION -> {
+                                val millis = mode.translation.mmPerUnit * tick / 1000F
+                                val offset = unidirectionalTranslation(axis, millis)
+                                selectedModel?.applyObjectPositionOffset(offset)
+                            }
+
+                            Transformation.ROTATION -> {
+                                val degrees = mode.rotation.halfDegPerUnit * tick / 2F
+                                val offset = unidirectionalRotation(axis, degrees)
+                                selectedModel?.applyObjectQuaternionOffset(offset)
+                            }
+                        }
+                    }
+                )
+            }
+        }
     ) {
         if (markers.isNotEmpty()) {
             ARScene(
@@ -391,9 +454,9 @@ fun SuccessModelsCalibrationScreen(
                 modelLoader = modelLoader,
                 materialLoader = materialLoader,
                 childNodes = nodes,
-                planeRenderer = false, // Turns off the dots on detected flat surfaces
+                planeRenderer = options.isPlaneEnabled, // Turns off the dots on detected flat surfaces
                 sessionConfiguration = ::configureARSession,
-                onSessionCreated = { arSession = it },
+                onSessionCreated = { session = it },
                 onSessionUpdated = { _, frame ->
                     // Gets the last detected trackable (QR code) in any
                     // previous frame as AugmentedImages in the scene
@@ -406,7 +469,7 @@ fun SuccessModelsCalibrationScreen(
                         if (markerNodes.none { it.imageName == trackable.name }) {
 
                             markerNodes.forEach {
-                                it.clearChildNodes()
+                                it.safeTerminate()
                                 nodes.remove(it)
                             }
 
@@ -431,7 +494,7 @@ fun SuccessModelsCalibrationScreen(
                         if (node is ModelNode && selectedModel == null) {
                             selectedModel = node.apply {
                                 setMaterialInstance(selectedMaterialInstance)
-                                childNodes.forEachApply { isVisible = true }
+                                setGizmoVisibility(true)
                                 previousModelTransform = transform
                             }
                         }
@@ -440,156 +503,86 @@ fun SuccessModelsCalibrationScreen(
             )
         }
 
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter)
+        AnimatedVisibility(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            visible = !isEditionEnabled,
+            enter = expandVertically(tween(), Alignment.Top),
+            exit = shrinkVertically(tween(), Alignment.Top)
         ) {
-            // Shutter Options
-            AnimatedVisibility(
-                visible = !isEditionEnabled,
-                enter = expandVertically(tween(), Alignment.Top),
-                exit = shrinkVertically(tween(), Alignment.Top)
-            ) {
-                ShutterSection(
-                    shutterEnabled = isShutterEnabled,
-                    onClickShutter = {
-                        calibrateOriginToMarker()
-                        val machineId = selectedMarker?.machineId ?: return@ShutterSection
-                        val markerIndex = selectedMarker.index
-                        val message = context.getString(
-                            R.string.toast_marker_calibration_success,
-                            machineId.toString(),
-                            markerIndex
-                        )
-                        val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
-                        infoToast.show()
-                    },
-                    onPressShutter = {
-                        repositionOrigin()
-                        val infoToast = Toast.makeText(
-                            context,
-                            "Model repositioned to M${selectedMarker?.machineId}P${selectedMarker?.index}",
-                            Toast.LENGTH_SHORT
-                        )
-                        infoToast.show()
-                    },
-                    rightSection = {
-                        ButtonWithIcon (
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                    addCategory(Intent.CATEGORY_OPENABLE)
-                                    type = "*/*"
-                                }
-                                pickModel.launch(intent)
-                            },
-                            modifier = Modifier
-                                .padding(end = MaterialTheme.spacing.small)
-                                .align(Alignment.CenterEnd),
-                            colors = ButtonDefaults.buttonColors().copy(
-                                containerColor = Color.White,
-                                contentColor = Color.Black
-                            ),
-                            iconInFront = false,
-                            icon = { AddIcon() },
-                            content = { Text("Agregar") } // todo create string
-                        )
-                    },
-                    iconDrawableId = R.drawable.ic_calibrate_to
-                )
-            }
-
-            // Editor Options
-            AnimatedVisibility(
-                visible = isEditionEnabled,
-                enter = expandVertically(tween(), Alignment.Top),
-                exit = shrinkVertically(tween(), Alignment.Top)
-            ) {
-                EditorOptions(
-                    modifier = Modifier.background(Color.Black, MaterialTheme.tubShapes.extraLarge),
-                    onRestoreDefaults = {
-                        if (transformation == Transformation.TRANSLATION) {
-                            selectedModel?.apply { worldPosition = Position() }
-                        } else {
-                            selectedModel?.apply { worldQuaternion = Quaternion() }
-                        }
-                    },
-                    transformation = transformation,
-                    transformationMode = transformMode,
-                    onSaveClick = {
-                        selectedModel?.apply {
-                            setMaterialInstance(unselectedMaterialInstance)
-                            childNodes.find { it.name == "gizmo" }?.isVisible = false
-                        }
-                        calibrateModel()
-                    },
-                    onCancelClick = {
-                        selectedModel?.apply {
-                            setMaterialInstance(unselectedMaterialInstance)
-                            childNodes.find { it.name == "gizmo" }?.isVisible = false
-                            transform = previousModelTransform
-                        }
-                        selectedModel = null
-                    },
-                    onTransformationChange = { transformation = it },
-                    onTransformationModeChange = { transformMode = it },
-                    onXTickDragged = { xTick ->
-                        if (transformation == Transformation.TRANSLATION) {
-                            applyTranslation(Position(x = transformMode.translation.mmPerUnit * xTick / 1000F))
-                        } else {
-                            applyRotation(
-                                transformMode.rotation.halfDegPerUnit * xTick / 2F,
-                                Axis.X
-                            )
-                        }
-                    },
-                    onYTickDragged = { yTick ->
-                        if (transformation == Transformation.TRANSLATION) {
-                            applyTranslation(Position(y = transformMode.translation.mmPerUnit * yTick / 1000F))
-                        } else {
-                            applyRotation(
-                                transformMode.rotation.halfDegPerUnit * yTick / 2F,
-                                Axis.Y
-                            )
-                        }
-                    },
-                    onZTickDragged = { zTick ->
-                        if (transformation == Transformation.TRANSLATION) {
-                            applyTranslation(Position(z = transformMode.translation.mmPerUnit * zTick / 1000F))
-                        } else {
-                            applyRotation(
-                                transformMode.rotation.halfDegPerUnit * zTick / 2F,
-                                Axis.Z
-                            )
-                        }
-                    }
-                )
-            }
-        }
-
-        if (showMarkersDialog) {
-            SelectedMarkerDialog(
-                modifier = Modifier,
-                onDismissRequest = { showMarkersDialog = false },
-                markers = markers,
-                currentMarker = selectedMarker,
-                onMarkerClick = { marker ->
-                    onEvent(ModelsEvent.OnSelectMarker(marker))
-                    showMarkersDialog = false
-                }
-            )
-        }
-
-        if (showWarningDialog) {
-            UnsavedChangesDialog(
-                onDismissRequest = { showWarningDialog = false },
-                onConfirm = {
-                    showWarningDialog = false
-                    onNavigateUp()
+            ShutterSection(
+                shutterEnabled = isShutterEnabled,
+                onClickShutter = {
+                    calibrateOriginToMarker()
+                    val machineId = selectedMarker?.machineId ?: return@ShutterSection
+                    val markerIndex = selectedMarker.index
+                    val message = context.getString(
+                        R.string.toast_marker_calibration_success,
+                        machineId.toString(),
+                        markerIndex
+                    )
+                    val infoToast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+                    infoToast.show()
                 },
-                onOpenMarkers = {
-                    showWarningDialog = false
-                    showMarkersDialog = true
-                }
+                onPressShutter = {
+                    repositionOrigin()
+                    val infoToast = Toast.makeText(
+                        context,
+                        "Model repositioned to M${selectedMarker?.machineId}P${selectedMarker?.index}",
+                        Toast.LENGTH_SHORT
+                    )
+                    infoToast.show()
+                },
+                rightSection = {
+                    ButtonWithIcon(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                            }
+                            pickModel.launch(intent)
+                        },
+                        modifier = Modifier
+                            .padding(end = MaterialTheme.spacing.small)
+                            .align(Alignment.CenterEnd),
+                        colors = ButtonDefaults.buttonColors().copy(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        iconInFront = false,
+                        icon = { AddIcon() },
+                        content = { Text("Agregar") } // todo create string
+                    )
+                },
+                iconDrawableId = R.drawable.ic_calibrate_to
             )
         }
+    }
+
+    if (showMarkersDialog) {
+        SelectedMarkerDialog(
+            modifier = Modifier,
+            onDismissRequest = { showMarkersDialog = false },
+            markers = markers,
+            currentMarker = selectedMarker,
+            onMarkerClick = { marker ->
+                onEvent(ModelsEvent.OnSelectMarker(marker))
+                showMarkersDialog = false
+            }
+        )
+    }
+
+    if (showWarningDialog) {
+        UnsavedChangesDialog(
+            onDismissRequest = { showWarningDialog = false },
+            onConfirm = {
+                //todo add deletion of model if not calibrated
+                showWarningDialog = false
+                onNavigateUp()
+            },
+            onOpenMarkers = {
+                showWarningDialog = false
+                showMarkersDialog = true
+            }
+        )
     }
 }

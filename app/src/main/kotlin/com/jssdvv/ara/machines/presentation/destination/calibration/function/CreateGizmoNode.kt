@@ -2,13 +2,12 @@ package com.jssdvv.ara.machines.presentation.destination.calibration.function
 
 import com.google.android.filament.Engine
 import com.google.android.filament.MaterialInstance
+import com.jssdvv.ara.machines.domain.utility.setPriorityIterable
 import dev.romainguy.kotlin.math.Quaternion
-import io.github.sceneview.components.RenderableComponent
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.CylinderNode
 import io.github.sceneview.node.GeometryNode
-import io.github.sceneview.node.Node
 import io.github.sceneview.node.SphereNode
 
 val GIZMO_CENTER_COLOR = floatArrayOf(1F, 1F, 1F)
@@ -34,10 +33,7 @@ fun createGizmoNode(
         radius = axisRadius,
         height = axisHeight,
         sideCount = 6,
-        materialInstance = createColorMaterialInstance(
-            materialLoader = materialLoader,
-            color = xColor
-        )
+        materialInstance = createColorMaterialInstance(materialLoader, xColor)
     ).apply {
         name = "x"
         position = Position(x = axisPosition)
@@ -49,10 +45,7 @@ fun createGizmoNode(
         radius = axisRadius,
         height = axisHeight,
         sideCount = 6,
-        materialInstance = createColorMaterialInstance(
-            materialLoader = materialLoader,
-            color = yColor
-        )
+        materialInstance = createColorMaterialInstance(materialLoader, yColor)
     ).apply {
         name = "y"
         position = Position(y = axisPosition)
@@ -64,10 +57,7 @@ fun createGizmoNode(
         radius = axisRadius,
         height = axisHeight,
         sideCount = 6,
-        materialInstance = createColorMaterialInstance(
-            materialLoader = materialLoader,
-            color = zColor
-        )
+        materialInstance = createColorMaterialInstance(materialLoader, zColor)
     ).apply {
         name = "z"
         position = Position(z = axisPosition)
@@ -78,10 +68,7 @@ fun createGizmoNode(
         engine = engine,
         center = Position(),
         radius = centerRadius,
-        materialInstance = createColorMaterialInstance(
-            materialLoader = materialLoader,
-            color = centerColor
-        )
+        materialInstance = createColorMaterialInstance(materialLoader, centerColor)
     ).apply {
         name = "gizmo"
         isTouchable = false
@@ -90,15 +77,7 @@ fun createGizmoNode(
         addChildNode(xAxis)
         addChildNode(yAxis)
         addChildNode(zAxis)
-
-        setGizmoPriority(this, 7)
-    }
-}
-
-fun setGizmoPriority(node: Node, priority: Int) {
-    if (node is RenderableComponent) node.setPriority(priority)
-    node.childNodes.forEach { child ->
-        setGizmoPriority(child, priority)
+        setPriorityIterable(7)
     }
 }
 

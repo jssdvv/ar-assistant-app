@@ -21,10 +21,7 @@ fun createModelNode(
     modelColor: FloatArray = MODEL_UNSELECTED_COLOR,
 ): ModelNode {
 
-    val materialInstance = getModelMaterialInstance(
-        materialLoader = materialLoader,
-        modelColor = modelColor
-    )
+    val materialInstance = getModelMaterialInstance(materialLoader, modelColor)
 
     val gizmoNode = createGizmoNode(
         engine = engine,
@@ -47,7 +44,6 @@ fun createModelNode(
     return modelNode.apply {
         setMaterialInstance(materialInstance)
         addChildNode(gizmoNode)
-        //childNodes.elementAt(0).position = this.boundingBox.center.toFloat3()
     }
 }
 

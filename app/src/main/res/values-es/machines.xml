@@ -201,6 +201,10 @@
     <string name="notification_chip_message_torch_disabled">Linterna desactivada</string>
     <string name="notification_chip_message_loop_enabled">Animación en bucle</string>
     <string name="notification_chip_message_loop_disabled">Animación lineal</string>
-
+    <string name="notification_chip_message_plane_enabled">Renderizador de plano habilitado</string>
+    <string name="notification_chip_message_plane_disabled">Renderizador de plano deshabilitado</string>
+    <string name="notification_chip_message_speed_half">Velocidad media</string>
+    <string name="notification_chip_message_speed_normal">Velocidad normal</string>
+    <string name="notification_chip_message_speed_double">Velocidad doble</string>
 
 </resources>

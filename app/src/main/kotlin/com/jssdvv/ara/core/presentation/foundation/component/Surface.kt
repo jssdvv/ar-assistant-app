@@ -33,7 +33,8 @@ fun SceneSurface(
     trailingAction: @Composable BoxScope.(size: DpSize) -> Unit = {},
     optionsRow: @Composable RowScope.(rowHeight: Dp) -> Unit = {},
     notificationChip: @Composable BoxScope.() -> Unit = {},
-    content: @Composable BoxScope.() -> Unit
+    bottomSheet: @Composable () -> Unit = {},
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val trailingActionSize = DpSize(48.dp,48.dp)
     val optionsRowHeight = 40.dp
@@ -81,6 +82,10 @@ fun SceneSurface(
                     .align(Alignment.TopEnd),
                 contentAlignment = Alignment.Center,
                 content = { trailingAction(trailingActionSize) }
+            )
+            Box(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                content = { bottomSheet() }
             )
         }
     }
