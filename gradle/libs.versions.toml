@@ -33,9 +33,6 @@ hashing = "0.27ea1"
 
 # Plugins
 gradle-plugin = "8.13.2"
-material3 = "1.4.0"
-uiText = "1.10.4"
-foundation = "1.10.4"
 
 [libraries]
 # Android
@@ -104,9 +101,6 @@ google-mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", 
 
 # Augmented Reality
 sceneview-arsceneview = { module = "io.github.sceneview:arsceneview", version.ref = "sceneview" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
-androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 # Hashing
 openhft-zero-allocation-hashing = { module = "net.openhft:zero-allocation-hashing", version.ref = "hashing"}

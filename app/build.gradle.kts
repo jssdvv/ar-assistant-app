@@ -66,57 +66,53 @@ android {
 
 dependencies {
     // Android
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx) // Checked
+    implementation(libs.androidx.activity.compose) // Checked
 
     // Kotlin
-    implementation(libs.jetbrains.kotlinx.serialization.json)
-    implementation(libs.jetbrains.kotlinx.coroutines.android)
-    implementation(libs.jetbrains.kotlinx.coroutines.guava)
-    implementation(libs.jetbrains.kotlin.reflect)
+    implementation(libs.jetbrains.kotlinx.serialization.json) // Checked
+    implementation(libs.jetbrains.kotlinx.coroutines.android) // Checked
+    implementation(libs.jetbrains.kotlinx.coroutines.guava) // Checked
+    implementation(libs.jetbrains.kotlin.reflect) // Checked
 
     // Lifecycle
-    implementation(libs.bundles.androidx.lifecycle)
+    implementation(libs.bundles.androidx.lifecycle) // Checked
 
     // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.androidx.compose)
-    implementation(libs.bundles.androidx.compose.adaptive)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.foundation)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(platform(libs.androidx.compose.bom)) // Checked
+    implementation(libs.bundles.androidx.compose) // Checked
+    implementation(libs.bundles.androidx.compose.adaptive) // Checked
+    debugImplementation(libs.androidx.compose.ui.tooling) // Checked
 
     // Camera
-    implementation(libs.bundles.androidx.camera)
+    implementation(libs.bundles.androidx.camera) // Checked
 
     // Navigation
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.compose) // Checked
 
     // Room
-    implementation(libs.bundles.androidx.room)
-//    annotationProcessor(libs.androidx.room.compiler)
-    kapt(libs.androidx.room.compiler)
+    implementation(libs.bundles.androidx.room) // Checked
+    kapt(libs.androidx.room.compiler) // Checked
 
     // Datastore
-    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences) // Checked
 
     // DI
-    implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.google.dagger.hilt.android)
-    kapt(libs.google.dagger.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose) // Checked
+    implementation(libs.google.dagger.hilt.android) // Checked
+    kapt(libs.google.dagger.hilt.android.compiler) // Checked
 
     // Images
-    implementation(libs.coil.compose)
+    implementation(libs.coil.compose) // Checked
 
     // Barcodes
-    implementation(libs.bundles.google.barcode.scanning)
+    implementation(libs.bundles.google.barcode.scanning) // Checked
 
     // Augmented Reality
-    implementation(libs.sceneview.arsceneview)
+    implementation(libs.sceneview.arsceneview) // Checked
 
     // Hashing
-    implementation(libs.openhft.zero.allocation.hashing)
+    implementation(libs.openhft.zero.allocation.hashing) // Checked
 }
 
 kapt {
