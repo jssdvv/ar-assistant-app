@@ -3,25 +3,34 @@ package com.jssdvv.ara.machines.domain.type
 import androidx.annotation.StringRes
 import com.jssdvv.ara.R
 import dev.romainguy.kotlin.math.Float3
+import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.abs
 
 enum class Axis(
     @param:StringRes val rotationNameId: Int,
-    val unitVector: Float3
+    val unitVector: Float3,
+    val color: FloatArray,
+    val quaternion: Quaternion
 ) {
     X(
         rotationNameId = R.string.enum_axis_x_name,
-        unitVector = Float3(x = 1F)
+        unitVector = Float3(x = 1F),
+        color = floatArrayOf(1F, 0F, 0F),
+        quaternion = Quaternion(w = 0.707107F, z = -0.707107F)
     ),
 
     Y(
         rotationNameId = R.string.enum_axis_y_name,
-        unitVector = Float3(y = 1F)
+        unitVector = Float3(y = 1F),
+        color = floatArrayOf(0F, 1F, 0F),
+        quaternion = Quaternion(w = 0.707107F, y = 0.707107F)
     ),
 
     Z(
         rotationNameId = R.string.enum_axis_z_name,
-        unitVector = Float3(z = 1F)
+        unitVector = Float3(z = 1F),
+        color = floatArrayOf(0F, 0F, 1F),
+        quaternion = Quaternion(w = 0.707107F, x = 0.707107F)
     );
 
     companion object {

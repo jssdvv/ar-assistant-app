@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="gizmo_x">#E6334D</color>
-    <color name="gizmo_y">#80CC1A</color>
-    <color name="gizmo_z">#3380E6</color>
-    <color name="gizmo_c">#FF9933</color>
+    <color name="plane_lost_tracking">#FFFF3333</color>
+    <color name="plane_full_tracking">#FF00FF00</color>
+    <color name="plane_last_position">#FFFFCC00</color>
 
-    <color name="gizmo_disabled">#808080</color>
+    <color name="model_selected">#FFFF9966</color>
+    <color name="model_unselected">#FF33ADFF</color>
+
+    <color name="gizmo_disabled">#FF808080</color>
+    <color name="gizmo_x">#FFE6334D</color>
+    <color name="gizmo_y">#FF80CC1A</color>
+    <color name="gizmo_z">#FF3380E6</color>
+    <color name="gizmo_c">#FFFF9933</color>
 
 </resources>
