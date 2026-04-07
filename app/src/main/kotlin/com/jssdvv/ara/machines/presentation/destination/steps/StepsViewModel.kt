@@ -171,7 +171,7 @@ class StepsViewModel @Inject constructor(
                 _isSelectionEnabled.value = event.isEnabled
             }
 
-            is StepsExternalEvent.OnLoadRenderables -> loadRenderable(event.renderableInfo, event.state)
+            is StepsExternalEvent.OnLoadRenderables -> loadRenderable(event.info, event.state)
             is StepsExternalEvent.OnSelectRenderable -> selectRenderable(event.renderableInfo)
             is StepsExternalEvent.OnSelectExistingRenderables -> selectExistingRenderables(event.targets)
             is StepsExternalEvent.OnUnselectRenderable -> unselectRenderable(event.renderableInfo)
@@ -351,17 +351,17 @@ class StepsViewModel @Inject constructor(
                 editingOperation.value = null
             } else {
                 // Existing Operation
-                val ReorderNumber = operation.order.coerceIn(1, currentOperations.size)
+                val reorderNumber = operation.order.coerceIn(1, currentOperations.size)
                 val updatedList = currentOperations.toMutableList().apply {
                     val currentIndex = indexOfFirst { it.id == operation.id }
                     if (currentIndex != -1) removeAt(currentIndex)
 
                     add(
-                        index = ReorderNumber - 1,
+                        index = reorderNumber - 1,
                         element = operation.copy(
                             id = existingOperation.id,
                             stepId = existingOperation.stepId,
-                            order = ReorderNumber
+                            order = reorderNumber
                         )
                     )
 
@@ -453,7 +453,7 @@ sealed interface StepsEvent {
 sealed interface StepsExternalEvent {
     data class OnToggleSelection(val isEnabled: Boolean) : StepsExternalEvent
     data class OnLoadRenderables(
-        val renderableInfo: RenderableInfo,
+        val info: RenderableInfo,
         val state: RenderableState
     ) : StepsExternalEvent
 
@@ -485,7 +485,7 @@ data class RenderableState(
     val name: String = "",
     val isVisible: Boolean = true,
     val isSelected: Boolean = false,
-    override val tempIndex: Int = 0,
+    override val index: Int = 0,
     override val initialPosition: Position = Position(),
     override val initialQuaternion: Quaternion = Quaternion()
 ): RestorableState

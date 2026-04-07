@@ -8,14 +8,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -45,23 +49,26 @@ import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
 import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.domain.type.Measurement
 import com.jssdvv.ara.machines.domain.utility.RenderableInfo
 import com.jssdvv.ara.machines.domain.utility.extractSingleAxisDegrees
 import com.jssdvv.ara.machines.domain.utility.rememberMultiRotationState
 import com.jssdvv.ara.machines.domain.utility.rememberMultiTranslationState
 import com.jssdvv.ara.machines.domain.utility.rememberSingleRotationState
 import com.jssdvv.ara.machines.domain.utility.rememberSingleTranslationState
+import com.jssdvv.ara.machines.domain.utility.rememberTimeState
 import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTransformPair
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
+import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.max
+import io.github.sceneview.math.Position
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.math.roundToInt
 
-sealed interface BottomSheetScreen {
-    data object Main : BottomSheetScreen
-    data object Entities : BottomSheetScreen
-    data object Operations : BottomSheetScreen
-}
+enum class BottomSheetScreen { MAIN, ENTITIES, OPERATIONS }
 
 @Composable
 fun OperationBottomSheet(
@@ -75,7 +82,8 @@ fun OperationBottomSheet(
     onOperationChange: (Operation) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var currentSheetScreen by remember { mutableStateOf<BottomSheetScreen>(BottomSheetScreen.Main) }
+    var currentSheetScreen by remember { mutableStateOf(BottomSheetScreen.MAIN) }
+    val lazyListState = rememberLazyListState()
 
     val interactionSource = remember { MutableInteractionSource() }
     val interactionSource2 = remember { MutableInteractionSource() }
@@ -83,8 +91,14 @@ fun OperationBottomSheet(
     val focus2 = interactionSource2.collectIsFocusedAsState().value
 
     LaunchedEffect(focus, focus2) {
-        onSelectionChange(focus)
-        if (focus2) currentSheetScreen = BottomSheetScreen.Operations
+        if(currentSheetScreen == BottomSheetScreen.MAIN) {
+            onSelectionChange(focus)
+        }
+        if (focus2) currentSheetScreen = BottomSheetScreen.OPERATIONS
+    }
+
+    LaunchedEffect(currentSheetScreen) {
+        onSelectionChange(currentSheetScreen == BottomSheetScreen.ENTITIES)
     }
 
     DraggableBottomSheet(
@@ -94,7 +108,7 @@ fun OperationBottomSheet(
             AnimatedContent(
                 targetState = currentSheetScreen,
                 transitionSpec = {
-                    if (targetState !is BottomSheetScreen.Main) {
+                    if (targetState != BottomSheetScreen.MAIN) {
                         slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
                     } else {
                         slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
@@ -102,7 +116,7 @@ fun OperationBottomSheet(
                 }
             ) { screen ->
                 when (screen) {
-                    is BottomSheetScreen.Main -> {
+                    BottomSheetScreen.MAIN -> {
                         BottomSheetMainHeader(
                             title = "Edit Operation",
                             onSaveClick = { onSaveClick(selectedOperation) },
@@ -110,17 +124,17 @@ fun OperationBottomSheet(
                         )
                     }
 
-                    is BottomSheetScreen.Operations -> {
+                    BottomSheetScreen.OPERATIONS -> {
                         BottomSheetSubHeader(
                             title = "Selected operation",
-                            onNavigateUp = { currentSheetScreen = BottomSheetScreen.Main }
+                            onNavigateUp = { currentSheetScreen = BottomSheetScreen.MAIN }
                         )
                     }
 
-                    else -> {
+                    BottomSheetScreen.ENTITIES -> {
                         BottomSheetSubHeader(
                             title = "Selected entities",
-                            onNavigateUp = { currentSheetScreen = BottomSheetScreen.Main }
+                            onNavigateUp = { currentSheetScreen = BottomSheetScreen.MAIN }
                         )
                     }
                 }
@@ -130,132 +144,243 @@ fun OperationBottomSheet(
         AnimatedContent(
             targetState = currentSheetScreen,
             transitionSpec = {
-                if (targetState !is BottomSheetScreen.Main) {
+                if (targetState != BottomSheetScreen.MAIN) {
                     slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
                 } else {
                     slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
                 }
             }
         ) { currentScreen ->
-            Column(
+
+            val settingsContent = when (selectedOperation.type) {
+                OperationType.POINT_TO_POINT -> pointToPointSettings(
+                    selectedOperation,
+                    onOperationChange
+                )
+
+                OperationType.SCREW -> screwSettings(selectedOperation, onOperationChange)
+                OperationType.CYLINDRICAL -> cylindricalSettings(
+                    selectedOperation,
+                    onOperationChange
+                )
+
+                OperationType.JOINT -> jointSettings(selectedOperation, onOperationChange)
+                else -> visibilitySettings(selectedOperation, onOperationChange)
+            }
+
+            val lazyListContent = when (currentScreen) {
+                BottomSheetScreen.MAIN -> {
+                    stepsMainBottomScreen(
+                        operation = selectedOperation,
+                        onOperationChange = onOperationChange,
+                        onNavigateToBottomScreen = { currentSheetScreen = it },
+                        selectedItemsCount = selectedRenderablesStates.count(),
+                        entitiesInteractionSource = interactionSource,
+                        operationsInteractionSource = interactionSource2,
+                        settingsContent = settingsContent
+                    )
+
+                }
+
+                BottomSheetScreen.ENTITIES -> {
+                    stepsOpSelectionBottomScreen(
+                        selectedRenderablesStates = selectedRenderablesStates,
+                        onUnselectItem = onUnselectItem
+                    )
+                }
+
+                BottomSheetScreen.OPERATIONS -> {
+                    stepsEntitiesBottomScreen(
+                        operation = selectedOperation,
+                        onOperationChange = onOperationChange,
+                        onNavigateToBottomScreen = { currentSheetScreen = it }
+                    )
+                }
+            }
+
+            LazyColumn(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(horizontal = MaterialTheme.spacing.medium)
-                    .verticalScroll(rememberScrollState())
                     .imePadding(),
+                state = lazyListState,
+                contentPadding = PaddingValues(vertical = MaterialTheme.spacing.small),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                when (currentScreen) {
-                    BottomSheetScreen.Main -> {
-                        OutlinedTextField(
-                            value = selectedOperation.title,
-                            onValueChange = {
-                                onOperationChange(selectedOperation.copy(title = it))
-                            },
-                            label = { Text("Operation name") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        EntitiesTextField(
-                            selectedItemsCount = selectedRenderablesStates.count(),
-                            onClick = { currentSheetScreen = BottomSheetScreen.Entities },
-                            modifier = Modifier.fillMaxWidth(),
-                            interactionSource = interactionSource
-                        )
-                        OperationsTextField(
-                            currentOperationType = selectedOperation.type,
-                            onClick = { currentSheetScreen = BottomSheetScreen.Operations },
-                            modifier = Modifier.fillMaxWidth(),
-                            interactionSource = interactionSource2
-                        )
-                        when (selectedOperation.type) {
-                            OperationType.POINT_TO_POINT -> FreeOperationSettings(
-                                currentOperation = selectedOperation,
-                                onOperationChange = onOperationChange
-                            )
-
-                            OperationType.SCREW -> ScrewOperationSettings(
-                                currentOperation = selectedOperation,
-                                onOperationChange = onOperationChange
-                            )
-
-                            OperationType.CYLINDRICAL -> CylindricalOperationSettings(
-                                currentOperation = selectedOperation,
-                                onOperationChange = onOperationChange
-                            )
-
-                            OperationType.JOINT -> JointOperationSettings(
-                                currentOperation = selectedOperation,
-                                onOperationChange = onOperationChange
-                            )
-
-                            else -> VisibilityOperationSettings()
-                        }
-                    }
-
-                    is BottomSheetScreen.Entities -> {
-                        selectedRenderablesStates.entries.forEachIndexed { index, (renderable, state) ->
-                            if (index > 0) HorizontalDivider()
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_renderable),
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = state.name,
-                                    modifier = Modifier.weight(1F)
-                                )
-                                IconButton(
-                                    onClick = { onUnselectItem(renderable) },
-                                    content = { CloseIcon() }
-                                )
-                            }
-                        }
-                    }
-
-                    is BottomSheetScreen.Operations -> {
-                        OperationType.entries.forEachIndexed { index, operationType ->
-                            if (index > 0) HorizontalDivider()
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .clickable {
-                                        onOperationChange(selectedOperation.copy(type = operationType))
-                                        currentSheetScreen = BottomSheetScreen.Main
-                                    },
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            ) {
-                                Icon(
-                                    painter = painterResource(operationType.iconResId),
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = stringResource(operationType.labelResId),
-                                    modifier = Modifier.weight(1F)
-                                )
-                                if (operationType == selectedOperation.type) CheckIcon()
-                            }
-                        }
-                    }
-                }
+                lazyListContent()
             }
         }
     }
 }
 
 @Composable
-fun FreeOperationSettings(
+fun stepsMainBottomScreen(
+    operation: Operation,
+    onOperationChange: (Operation) -> Unit,
+    onNavigateToBottomScreen: (BottomSheetScreen) -> Unit,
+    selectedItemsCount: Int,
+    entitiesInteractionSource: MutableInteractionSource,
+    operationsInteractionSource: MutableInteractionSource,
+    settingsContent: LazyListScope.() -> Unit
+): LazyListScope.() -> Unit {
+
+    var isGlobalOffset by remember { mutableStateOf(false) }
+    val delayState = rememberTimeState(operation.delay)
+    val durationState = rememberTimeState(operation.duration)
+
+    val updatedCurrentOperation = rememberUpdatedState(operation)
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { delayState.seconds to durationState.seconds }
+            .distinctUntilChanged()
+            .collect { (delay, duration) ->
+                onOperationChange(
+                    updatedCurrentOperation.value.copy(
+                        delay = delay,
+                        duration = duration
+                    )
+                )
+            }
+    }
+
+    return {
+        item {
+            OutlinedTextField(
+                value = operation.title,
+                onValueChange = {
+                    onOperationChange(operation.copy(title = it))
+                },
+                label = { Text("Operation name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            EntitiesTextField(
+                selectedItemsCount = selectedItemsCount,
+                onClick = { onNavigateToBottomScreen(BottomSheetScreen.ENTITIES) },
+                modifier = Modifier.fillMaxWidth(),
+                interactionSource = entitiesInteractionSource
+            )
+        }
+        item {
+            OperationsTextField(
+                currentOperationType = operation.type,
+                onClick = { onNavigateToBottomScreen(BottomSheetScreen.OPERATIONS) },
+                modifier = Modifier.fillMaxWidth(),
+                interactionSource = operationsInteractionSource
+            )
+        }
+        item {
+            TimeTextField(
+                name = "delay",
+                state = delayState,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            TimeTextField(
+                name = "duration",
+                state = durationState,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        if (operation.type != OperationType.VISIBILITY) {
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = isGlobalOffset,
+                        onCheckedChange = {
+                            isGlobalOffset = it
+                            onOperationChange(
+                                operation.copy(
+                                    isGlobal = it
+                                )
+                            )
+                        }
+                    )
+                    Text("Movel en coordenadas globales")
+                }
+            }
+        }
+        settingsContent(this)
+    }
+}
+
+@Composable
+fun stepsOpSelectionBottomScreen(
+    selectedRenderablesStates: Map<RenderableInfo, RenderableState>,
+    onUnselectItem: (RenderableInfo) -> Unit,
+): LazyListScope.() -> Unit {
+    return {
+        itemsIndexed(selectedRenderablesStates.entries.toList()) { index, (renderable, state) ->
+            if (index > 0) HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_renderable),
+                    contentDescription = null
+                )
+                Text(
+                    text = state.name,
+                    modifier = Modifier.weight(1F)
+                )
+                IconButton(
+                    onClick = { onUnselectItem(renderable) },
+                    content = { CloseIcon() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun stepsEntitiesBottomScreen(
+    operation: Operation,
+    onOperationChange: (Operation) -> Unit,
+    onNavigateToBottomScreen: (BottomSheetScreen) -> Unit
+): LazyListScope.() -> Unit {
+    return {
+        itemsIndexed(OperationType.entries) { index, operationType ->
+            if (index > 0) HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable {
+                        onOperationChange(operation.copy(type = operationType))
+                        onNavigateToBottomScreen(BottomSheetScreen.MAIN)
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Icon(
+                    painter = painterResource(operationType.iconResId),
+                    contentDescription = null
+                )
+                Text(
+                    text = stringResource(operationType.labelResId),
+                    modifier = Modifier.weight(1F)
+                )
+                if (operationType == operation.type) CheckIcon()
+            }
+        }
+    }
+}
+
+@Composable
+fun pointToPointSettings(
     currentOperation: Operation,
     onOperationChange: (Operation) -> Unit,
-) {
+): LazyListScope.() -> Unit {
     val multiTranslationState = rememberMultiTranslationState(
         initialXMeters = currentOperation.offsetPosition.x,
         initialYMeters = currentOperation.offsetPosition.y,
@@ -279,134 +404,154 @@ fun FreeOperationSettings(
             }
     }
 
-    HorizontalDivider()
-
-    listOf(
-        Axis.X to multiTranslationState.x,
-        Axis.Y to multiTranslationState.y,
-        Axis.Z to multiTranslationState.z
-    ).forEach { (axis, state) ->
-        TranslationTextField(
-            name = axis.name,
-            state = state,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-
-    HorizontalDivider()
-
-    listOf(
-        Axis.X to multiRotationState.x,
-        Axis.Y to multiRotationState.y,
-        Axis.Z to multiRotationState.z
-    ).forEach { (axis, state) ->
-        RotationTextField(
-            name = stringResource(axis.rotationNameId),
-            state = state,
-            modifier = Modifier.fillMaxWidth()
-        )
+    return {
+        item { HorizontalDivider() }
+        items(
+            listOf(
+                Axis.X to multiTranslationState.x,
+                Axis.Y to multiTranslationState.y,
+                Axis.Z to multiTranslationState.z
+            )
+        ) { (axis, state) ->
+            TranslationTextField(
+                name = axis.name,
+                state = state,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item { HorizontalDivider() }
+        items(
+            listOf(
+                Axis.X to multiRotationState.x,
+                Axis.Y to multiRotationState.y,
+                Axis.Z to multiRotationState.z
+            )
+        ) { (axis, state) ->
+            RotationTextField(
+                name = stringResource(axis.rotationNameId),
+                state = state,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
 @Composable
-fun ScrewOperationSettings(
-    currentOperation: Operation,
+fun screwSettings(
+    operation: Operation,
     onOperationChange: (Operation) -> Unit,
-) {
-    var selectedAxis by remember { mutableStateOf(currentOperation.axis) }
-    val translationState = rememberSingleTranslationState(
-        initialMeters = max(currentOperation.offsetPosition),
-    )
-    val pitchOrTurnsState = rememberSingleTranslationState(
-        initialMeters = currentOperation.pitch
-    )
+): LazyListScope.() -> Unit {
+
+    var selectedAxis by remember { mutableStateOf(operation.axis) }
     var useTurns by remember { mutableStateOf(false) }
-    val updatedUseTurns by rememberUpdatedState(useTurns)
-    val updatedCurrentOperation by rememberUpdatedState(currentOperation)
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { translationState.meters to pitchOrTurnsState }
-            .distinctUntilChanged()
-            .collect { (distance, pitchOrTurnsState) ->
-                val (turns, pitch) = if (updatedUseTurns) {
-                    pitchOrTurnsState.numeric to
-                            (if (pitchOrTurnsState.numeric != 0F) distance / pitchOrTurnsState.numeric else 0F)
-                } else {
-                    (if (pitchOrTurnsState.meters != 0F) distance / pitchOrTurnsState.meters else 0F) to
-                            pitchOrTurnsState.meters
-                }
+    val translationState =
+        rememberSingleTranslationState(initialMeters = max(operation.offsetPosition))
+    val pitchState = rememberSingleTranslationState(initialMeters = operation.pitch)
+    val turnsState = rememberSingleTranslationState(
+        initialMeters = operation.turns,
+        initialMeasurement = Measurement.METERS
+    )
 
-                onOperationChange(
-                    updatedCurrentOperation.copy(
-                        offsetPosition = unidirectionalTranslation(selectedAxis, distance),
-                        offsetRotation = unidirectionalRotation(selectedAxis, turns * 360F),
-                        pitch = pitch,
-                        axis = selectedAxis
-                    )
-                )
-            }
+    fun updateFromPitch() {
+        val pitch = pitchState.meters
+        if (pitch != 0f) {
+            val calculatedTurns = translationState.meters / pitch
+            turnsState.updateUnits(calculatedTurns.toString())
+        } else {
+            turnsState.updateUnits("0")
+        }
     }
 
-    AxisSelector(
-        axis = selectedAxis,
-        onAxisChange = { axis ->
-            selectedAxis = axis
-            val (newPosition, newRotation) = unidirectionalTransformPair(
-                axis = axis,
-                translationUnits = translationState.meters,
-                rotationUnits = if (pitchOrTurnsState.meters != 0F) {
-                    translationState.meters / pitchOrTurnsState.meters * 360F
-                } else 0F
+    fun updateFromTurns() {
+        val turns = turnsState.numeric
+        if (turns != 0f) {
+            val calculatedPitchMeters = translationState.meters / turns
+            pitchState.updateMeters(calculatedPitchMeters)
+        } else {
+            pitchState.updateUnits("0")
+        }
+    }
+
+    LaunchedEffect(translationState.meters, pitchState.meters, turnsState.numeric, selectedAxis) {
+        val turns = turnsState.numeric
+        val pitch = pitchState.meters
+        val distance = translationState.meters
+
+        onOperationChange(
+            operation.copy(
+                offsetPosition = unidirectionalTranslation(selectedAxis, distance),
+                offsetRotation = unidirectionalRotation(selectedAxis, turns * 360F),
+                pitch = pitch,
+                turns = turns,
+                axis = selectedAxis
             )
-            onOperationChange(
-                updatedCurrentOperation.copy(
-                    offsetPosition = newPosition,
-                    offsetRotation = newRotation,
-                    axis = axis
-                )
-            )
-        },
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    TranslationTextField(
-        name = selectedAxis.name,
-        state = translationState,
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    PitchTextField(
-        name = if (useTurns) "Turns" else "Pitch",
-        state = pitchOrTurnsState,
-        isPitch = !useTurns,
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Checkbox(
-            checked = useTurns,
-            onCheckedChange = { useTurns = it }
         )
-        Text(stringResource(R.string.operation_checkbox_use_turns_supporting_text))
+    }
+
+    return {
+        item {
+            AxisSelector(
+                axis = selectedAxis,
+                onAxisChange = { selectedAxis = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            TranslationTextField(
+                name = selectedAxis.name,
+                state = translationState,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            PitchTextField(
+                name = if (useTurns) "Turns" else "Pitch", // TODO create strings
+                state = if (useTurns) turnsState else pitchState,
+                onValueChange = { units ->
+                    if (useTurns) {
+                        turnsState.updateUnits(units)
+                        updateFromTurns()
+                    } else {
+                        pitchState.updateUnits(units)
+                        updateFromPitch()
+                    }
+                },
+                isPitch = !useTurns,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = useTurns,
+                    onCheckedChange = { checked ->
+                        useTurns = checked
+                        if (checked) updateFromPitch() else updateFromTurns()
+                    }
+                )
+                Text(stringResource(R.string.operation_checkbox_use_turns_supporting_text))
+            }
+        }
     }
 }
 
 @Composable
-fun CylindricalOperationSettings(
-    currentOperation: Operation,
+fun cylindricalSettings(
+    operation: Operation,
     onOperationChange: (Operation) -> Unit,
-) {
-    var selectedAxis by remember { mutableStateOf(currentOperation.axis) }
+): LazyListScope.() -> Unit {
+    var selectedAxis by remember { mutableStateOf(operation.axis) }
     val translationState = rememberSingleTranslationState(
-        initialMeters = max(currentOperation.offsetPosition)
+        initialMeters = max(operation.offsetPosition)
     )
     val rotationState = rememberSingleRotationState(
-        initialDegrees = currentOperation.offsetRotation.extractSingleAxisDegrees(selectedAxis)
+        initialDegrees = operation.offsetRotation.extractSingleAxisDegrees(selectedAxis)
     )
-    val updatedCurrentOperation by rememberUpdatedState(currentOperation)
+    val updatedCurrentOperation by rememberUpdatedState(operation)
 
     LaunchedEffect(Unit) {
         snapshotFlow { translationState.meters to rotationState.degrees }
@@ -422,48 +567,54 @@ fun CylindricalOperationSettings(
             }
     }
 
-    AxisSelector(
-        axis = selectedAxis,
-        onAxisChange = { axis ->
-            selectedAxis = axis
-            val (newPosition, newRotation) = unidirectionalTransformPair(
-                axis = axis,
-                translationUnits = translationState.meters,
-                rotationUnits = rotationState.degrees,
+    return {
+        item {
+            AxisSelector(
+                axis = selectedAxis,
+                onAxisChange = { axis ->
+                    selectedAxis = axis
+                    val (newPosition, newRotation) = unidirectionalTransformPair(
+                        axis = axis,
+                        translationUnits = translationState.meters,
+                        rotationUnits = rotationState.degrees,
+                    )
+                    onOperationChange(
+                        updatedCurrentOperation.copy(
+                            offsetPosition = newPosition,
+                            offsetRotation = newRotation,
+                            axis = axis
+                        )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
             )
-            onOperationChange(
-                updatedCurrentOperation.copy(
-                    offsetPosition = newPosition,
-                    offsetRotation = newRotation,
-                    axis = axis
-                )
+        }
+        item {
+            TranslationTextField(
+                name = selectedAxis.name,
+                state = translationState,
+                modifier = Modifier.fillMaxWidth()
             )
-        },
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    TranslationTextField(
-        name = selectedAxis.name,
-        state = translationState,
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    RotationTextField(
-        name = stringResource(selectedAxis.rotationNameId),
-        state = rotationState,
-        modifier = Modifier.fillMaxWidth()
-    )
+        }
+        item {
+            RotationTextField(
+                name = stringResource(selectedAxis.rotationNameId),
+                state = rotationState,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
 }
 
 @Composable
-fun JointOperationSettings(
-    currentOperation: Operation,
+fun jointSettings(
+    operation: Operation,
     onOperationChange: (Operation) -> Unit,
-) {
+): LazyListScope.() -> Unit {
     val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = currentOperation.offsetRotation.toEulerAngles()
+        initialEulerDegrees = operation.offsetRotation.toEulerAngles()
     )
-    val updatedCurrentOperation by rememberUpdatedState(currentOperation)
+    val updatedCurrentOperation by rememberUpdatedState(operation)
 
     LaunchedEffect(Unit) {
         snapshotFlow { multiRotationState.quaternion }
@@ -477,31 +628,58 @@ fun JointOperationSettings(
             }
     }
 
-    listOf(
-        Axis.X to multiRotationState.x,
-        Axis.Y to multiRotationState.y,
-        Axis.Z to multiRotationState.z
-    ).forEach { (axis, state) ->
-        RotationTextField(
-            name = axis.name,
-            state = state,
-            modifier = Modifier.fillMaxWidth()
-        )
+    return {
+        items(
+            listOf(
+                Axis.X to multiRotationState.x,
+                Axis.Y to multiRotationState.y,
+                Axis.Z to multiRotationState.z
+            )
+        ) { (axis, state) ->
+            RotationTextField(
+                name = axis.name,
+                state = state,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
-// todo fix this implementation
 @Composable
-fun VisibilityOperationSettings(
-    modifier: Modifier = Modifier
-) {
-    var alpha by remember { mutableStateOf(1F) }
+fun visibilitySettings(
+    operation: Operation,
+    onOperationChange: (Operation) -> Unit
+): LazyListScope.() -> Unit {
+    val steps = 4
+    var alphaPercent by remember { mutableFloatStateOf(operation.alpha * 100F) }
 
-    Text("Transparency = ${(alpha * 100).toInt()}%")
-
-    Slider(
-        value = alpha,
-        onValueChange = { alpha = it },
-        steps = 10
-    )
+    return {
+        item {
+            Text(
+                text = "Transparency = ${alphaPercent.roundToInt()}%",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(
+                    horizontal = MaterialTheme.spacing.extraSmall,
+                    vertical = MaterialTheme.spacing.small
+                )
+            )
+        }
+        item {
+            Slider(
+                value = alphaPercent,
+                onValueChange = {
+                    alphaPercent = it
+                    onOperationChange(
+                        operation.copy(
+                            alpha = (it / 100F).coerceIn(0F..1F),
+                            offsetPosition = Position(),
+                            offsetRotation = Quaternion()
+                        )
+                    )
+                },
+                valueRange = 0F..100F,
+                steps = steps - 1
+            )
+        }
+    }
 }

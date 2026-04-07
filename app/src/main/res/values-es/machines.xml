@@ -179,10 +179,11 @@
     <string name="text_field_entities_selected_label">Entidades seleccionadas</string>
 
     <plurals name="text_field_entities_count_value">
-        <item quantity="zero">Sin entidades seleccionadas</item>
         <item quantity="one">%1$d entidad</item>
         <item quantity="other">%1$d entidades</item>
     </plurals>
+
+    <string name="text_field_entities_empty">Ninguna entidad seleccionada</string>
 
     <!--OPERATION SETTINGS [COMPONENT]-->
 

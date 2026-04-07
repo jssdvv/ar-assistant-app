@@ -207,10 +207,11 @@
     <string name="text_field_entities_selected_label">Selected entities</string>
 
     <plurals name="text_field_entities_count_value">
-        <item quantity="zero">No selected entities</item>
         <item quantity="one">%1$d entity</item>
         <item quantity="other">%1$d entities</item>
     </plurals>
+
+    <string name="text_field_entities_empty">No selected entities</string>
 
     <!--OPERATION ITEM [COMPONENT]-->
 
