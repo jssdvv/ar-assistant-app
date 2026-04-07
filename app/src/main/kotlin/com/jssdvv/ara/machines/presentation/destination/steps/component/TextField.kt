@@ -25,6 +25,7 @@ import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
 import com.jssdvv.ara.machines.domain.utility.SingleRotationState
 import com.jssdvv.ara.machines.domain.utility.SingleTranslationState
+import com.jssdvv.ara.machines.domain.utility.TimeState
 
 
 @Composable
@@ -38,7 +39,7 @@ fun TranslationTextField(
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
-        keyboardType = KeyboardType.Number,
+        keyboardType = KeyboardType.Decimal,
         imeAction = ImeAction.Done
     ),
     leadingIcon = {
@@ -59,15 +60,16 @@ fun TranslationTextField(
 fun PitchTextField(
     name: String,
     state: SingleTranslationState,
+    onValueChange: (String) -> Unit,
     isPitch: Boolean,
     modifier: Modifier = Modifier
 ) = OutlinedTextField(
     value = state.units,
-    onValueChange = { state.updateUnits(it) },
+    onValueChange = onValueChange,
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
-        keyboardType = KeyboardType.Number,
+        keyboardType = KeyboardType.Decimal,
         imeAction = ImeAction.Done
     ),
     leadingIcon = {
@@ -97,7 +99,7 @@ fun RotationTextField(
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
-        keyboardType = KeyboardType.Number,
+        keyboardType = KeyboardType.Decimal,
         imeAction = ImeAction.Done
     ),
     leadingIcon = {
@@ -124,8 +126,9 @@ fun EntitiesTextField(
 ) = OutlinedTextField(
     modifier = modifier,
     value = pluralStringResource(
-        count = selectedItemsCount,
         id = R.plurals.text_field_entities_count_value,
+        selectedItemsCount,
+        selectedItemsCount
     ),
     onValueChange = {},
     label = { Text(stringResource(R.string.text_field_entities_selected_label)) },
@@ -172,4 +175,33 @@ fun OperationsTextField(
         )
     },
     interactionSource = interactionSource
+)
+
+@Composable
+fun TimeTextField(
+    name: String,
+    state: TimeState,
+    modifier: Modifier = Modifier,
+) = OutlinedTextField(
+    value = state.units,
+    onValueChange = { state.updateUnits(it) },
+    modifier = modifier,
+    shape = MaterialTheme.shapes.small,
+    keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Decimal,
+        imeAction = ImeAction.Done
+    ),
+    leadingIcon = {
+        Text(
+            text = "$name = ",
+            modifier = Modifier.padding(start = 24.dp)
+        )
+    },
+    trailingIcon = {
+        TextButton(
+            onClick = {},
+            modifier = Modifier.padding(end = 8.dp),
+            content = { Text("seconds") } // todo create string
+        )
+    }
 )
