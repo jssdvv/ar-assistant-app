@@ -65,7 +65,7 @@ class Arrow {
         val DEFAULT_CENTER = Position(0F)
         const val DEFAULT_SIDE_COUNT = 8
         const val DEFAULT_HEAD_RADIUS = 0.008F // 8mm
-        const val DEFAULT_SHAFT_RADIUS = 0.003F // 3mm
+        const val DEFAULT_SHAFT_RADIUS = 0.001F // 3mm
         const val DEFAULT_HEAD_HEIGHT = 0.02F // 2cm = 20% shaft
         const val DEFAULT_SHAFT_HEIGHT = 0.08F // 8cm
 

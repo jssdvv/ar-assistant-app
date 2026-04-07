@@ -19,6 +19,35 @@ import kotlin.math.atan2
 
 private val translationFormat = DecimalFormat("0.######", DecimalFormatSymbols(Locale.US))
 private val rotationFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
+private val timeFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
+val alphaFormat = DecimalFormat("0.#", DecimalFormatSymbols(Locale.US))
+
+@Stable
+class TimeState(
+    initialUnits: String = "0"
+) {
+    private var _units by mutableStateOf(initialUnits)
+
+    val units: String
+        get() = _units
+
+    val seconds: Float
+        get() = _units.toFloatOrNull() ?: 0F
+
+    val isNumeric: Boolean
+        get() = _units.toFloatOrNull() != null
+
+    fun updateUnits(units: String) {
+        _units = updateNumericString(_units, units, false)
+    }
+}
+
+@Composable
+fun rememberTimeState(
+    initialDegrees: Float = 0F
+): TimeState = remember {
+    TimeState(timeFormat.format(initialDegrees))
+}
 
 @Stable
 class SingleTranslationState(
@@ -44,7 +73,12 @@ class SingleTranslationState(
         get() = _units.toDoubleOrNull() != null
 
     fun updateUnits(units: String) {
-        _units = units
+        _units = updateNumericString(_units, units)
+    }
+
+    fun updateMeters(meters: Float) {
+        val toCurrentMeasurement = meters * _measurement.metersPerUnit
+        _units = updateNumericString(_units, toCurrentMeasurement.toString())
     }
 
     fun updateMeasurement(measurement: Measurement) {
@@ -79,7 +113,7 @@ class SingleRotationState(
         get() = _units.toFloatOrNull() != null
 
     fun updateUnits(units: String) {
-        _units = units
+        _units = updateNumericString(_units, units)
     }
 }
 
@@ -170,4 +204,25 @@ fun Quaternion.extractSingleAxisDegrees(axis: Axis): Float {
     val radians = 2.0 * atan2(sinHalfTheta.toDouble(), this.w.toDouble())
     val degrees = Math.toDegrees(radians).toFloat()
     return degrees
+}
+
+fun updateNumericString(
+    oldValue: String,
+    newValue: String,
+    allowNegatives: Boolean = true
+): String {
+    val pattern = if (allowNegatives) "^-?\\d*(\\.\\d*)?\$" else "^\\d*(\\.\\d*)?\$"
+    val numericRegex = pattern.toRegex()
+    if (newValue.isNotEmpty() && !newValue.matches(numericRegex)) return oldValue
+
+    return when {
+        oldValue == "0" && newValue.length > 1 && !newValue.contains(".") -> {
+            newValue.last().toString()
+        }
+
+        allowNegatives && oldValue == "-0" && newValue.length > 2 && !newValue.contains(".") -> {
+            "-${newValue.last()}"
+        }
+        else -> newValue
+    }
 }

@@ -4,9 +4,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import com.google.android.filament.Skybox
 import com.google.ar.core.AugmentedImageDatabase
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import io.github.sceneview.environment.Environment
+import io.github.sceneview.loaders.EnvironmentLoader
 
 fun configureARSession(
     session: Session,
@@ -16,6 +19,7 @@ fun configureARSession(
         setFocusMode(Config.FocusMode.AUTO)
         setLightEstimationMode(Config.LightEstimationMode.DISABLED)
         setInstantPlacementMode(Config.InstantPlacementMode.DISABLED)
+        planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
         setDepthMode(
             when (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
                 true -> Config.DepthMode.AUTOMATIC
@@ -48,5 +52,14 @@ fun Session.setImageDatabase(imageName: String, bitmap: Bitmap) {
         config.setAugmentedImageDatabase(
             AugmentedImageDatabase(this).apply { addImage(imageName, bitmap) }
         )
+    )
+}
+
+fun EnvironmentLoader.createMainEnvironment() : Environment {
+    return createEnvironment(
+        skybox = Skybox
+            .Builder()
+            .color(0.2F, 0.2F, 0.2F, 1.0F)
+            .build(engine)
     )
 }

@@ -29,6 +29,7 @@ import io.github.sceneview.math.Size
 import io.github.sceneview.math.halfExtentSize
 import io.github.sceneview.node.CubeNode
 import io.github.sceneview.node.LightNode
+import net.openhft.hashing.LongHashFunction
 import java.io.File
 
 /**
@@ -76,20 +77,36 @@ fun OriginNode.offset(
     quaternion = markerNode.getWorldQuaternion(offsetQuaternion)
 }
 
-fun Node.applyGlobalPositionOffset(offsetPosition: Position) {
-    worldPosition += offsetPosition
+fun Node.calculateWorldPosition(
+    offset: Position,
+    isGlobal: Boolean = false
+): Position {
+    val rotatedOffsetPosition = if (isGlobal) offset else worldQuaternion * offset
+    return worldPosition + rotatedOffsetPosition
 }
 
-fun Node.applyObjectPositionOffset(offsetPosition: Position) {
-    worldPosition += worldQuaternion * offsetPosition
+fun Node.calculateWorldQuaternion(
+    offset: Quaternion,
+    isGlobal: Boolean
+): Quaternion {
+    val quaternion = if (isGlobal) offset * worldQuaternion else worldQuaternion * offset
+    return normalize(quaternion)
+}
+
+fun Node.applyGlobalPositionOffset(offset: Position) {
+    worldPosition = calculateWorldPosition(offset, true)
+}
+
+fun Node.applyObjectPositionOffset(offset: Position) {
+    worldPosition = calculateWorldPosition(offset, false)
 }
 
 fun Node.applyGlobalQuaternionOffset(offsetQuaternion: Quaternion) {
-    worldQuaternion = normalize(offsetQuaternion * worldQuaternion)
+    worldQuaternion = calculateWorldQuaternion(offsetQuaternion, true)
 }
 
 fun Node.applyObjectQuaternionOffset(offsetQuaternion: Quaternion) {
-    worldQuaternion = normalize(worldQuaternion * offsetQuaternion)
+    worldQuaternion = calculateWorldQuaternion(offsetQuaternion, false)
 }
 
 fun Node.setPriorityIterable(priority: Int) {
@@ -132,7 +149,7 @@ fun Collection<Node>.filterPivotNodes() = filterIsInstance<PivotNode>()
 fun Collection<Node>.filterRenderableNodes() = filterIsInstance<ModelNode.RenderableNode>()
 fun Collection<Node>.filterAxisNodes() = filterIsInstance<InfiniteAxisNode>()
 fun Collection<Node>.filterContainerNodes() = filterIsInstance<ContainerNode>()
-fun Collection<Node>.filterBoxNode() = filterIsInstance<CubeNode>()
+fun Collection<Node>.filterBoxNodes() = filterIsInstance<CubeNode>()
 
 val ContainerNode.modelNode: ModelNode?
     get() = childNodes.filterModelNodes().firstOrNull()
@@ -141,7 +158,7 @@ val ContainerNode.gizmoNode: GizmoNode?
     get() = childNodes.filterGizmoNodes().firstOrNull()
 
 val ContainerNode.boxNode: CubeNode?
-    get() = childNodes.filterBoxNode().firstOrNull()
+    get() = childNodes.filterBoxNodes().firstOrNull()
 
 val ContainerNode.pivotNodes: List<PivotNode>
     get() = modelNode?.pivotNodes ?: emptyList()
@@ -160,6 +177,9 @@ val PivotNode.renderableNode: ModelNode.RenderableNode?
 
 val PivotNode.gizmoNode: GizmoNode?
     get() = childNodes.filterGizmoNodes().firstOrNull()
+
+val PivotNode.boxNode: CubeNode?
+    get() = childNodes.filterBoxNodes().firstOrNull()
 
 val PivotNode.infiniteAxisNodes: List<InfiniteAxisNode>
     get() = childNodes.filterIsInstance<InfiniteAxisNode>()
@@ -182,8 +202,8 @@ fun createContainerNode(
     modelColor: FloatArray = MODEL_UNSELECTED_COLOR,
 ): ContainerNode {
     val containerNode = ContainerNode(engine).apply {
-        name = modelId.toString()
-        generateGizmoNode(engine, materialLoader)
+        id = modelId
+        generateGizmoNode(materialLoader)
     }
 
     val modelNode = ModelNode(
@@ -238,15 +258,17 @@ fun generateBoxNode(
         size = size + Size(0.005F),
         center = Position(),
         materialInstance = materialLoader.createColorInstance(
-            color = Color(1F, 1F, 1F, 0.3F),
-            metallic = 0.1F,
-            reflectance = 1F
+            color = Color(1F, 1F, 1F, 0.2F),
+            metallic = 0F,
+            roughness = 0F,
+            reflectance = 0F
         )
     ).apply {
         name = "box"
         isVisible = false
         isHittable = false
         isTouchable = false
+        setPriority(6)
     }
 }
 
@@ -258,15 +280,15 @@ fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
         val pivotPosition = position + quaternion * center
 
         val pivotNode = PivotNode(engine).apply {
-            name = renderableNode.name
+            this.hash = LongHashFunction.xx3().hashChars(renderableNode.name ?: "")
+            this.name = renderableNode.name
             this.position = pivotPosition
             this.quaternion = quaternion
-            generateGizmoNode(engine, materialLoader) // todo remove, this is just testing
         }
 
         renderableNode.apply {
             parent = pivotNode
-            this.position = - center
+            this.position = -center
             this.quaternion = Quaternion()
         }
 
@@ -282,16 +304,31 @@ fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
     }
 }
 
-fun Node.generateAxisNodes(
-    engine: Engine,
+fun Node.generateSingeAxisNode(
+    axis: Axis,
     materialLoader: MaterialLoader,
+    startVisible: Boolean = true
 ) {
-    Axis.entries.forEach {
-        InfiniteAxisNode(
-            engine = engine,
+    val axisNode = InfiniteAxisNode(
+        engine = engine,
+        materialLoader = materialLoader,
+        axis = axis
+    ).apply {
+        isVisible = startVisible
+    }
+    addChildNode(axisNode)
+}
+
+fun Node.generateAllAxisNodes(
+    materialLoader: MaterialLoader,
+    startAllVisible: Boolean = false
+) {
+    Axis.entries.map {
+        generateSingeAxisNode(
+            axis = it,
             materialLoader = materialLoader,
-            axis = it
-        ).apply { parent = this@generateAxisNodes }
+            startVisible = startAllVisible
+        )
     }
 }
 
@@ -304,27 +341,30 @@ fun Node.removeAxisNodes() {
 
 fun Node.isolateAxisVisibility(
     axis: Axis,
-    engine: Engine,
     materialLoader: MaterialLoader,
 ) {
-    val axisNodes = childNodes.filterAxisNodes()
-    if (axisNodes.isNotEmpty()) {
-        val axisName = "${INFINITE_AXIS_PREFIX}${axis.name.lowercase()}"
-        axisNodes.forEach { it.isVisible = it.name == axisName }
+    val axisNodes = childNodes.filterAxisNodes().also { nodes ->
+        nodes.forEach { it.isVisible = false }
+    }
+    val node = axisNodes.firstOrNull { it.axis == axis }
+    if (node != null) {
+        node.isVisible = true
     } else {
-        generateAxisNodes(engine, materialLoader)
-        isolateAxisVisibility(axis, engine, materialLoader)
+        generateSingeAxisNode(axis, materialLoader, true)
     }
 }
 
 fun Node.generateGizmoNode(
-    engine: Engine,
     materialLoader: MaterialLoader,
+    startVisible: Boolean = false
 ) {
     GizmoNode(
         engine = engine,
-        materialLoader = materialLoader
-    ).apply { parent = this@generateGizmoNode }
+        materialLoader = materialLoader,
+    ).apply {
+        parent = this@generateGizmoNode
+        isVisible = startVisible
+    }
 }
 
 fun Node.removeGizmoNodes() {
@@ -332,6 +372,11 @@ fun Node.removeGizmoNodes() {
         it.safeTerminate()
         removeChildNode(it)
     }
+}
+
+fun Node.removeAllGuideNodes() {
+    removeAxisNodes()
+    removeGizmoNodes()
 }
 
 fun AugmentedImage.detectMarkerNode(
@@ -370,53 +415,6 @@ fun AugmentedImage.detectMarkerNode(
     if (markerNode.planeNode != null) {
         planeNode = markerNode.planeNode
         onMarkerDetected(markerNode)
-    }
-}
-
-fun detectMarker(
-    engine: Engine,
-    materialLoader: MaterialLoader,
-    trackable: AugmentedImage,
-    fullTrackingColor: FloatArray = PLANE_FULL_TRACKING_COLOR,
-    lastPositionColor: FloatArray = PLANE_LAST_POSITION_COLOR,
-    lostTrackingColor: FloatArray = PLANE_LOST_TRACKING_COLOR,
-    onTrackingMethodChanged: (AugmentedImage.TrackingMethod) -> Unit = {},
-    onMarkerDetected: (AugmentedImageNode) -> Unit,
-) {
-    var planeNode: PlaneNode? = null
-    val augmentedImageNode = AugmentedImageNode(
-        engine = engine,
-        augmentedImage = trackable,
-        onTrackingMethodChanged = { trackingMethod ->
-            planeNode?.materialInstance = when (trackingMethod) {
-                AugmentedImage.TrackingMethod.FULL_TRACKING ->
-                    materialLoader.createGizmoColorMaterialInstance(fullTrackingColor)
-
-                AugmentedImage.TrackingMethod.LAST_KNOWN_POSE ->
-                    materialLoader.createGizmoColorMaterialInstance(lastPositionColor)
-
-                AugmentedImage.TrackingMethod.NOT_TRACKING ->
-                    materialLoader.createGizmoColorMaterialInstance(lostTrackingColor)
-            }
-
-            onTrackingMethodChanged(trackingMethod)
-        }
-    ).apply { name = trackable.name }
-
-    // Create a plane only if the marker has valid dimensions
-    if (trackable.extentX > 0 && trackable.extentZ > 0) {
-        planeNode = PlaneNode(
-            engine = engine,
-            size = Size(x = trackable.extentX, z = trackable.extentZ),
-            normal = augmentedImageNode.pose.yDirection,
-            materialInstance = materialLoader.createMarkerColorMaterialInstance(fullTrackingColor)
-        ).apply {
-            //setPriority(7)
-            isVisible = true
-        }
-
-        augmentedImageNode.addChildNode(planeNode)
-        onMarkerDetected(augmentedImageNode)
     }
 }
 
