@@ -112,9 +112,13 @@ class GizmoNode(
 ) : SphereNode(
     engine = engine,
     center = Position(),
-    radius = Arrow.DEFAULT_HEAD_RADIUS,
+    radius = DEFAULT_SPHERE_RADIUS,
     materialInstance = materialLoader.createGizmoColorMaterialInstance(cColor)
 ) {
+    companion object {
+        const val DEFAULT_SPHERE_RADIUS = Arrow.DEFAULT_SHAFT_RADIUS * 2.5F
+    }
+
     val xArrow = ArrowNode(
         engine = engine,
         materialInstance = materialLoader.createGizmoColorMaterialInstance(xColor)
@@ -122,6 +126,7 @@ class GizmoNode(
         name = Axis.X.name.lowercase()
         parent = this@GizmoNode
         quaternion = Axis.X.quaternion
+        position += Axis.X.unitVector * DEFAULT_SPHERE_RADIUS
         isTouchable = false
         isHittable = false
     }
@@ -133,6 +138,7 @@ class GizmoNode(
         name = Axis.Y.name.lowercase()
         parent = this@GizmoNode
         quaternion = Axis.Y.quaternion
+        position += Axis.Y.unitVector * DEFAULT_SPHERE_RADIUS
         isTouchable = false
         isHittable = false
     }
@@ -144,6 +150,7 @@ class GizmoNode(
         name = Axis.Z.name.lowercase()
         parent = this@GizmoNode
         quaternion = Axis.Z.quaternion
+        position += Axis.Z.unitVector * DEFAULT_SPHERE_RADIUS
         isTouchable = false
         isHittable = false
     }
@@ -164,20 +171,27 @@ class GizmoNode(
 class InfiniteAxisNode(
     engine: Engine,
     materialLoader: MaterialLoader,
-    axis: Axis,
-    radius: Float = Arrow.DEFAULT_SHAFT_RADIUS,
-    height: Float = 1F,
-    scale: Float = 50F,
+    val axis: Axis,
+    radius: Float = DEFAULT_RADIUS,
+    height: Float = DEFAULT_HEIGHT,
+    scale: Float = DEFAULT_SCALE,
+    sideCount: Int = DEFAULT_SIDE_COUNT
 ) : CylinderNode(
     engine = engine,
     radius = radius,
     height = height,
-    sideCount = 8,
+    sideCount = sideCount,
     materialInstance = materialLoader.createGizmoColorMaterialInstance(axis.color)
 ) {
+    companion object {
+        const val DEFAULT_RADIUS = 0.001F
+        const val DEFAULT_HEIGHT = 1F
+        const val DEFAULT_SCALE = 10F
+        const val DEFAULT_SIDE_COUNT = 4
+    }
+
     init {
-        name = "$INFINITE_AXIS_PREFIX${axis.name.lowercase()}"
-        this.scale = Scale(y = scale)
+        this.scale = Scale(x = 1F, y = scale, z = 1F)
         quaternion = axis.quaternion
         isVisible = false
         isTouchable = false
@@ -205,11 +219,15 @@ class MarkerNode(
             engine = engine,
             size = Size(x = augmentedImage.extentX, z = augmentedImage.extentZ),
             normal = pose.yDirection,
-            materialInstance = materialLoader.createMarkerColorMaterialInstance(PLANE_FULL_TRACKING_COLOR)
+            materialInstance = materialLoader.createMarkerColorMaterialInstance(
+                PLANE_FULL_TRACKING_COLOR
+            )
         ).also { addChildNode(it) }
     } else null
 
-    init { name = augmentedImage.name }
+    init {
+        name = augmentedImage.name
+    }
 }
 
 /**
@@ -217,6 +235,8 @@ class MarkerNode(
  * center of its [RenderableNode] child.
  */
 class PivotNode(engine: Engine) : Node(engine) {
+    var hash: Long? = null
+
     init {
         isTouchable = false
         isHittable = false
@@ -227,6 +247,8 @@ class PivotNode(engine: Engine) : Node(engine) {
  * Groups a [ModelNode] with its editor overlays.
  */
 class ContainerNode(engine: Engine) : Node(engine) {
+    var id: Int = 0
+
     init {
         isTouchable = false
         isHittable = false
