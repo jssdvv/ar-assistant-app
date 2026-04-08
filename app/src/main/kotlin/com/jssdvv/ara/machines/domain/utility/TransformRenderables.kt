@@ -5,13 +5,15 @@ import androidx.compose.runtime.withFrameNanos
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Step
+import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.destination.ar_session.component.Speed
 import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.slerp
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.lerp
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
@@ -113,7 +115,7 @@ fun applyOperationsOffsetsBeforeTo(
     )
 }
 
-fun CoroutineScope.launchOperationAnimation(
+suspend fun launchOperationAnimation(
     currentOperation: Operation,
     operationsTargets: List<OperationTargets>,
     renderableInfoStates: Map<RenderableInfo, RestorableState>,
@@ -123,7 +125,6 @@ fun CoroutineScope.launchOperationAnimation(
     currentSpeed: Speed,
     isPlaying: Boolean,
     isLoopingEnabled: Boolean,
-    onFinished: () -> Unit
 ) {
     val nodesToAnimate: List<PivotNode> = if (isEditionEnabled) {
         // From current selections
@@ -141,18 +142,20 @@ fun CoroutineScope.launchOperationAnimation(
                 containersMap[target.modelId]?.pivotNodes?.getOrNull(state.index)
             } ?: emptyList()
     }
-    nodesToAnimate.forEach { pivotNode ->
-        launch {
-            pivotNode.animate(
-                operation = currentOperation,
-                initialPosition = pivotNode.worldPosition,
-                initialQuaternion = pivotNode.worldQuaternion,
-                speed = currentSpeed,
-                isPlaying = isPlaying,
-                isLoopingEnabled = isLoopingEnabled,
-                onFinished = onFinished
-            )
-        }
+
+    coroutineScope {
+        nodesToAnimate.map { pivotNode ->
+            launch {
+                pivotNode.animate(
+                    operation = currentOperation,
+                    initialPosition = pivotNode.worldPosition,
+                    initialQuaternion = pivotNode.worldQuaternion,
+                    speed = currentSpeed,
+                    isPlaying = isPlaying,
+                    isLoopingEnabled = isLoopingEnabled,
+                )
+            }
+        }.joinAll()
     }
 }
 
@@ -163,10 +166,12 @@ suspend fun PivotNode.animate(
     speed: Speed,
     isPlaying: Boolean,
     isLoopingEnabled: Boolean,
-    onFinished: () -> Unit
 ) {
     val finalPosition = calculateWorldPosition(operation.offsetPosition, operation.isGlobal)
     val finalQuaternion = calculateWorldQuaternion(operation.offsetRotation, operation.isGlobal)
+
+    val isScrew = operation.type == OperationType.SCREW
+    val totalDegrees = operation.turns * 360F
 
     val baseDelayMs = operation.delay * 1000F
     val baseDurationMs = operation.duration * 1000F
@@ -177,6 +182,7 @@ suspend fun PivotNode.animate(
     var delayTimeMs = 0F
     var animationTimeMs = 0F
     var postDelayTimeMs = 0F
+    var reverseTimeMs = 0F
 
     suspend fun updateMs(onUpdate: (Float) -> Unit) {
         withFrameNanos { currentNanos ->
@@ -196,6 +202,12 @@ suspend fun PivotNode.animate(
         onResume()
     }
 
+    fun animationQuaternion(ratio: Float): Quaternion = if (isScrew) {
+        initialQuaternion * unidirectionalRotation(operation.axis, ratio * totalDegrees)
+    } else {
+        slerp(initialQuaternion, finalQuaternion, ratio)
+    }
+
     while (true) {
         // Delay
         while (delayTimeMs < baseDelayMs) {
@@ -211,7 +223,7 @@ suspend fun PivotNode.animate(
             updateMs { animationDeltaMs -> animationTimeMs += animationDeltaMs }
             val ratio = (animationTimeMs / baseDurationMs).coerceIn(0F..1F)
             worldPosition = lerp(initialPosition, finalPosition, ratio)
-            worldQuaternion = slerp(initialQuaternion, finalQuaternion, ratio)
+            worldQuaternion = animationQuaternion(ratio)
 
             if (!isPlaying) pauseUntilResumed { lastNanos = 0L }
             yield()
@@ -230,13 +242,24 @@ suspend fun PivotNode.animate(
                 yield()
             }
 
+            // Reverse Animation
+            while (reverseTimeMs < baseDurationMs) {
+                updateMs { reverseDeltaMs -> reverseTimeMs += reverseDeltaMs }
+                val ratio = 1 - (reverseTimeMs / baseDurationMs).coerceIn(0F..1F)
+                worldPosition = lerp(initialPosition, finalPosition, ratio)
+                worldQuaternion = animationQuaternion(ratio)
+
+                if (!isPlaying) pauseUntilResumed { lastNanos = 0L }
+                yield()
+            }
+
             // Reset
             delayTimeMs = 0F
             animationTimeMs = 0F
             postDelayTimeMs = 0F
+            reverseTimeMs = 0F
             lastNanos = 0L
         } else {
-            onFinished()
             return
         }
     }
