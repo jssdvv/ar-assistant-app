@@ -17,7 +17,7 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.foundation.component.TextIcon
 
 enum class Speed(
-    val multiplier: Float,
+    val denominator: Float,
     val displayText: String
 ) {
     HALF(0.5F, ".5×"),
@@ -55,6 +55,7 @@ fun RowScope.OptionsRow(
             )
         }
     )
+
     IconButton(
         onClick = onToggleSpeed,
         modifier = Modifier.size(rowHeight),

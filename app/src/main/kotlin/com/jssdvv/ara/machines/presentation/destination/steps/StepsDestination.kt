@@ -1,6 +1,5 @@
 package com.jssdvv.ara.machines.presentation.destination.steps
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +31,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -46,7 +44,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
@@ -68,6 +65,7 @@ import com.jssdvv.ara.machines.domain.utility.createMainEnvironment
 import com.jssdvv.ara.machines.domain.utility.createMainLightNode
 import com.jssdvv.ara.machines.domain.utility.filterContainerNodes
 import com.jssdvv.ara.machines.domain.utility.filterModelNodes
+import com.jssdvv.ara.machines.domain.utility.findPivotFromRenderable
 import com.jssdvv.ara.machines.domain.utility.generateGizmoNode
 import com.jssdvv.ara.machines.domain.utility.generatePivotNodes
 import com.jssdvv.ara.machines.domain.utility.launchOperationAnimation
@@ -102,7 +100,6 @@ import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import net.openhft.hashing.LongHashFunction
 
 @Composable
 fun StepsDestination(
@@ -181,7 +178,7 @@ fun StepsContent(
     // Nodes
     val nodes = rememberNodes()
     val containersMap by remember {
-        derivedStateOf { nodes.filterContainerNodes().associateBy { it.id } }
+        derivedStateOf { nodes.filterContainerNodes().associateBy { it.modelId } }
     }
     val cameraNode = rememberCameraNode(engine)
     val mainLightNode = rememberNode { createMainLightNode(engine) }
@@ -205,8 +202,7 @@ fun StepsContent(
                     engine = engine,
                     modelLoader = modelLoader,
                     materialLoader = materialLoader,
-                    modelFile = model.glbUri.toFile(),
-                    modelId = model.id
+                    model = model,
                 ).apply {
                     position = model.offsetPosition
                     quaternion = model.offsetRotation
@@ -221,57 +217,43 @@ fun StepsContent(
                 onDispose { nodes.safeTerminate(containerNode) }
             }
 
-            val isSelectionEnabledState = rememberUpdatedState(isSelectionEnabled)
-            val showBottomSheetState = rememberUpdatedState(isEditionEnabled)
-
-            containerNode.pivotNodes.forEachIndexed { index, pivotNode ->
-                val renderableNode = pivotNode.renderableNode
-                val hash = pivotNode.hash
-
-                val info = remember(model.id, renderableNode?.name) {
-                    RenderableInfo(
-                        modelId = model.id,
-                        xxh3 = hash ?: LongHashFunction.xx3().hashChars(renderableNode?.name ?: "")
-                    )
-                }
-
-                val initialState = remember(model.id, hash) {
-                    RenderableState(
+            LaunchedEffect(containerNode) {
+                val infoStates = mutableMapOf<RenderableInfo, RenderableState>()
+                containerNode.pivotNodes.forEachIndexed { index, pivotNode ->
+                    val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
+                    infoStates[info] = RenderableState(
                         name = pivotNode.name ?: "",
                         index = index,
                         initialPosition = pivotNode.position,
                         initialQuaternion = pivotNode.quaternion
                     )
                 }
+                onExternalEvent(StepsExternalEvent.OnLoadRenderables(infoStates))
+            }
 
-                LaunchedEffect(info) {
-                    onExternalEvent(StepsExternalEvent.OnLoadRenderables(info, initialState))
-                    renderableNode?.onSingleTapConfirmed = {
-                        if (showBottomSheetState.value && isSelectionEnabledState.value) {
-                            onExternalEvent(StepsExternalEvent.OnSelectRenderable(info))
-                        }
-                        false
-                    }
-                }
+            val containerRenderableStates by remember(renderableInfoStates) {
+                derivedStateOf { renderableInfoStates.filter { it.key.modelId == model.id }.values }
+            }
 
-                val renderableState by remember(info) {
-                    derivedStateOf { renderableInfoStates[info] ?: initialState }
-                }
+            LaunchedEffect(containerRenderableStates) {
+                containerNode.pivotNodes.forEach { pivotNode ->
+                    val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
+                    val state = renderableInfoStates[info] ?: return@forEach
 
-                LaunchedEffect(renderableState.isVisible, renderableState.isSelected) {
                     pivotNode.boxNode?.apply {
-                        isVisible = renderableState.isSelected
-                        if(renderableState.isSelected && renderableState.isVisible) {
+                        isVisible = state.isSelected
+                        if (state.isSelected && state.isVisible) {
                             generateGizmoNode(materialLoader, true)
                         } else {
                             removeGizmoNodes()
                         }
                     }
-                    renderableNode?.apply {
-                        isVisible = renderableState.isVisible
-                        isTouchable = renderableState.isVisible && !renderableState.isSelected
-                        childNodes.forEach { it.isVisible = renderableState.isSelected }
-                        if (renderableState.isSelected) {
+
+                    pivotNode.renderableNode?.apply {
+                        isVisible = state.isVisible
+                        isTouchable = state.isVisible && !state.isSelected
+                        childNodes.forEach { it.isVisible = state.isSelected }
+                        if (state.isSelected) {
                             setSelectedMaterialInstance(materialLoader)
                         } else {
                             setUnselectedMaterialInstance(materialLoader)
@@ -319,7 +301,7 @@ fun StepsContent(
             containersMap = containersMap
         )
 
-        if(selectedOperation == null) return@LaunchedEffect
+        if (selectedOperation == null) return@LaunchedEffect
 
         launchOperationAnimation(
             currentOperation = selectedOperation,
@@ -328,10 +310,10 @@ fun StepsContent(
             selectedRenderableInfoStates = selectedRenderableItems,
             containersMap = containersMap,
             isEditionEnabled = isEditionEnabled,
-            currentSpeed =  Speed.NORMAL,
-            isPlaying =  true,
+            currentSpeed = Speed.NORMAL,
+            isPlaying = true,
             isLoopingEnabled = true,
-        ) {}
+        )
     }
 
     Scaffold(
@@ -363,6 +345,16 @@ fun StepsContent(
                 cameraNode = cameraNode,
                 cameraManipulator = cameraManipulator,
                 childNodes = nodes,
+                onGestureListener = rememberOnGestureListener(
+                    onSingleTapConfirmed = { _, node ->
+                        if (isEditionEnabled && isSelectionEnabled) {
+                            node?.findPivotFromRenderable { pivotNode ->
+                                val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
+                                onExternalEvent(StepsExternalEvent.OnSelectRenderable(info))
+                            }
+                        }
+                    }
+                ),
                 onTouchEvent = { event, hitResult ->
                     gestureCameraDetector.onTouchEvent(event)
                     gestureDetector.onTouchEvent(event, hitResult)

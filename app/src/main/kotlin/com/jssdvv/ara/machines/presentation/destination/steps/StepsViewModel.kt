@@ -171,7 +171,7 @@ class StepsViewModel @Inject constructor(
                 _isSelectionEnabled.value = event.isEnabled
             }
 
-            is StepsExternalEvent.OnLoadRenderables -> loadRenderable(event.info, event.state)
+            is StepsExternalEvent.OnLoadRenderables -> loadRenderables(event.infoStates)
             is StepsExternalEvent.OnSelectRenderable -> selectRenderable(event.renderableInfo)
             is StepsExternalEvent.OnSelectExistingRenderables -> selectExistingRenderables(event.targets)
             is StepsExternalEvent.OnUnselectRenderable -> unselectRenderable(event.renderableInfo)
@@ -373,7 +373,7 @@ class StepsViewModel @Inject constructor(
                 val (editedOperations, reorderedOperations) =
                     updatedList.partition { it.id == operation.id }
 
-                if(reorderedOperations.isNotEmpty()) opsDataManager.upsert(*reorderedOperations.toTypedArray())
+                if (reorderedOperations.isNotEmpty()) opsDataManager.upsert(*reorderedOperations.toTypedArray())
                 opsDataManager.upsert(
                     OperationTargets(
                         operation = editedOperations.first(),
@@ -392,8 +392,10 @@ class StepsViewModel @Inject constructor(
         }
     }
 
-    private fun loadRenderable(renderableInfo: RenderableInfo, state: RenderableState) {
-        _renderableInfoStates.putIfAbsent(renderableInfo, state)
+    private fun loadRenderables(renderables: Map<RenderableInfo, RenderableState>) {
+        renderables.forEach { (info, state) ->
+            _renderableInfoStates.putIfAbsent(info, state)
+        }
     }
 
     private fun selectRenderable(vararg renderableInfo: RenderableInfo) {
@@ -418,7 +420,8 @@ class StepsViewModel @Inject constructor(
 
     private fun toggleRenderableVisibility(renderableInfo: RenderableInfo) {
         val currentState = _renderableInfoStates[renderableInfo] ?: RenderableState()
-        _renderableInfoStates[renderableInfo] = currentState.copy(isVisible = !currentState.isVisible)
+        _renderableInfoStates[renderableInfo] =
+            currentState.copy(isVisible = !currentState.isVisible)
     }
 
     private fun unselectAllRenderables() {
@@ -453,8 +456,7 @@ sealed interface StepsEvent {
 sealed interface StepsExternalEvent {
     data class OnToggleSelection(val isEnabled: Boolean) : StepsExternalEvent
     data class OnLoadRenderables(
-        val info: RenderableInfo,
-        val state: RenderableState
+        val infoStates: Map<RenderableInfo, RenderableState>
     ) : StepsExternalEvent
 
     data class OnSelectRenderable(val renderableInfo: RenderableInfo) : StepsExternalEvent
@@ -488,4 +490,4 @@ data class RenderableState(
     override val index: Int = 0,
     override val initialPosition: Position = Position(),
     override val initialQuaternion: Quaternion = Quaternion()
-): RestorableState
+) : RestorableState

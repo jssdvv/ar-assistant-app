@@ -47,6 +47,7 @@ fun CalibrationBottomSheetContent(
     onTransformationChange: (Transformation) -> Unit,
     onModeChange: (TransformationMode) -> Unit,
     onDeleteModel: () -> Unit,
+    onAxisPressed: (Axis, Boolean) -> Unit,
     onTickDragged: (Axis, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -149,7 +150,11 @@ fun CalibrationBottomSheetContent(
             ).forEach { (axis, color) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SubtractButton { onTickDragged(axis, -1) }
-                    OutlinedScrollWheel(color) { onTickDragged(axis, it) }
+                    OutlinedScrollWheel(
+                        color = color,
+                        onPressedChange = { onAxisPressed(axis, it) },
+                        onDrag = { onTickDragged(axis, it) }
+                    )
                     AddButton { onTickDragged(axis, 1) }
                 }
             }
@@ -164,7 +169,7 @@ fun CalibrationBottomSheetContent(
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             ),
             icon = { DeleteIcon() },
-            content = { Text("Delete model") }
+            content = { Text("Delete model") } // todo create string
         )
     }
 }

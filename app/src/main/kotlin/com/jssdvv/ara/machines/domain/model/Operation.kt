@@ -15,14 +15,14 @@ data class Operation(
     // Animation
     val type: OperationType,
     val delay: Float = 0F, // Seconds
-    val duration: Float = 5F, // Seconds
+    val duration: Float = 8F, // Seconds
 
     // Renderables
     val axis: Axis = Axis.X,
-    val pivot: Float3 = Float3(),
+    val pivot: Float3 = Float3(), // todo, delete this
     val alpha: Float = 1F, // Restarts Every Step
     val pitch: Float = 2F, // Millis
-    val turns: Float = 0F,
+    val turns: Float = 2F,
     val isGlobal: Boolean = false,
     val offsetPosition: Position = Position(),
     val offsetRotation: Quaternion = Quaternion()

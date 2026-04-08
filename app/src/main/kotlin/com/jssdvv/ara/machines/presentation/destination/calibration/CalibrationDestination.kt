@@ -39,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.ar.core.AugmentedImage
@@ -53,14 +52,26 @@ import com.jssdvv.ara.core.presentation.foundation.component.SceneSurface
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
+import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.domain.utility.ContainerNode
+import com.jssdvv.ara.machines.domain.utility.OriginNode
 import com.jssdvv.ara.machines.domain.utility.applyObjectPositionOffset
 import com.jssdvv.ara.machines.domain.utility.applyObjectQuaternionOffset
 import com.jssdvv.ara.machines.domain.utility.configureARSession
-import com.jssdvv.ara.machines.domain.utility.repositionOrigin
-import com.jssdvv.ara.machines.domain.utility.setGizmoVisibility
+import com.jssdvv.ara.machines.domain.utility.createContainerNode
+import com.jssdvv.ara.machines.domain.utility.detectMarkerNode
+import com.jssdvv.ara.machines.domain.utility.filterMarkerNodes
+import com.jssdvv.ara.machines.domain.utility.filterModelNodes
+import com.jssdvv.ara.machines.domain.utility.findModelInContainerFromRenderable
+import com.jssdvv.ara.machines.domain.utility.generateGizmoNode
+import com.jssdvv.ara.machines.domain.utility.isolateAxisVisibility
+import com.jssdvv.ara.machines.domain.utility.offset
 import com.jssdvv.ara.machines.domain.utility.safeTerminate
+import com.jssdvv.ara.machines.domain.utility.setGizmoVisibility
 import com.jssdvv.ara.machines.domain.utility.setImageDatabase
+import com.jssdvv.ara.machines.domain.utility.setSelectedMaterialInstance
 import com.jssdvv.ara.machines.domain.utility.setTorch
+import com.jssdvv.ara.machines.domain.utility.setUnselectedMaterialInstance
 import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
 import com.jssdvv.ara.machines.presentation.component.NotificationChip
@@ -71,28 +82,22 @@ import com.jssdvv.ara.machines.presentation.destination.calibration.component.Ca
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.OptionsRow
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.SelectedMarkerDialog
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.UnsavedChangesDialog
-import com.jssdvv.ara.machines.presentation.destination.calibration.function.MODEL_SELECTED_COLOR
-import com.jssdvv.ara.machines.presentation.destination.calibration.function.MODEL_UNSELECTED_COLOR
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.Transformation
 import com.jssdvv.ara.machines.presentation.destination.calibration.function.TransformationMode
-import com.jssdvv.ara.machines.presentation.destination.calibration.function.createModelNode
-import com.jssdvv.ara.machines.presentation.destination.calibration.function.detectMarker
-import com.jssdvv.ara.machines.presentation.destination.calibration.function.getModelMaterialInstance
 import com.jssdvv.ara.machines.presentation.destination.steps.component.BottomSheetMainHeader
 import com.jssdvv.ara.machines.presentation.destination.steps.component.DraggableBottomSheet
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.ar.ARScene
-import io.github.sceneview.ar.node.AugmentedImageNode
+import io.github.sceneview.ar.arcore.getUpdatedAugmentedImages
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Transform
-import io.github.sceneview.node.ModelNode
-import io.github.sceneview.node.Node
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
 import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
@@ -248,15 +253,13 @@ fun SuccessModelsCalibrationScreen(
     var session by remember { mutableStateOf<Session?>(null) }
 
     // The Scene Nodes
-    val originNode = remember { Node(engine) }
+    val originNode = remember { OriginNode(engine) }
     val nodes = rememberNodes { add(0, originNode) }
-    val markerNode = remember(nodes.size) {
-        nodes.filterIsInstance<AugmentedImageNode>().firstOrNull()
-    }
+    val markerNode = remember(nodes.size) { nodes.filterMarkerNodes().firstOrNull() }
 
     // Model Edition
-    var selectedModel by remember { mutableStateOf<ModelNode?>(null) }
-    val isEditionEnabled by remember { derivedStateOf { selectedModel != null } }
+    var selectedContainer by remember { mutableStateOf<ContainerNode?>(null) }
+    val isEditionEnabled by remember { derivedStateOf { selectedContainer != null } }
     var previousModelTransform: Transform by remember { mutableStateOf(Transform()) }
 
     // Editor Toggle Options
@@ -267,15 +270,11 @@ fun SuccessModelsCalibrationScreen(
 
     var trackingMethod by remember { mutableStateOf(AugmentedImage.TrackingMethod.NOT_TRACKING) }
     val isShutterEnabled = trackingMethod == AugmentedImage.TrackingMethod.FULL_TRACKING
+    var pressedAxis by remember { mutableStateOf<Axis?>(null) }
 
     // Dialogs
     var showWarningDialog by remember { mutableStateOf(false) }
     var showMarkersDialog by remember { mutableStateOf(true) }
-
-    // Model Materials
-    val selectedMaterialInstance = getModelMaterialInstance(materialLoader, MODEL_SELECTED_COLOR)
-    val unselectedMaterialInstance =
-        getModelMaterialInstance(materialLoader, MODEL_UNSELECTED_COLOR)
 
     val pickModel = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -289,11 +288,10 @@ fun SuccessModelsCalibrationScreen(
     val repositionOrigin = remember(selectedMarker, markerNode) {
         {
             if (selectedMarker != null && markerNode != null) {
-                repositionOrigin(
-                    originNode = originNode,
+                originNode.offset(
                     markerNode = markerNode,
-                    originOffsetPosition = selectedMarker.originOffsetPosition,
-                    originOffsetQuaternion = selectedMarker.originOffsetRotation
+                    offsetPosition = selectedMarker.originOffsetPosition,
+                    offsetQuaternion = selectedMarker.originOffsetRotation
                 )
             }
         }
@@ -301,8 +299,8 @@ fun SuccessModelsCalibrationScreen(
 
     val calibrateOriginToMarker = remember(selectedMarker, markerNode) {
         {
+            // Update the position and rotation of the Origin node in the Marker's local space
             if (selectedMarker != null && markerNode != null) {
-                // Update the position and rotation of the Origin node in the Marker's local space
                 onEvent(
                     ModelsEvent.OnCalibrateOriginToMarker(
                         markerId = selectedMarker.id,
@@ -314,17 +312,11 @@ fun SuccessModelsCalibrationScreen(
         }
     }
 
-    val calibrateModel = remember(selectedModel) {
+    val calibrateModel = remember(selectedContainer) {
         {
-            if (selectedModel != null) {
-                onEvent(
-                    ModelsEvent.OnCalibrateModelsToOrigin(
-                        modelId = selectedModel!!.name!!.toInt(),
-                        newModelPosition = selectedModel!!.position,
-                        newModelQuaternion = selectedModel!!.quaternion
-                    )
-                )
-                selectedModel = null
+            selectedContainer?.apply {
+                onEvent(ModelsEvent.OnCalibrateModelsToOrigin(modelId, position, quaternion))
+                selectedContainer = null
             }
         }
     }
@@ -332,20 +324,23 @@ fun SuccessModelsCalibrationScreen(
     if (firstTimeDetected) {
         models.forEach { model ->
             key(model.id) {
-                DisposableEffect(model.id) {
-                    val node = createModelNode(
+                val containerNode = remember(model.id) {
+                    createContainerNode(
                         engine = engine,
                         modelLoader = modelLoader,
                         materialLoader = materialLoader,
-                        modelFile = model.glbUri.toFile(),
-                        modelId = model.id
+                        model = model
                     ).apply {
-                        parent = originNode
                         position = model.offsetPosition
                         quaternion = model.offsetRotation
+                        generateGizmoNode(materialLoader)
                     }
+                }
+
+                DisposableEffect(containerNode) {
+                    originNode.addChildNode(containerNode)
                     repositionOrigin()
-                    onDispose { node.safeTerminate() }
+                    onDispose { nodes.safeTerminate(containerNode) }
                 }
             }
         }
@@ -356,14 +351,26 @@ fun SuccessModelsCalibrationScreen(
     LaunchedEffect(currentBitmapInfo, Unit) {
         val info = currentBitmapInfo ?: return@LaunchedEffect
         session?.setImageDatabase(info.markerId.toString(), info.bitmap) ?: return@LaunchedEffect
-        nodes.filterIsInstance<AugmentedImageNode>().forEach {
-            it.safeTerminate()
-            nodes.remove(it)
-        }
+        nodes.safeTerminate(nodes.filterMarkerNodes())
     }
 
     LaunchedEffect(options.isTorchEnabled) {
         session?.setTorch(options.isTorchEnabled)
+    }
+
+    LaunchedEffect(pressedAxis) {
+        pressedAxis?.let {
+            selectedContainer?.isolateAxisVisibility(it, materialLoader)
+            selectedContainer?.setGizmoVisibility(false)
+            return@LaunchedEffect
+        }
+        delay(100)
+        selectedContainer?.isolateAxisVisibility(null, materialLoader)
+        if(isEditionEnabled) {
+            selectedContainer?.setGizmoVisibility(true)
+        } else {
+            selectedContainer?.setGizmoVisibility(false)
+        }
     }
 
     SceneSurface(
@@ -399,19 +406,21 @@ fun SuccessModelsCalibrationScreen(
                     BottomSheetMainHeader(
                         title = "Edit Model",
                         onSaveClick = {
-                            selectedModel?.apply {
-                                setMaterialInstance(unselectedMaterialInstance)
+                            selectedContainer?.apply {
+                                childNodes.filterModelNodes()
+                                    .forEach { it.setUnselectedMaterialInstance(materialLoader) }
                                 setGizmoVisibility(false)
                             }
                             calibrateModel()
                         },
                         onCancelClick = {
-                            selectedModel?.apply {
-                                setMaterialInstance(unselectedMaterialInstance)
+                            selectedContainer?.apply {
+                                childNodes.filterModelNodes()
+                                    .forEach { it.setUnselectedMaterialInstance(materialLoader) }
                                 setGizmoVisibility(false)
                                 transform = previousModelTransform
                             }
-                            selectedModel = null
+                            selectedContainer = null
                         }
                     )
                 }
@@ -419,8 +428,13 @@ fun SuccessModelsCalibrationScreen(
                 CalibrationBottomSheetContent(
                     onRestoreDefaults = {
                         when (transformation) {
-                            Transformation.TRANSLATION -> selectedModel?.worldPosition = Position()
-                            Transformation.ROTATION -> selectedModel?.worldQuaternion = Quaternion()
+                            Transformation.TRANSLATION -> {
+                                selectedContainer?.worldPosition = Position()
+                            }
+
+                            Transformation.ROTATION -> {
+                                selectedContainer?.worldQuaternion = Quaternion()
+                            }
                         }
                     },
                     transformation = transformation,
@@ -428,18 +442,21 @@ fun SuccessModelsCalibrationScreen(
                     onTransformationChange = { transformation = it },
                     onModeChange = { mode = it },
                     onDeleteModel = {}, // todo add this
+                    onAxisPressed = { axis, isPressed ->
+                        pressedAxis = if (isPressed) axis else null
+                    },
                     onTickDragged = { axis, tick ->
                         when (transformation) {
                             Transformation.TRANSLATION -> {
                                 val millis = mode.translation.mmPerUnit * tick / 1000F
                                 val offset = unidirectionalTranslation(axis, millis)
-                                selectedModel?.applyObjectPositionOffset(offset)
+                                selectedContainer?.applyObjectPositionOffset(offset)
                             }
 
                             Transformation.ROTATION -> {
                                 val degrees = mode.rotation.halfDegPerUnit * tick / 2F
                                 val offset = unidirectionalRotation(axis, degrees)
-                                selectedModel?.applyObjectQuaternionOffset(offset)
+                                selectedContainer?.applyObjectQuaternionOffset(offset)
                             }
                         }
                     }
@@ -454,48 +471,39 @@ fun SuccessModelsCalibrationScreen(
                 modelLoader = modelLoader,
                 materialLoader = materialLoader,
                 childNodes = nodes,
-                planeRenderer = options.isPlaneEnabled, // Turns off the dots on detected flat surfaces
+                planeRenderer = options.isPlaneEnabled, // Dots on detected flat surfaces
                 sessionConfiguration = ::configureARSession,
                 onSessionCreated = { session = it },
                 onSessionUpdated = { _, frame ->
                     // Gets the last detected trackable (QR code) in any
                     // previous frame as AugmentedImages in the scene
-                    val trackables = frame.getUpdatedTrackables(AugmentedImage::class.java)
-
-                    trackables.forEach { trackable ->
-
-                        val markerNodes = nodes.filterIsInstance<AugmentedImageNode>()
-
+                    frame.getUpdatedAugmentedImages().forEach { trackable ->
+                        val markerNodes = nodes.filterMarkerNodes()
                         if (markerNodes.none { it.imageName == trackable.name }) {
-
-                            markerNodes.forEach {
-                                it.safeTerminate()
-                                nodes.remove(it)
-                            }
-
-                            detectMarker(
+                            nodes.safeTerminate(markerNodes)
+                            trackable.detectMarkerNode(
                                 engine = engine,
-                                trackable = trackable,
                                 materialLoader = materialLoader,
                                 onTrackingMethodChanged = { trackingMethod = it },
-                            ) { newMarkerNode ->
-                                nodes.add(newMarkerNode)
-
-                                if (selectedMarker != null && !firstTimeDetected) {
-                                    firstTimeDetected = true
-                                    repositionOrigin()
+                                onMarkerDetected = {
+                                    nodes.add(it)
+                                    if (selectedMarker != null && !firstTimeDetected) {
+                                        firstTimeDetected = true
+                                        repositionOrigin()
+                                    }
                                 }
-                            }
+                            )
                         }
                     }
                 },
                 onGestureListener = rememberOnGestureListener(
                     onSingleTapConfirmed = { _, node ->
-                        if (node is ModelNode && selectedModel == null) {
-                            selectedModel = node.apply {
-                                setMaterialInstance(selectedMaterialInstance)
-                                setGizmoVisibility(true)
-                                previousModelTransform = transform
+                        if (selectedContainer == null) {
+                            node?.findModelInContainerFromRenderable { containerNode, modelNode ->
+                                selectedContainer = containerNode
+                                previousModelTransform = containerNode.transform
+                                modelNode.setSelectedMaterialInstance(materialLoader)
+                                containerNode.setGizmoVisibility(true)
                             }
                         }
                     }
@@ -544,6 +552,7 @@ fun SuccessModelsCalibrationScreen(
                         modifier = Modifier
                             .padding(end = MaterialTheme.spacing.small)
                             .align(Alignment.CenterEnd),
+                        enabled = firstTimeDetected,
                         colors = ButtonDefaults.buttonColors().copy(
                             containerColor = Color.White,
                             contentColor = Color.Black
