@@ -187,7 +187,7 @@ class InfiniteAxisNode(
         const val DEFAULT_RADIUS = 0.001F
         const val DEFAULT_HEIGHT = 1F
         const val DEFAULT_SCALE = 10F
-        const val DEFAULT_SIDE_COUNT = 4
+        const val DEFAULT_SIDE_COUNT = 3
     }
 
     init {
@@ -235,7 +235,8 @@ class MarkerNode(
  * center of its [RenderableNode] child.
  */
 class PivotNode(engine: Engine) : Node(engine) {
-    var hash: Long? = null
+    var modelId: Int = 0
+    var hash: Long = 0
 
     init {
         isTouchable = false
@@ -247,7 +248,7 @@ class PivotNode(engine: Engine) : Node(engine) {
  * Groups a [ModelNode] with its editor overlays.
  */
 class ContainerNode(engine: Engine) : Node(engine) {
-    var id: Int = 0
+    var modelId: Int = 0
 
     init {
         isTouchable = false
