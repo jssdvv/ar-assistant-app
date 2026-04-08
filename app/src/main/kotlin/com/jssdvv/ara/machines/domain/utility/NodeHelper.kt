@@ -5,17 +5,17 @@ import com.jssdvv.ara.machines.presentation.destination.steps.StepsDestination
 import com.jssdvv.ara.machines.presentation.destination.calibration.CalibrationDestination
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
+import androidx.core.net.toFile
 import com.google.android.filament.Engine
 import com.google.android.filament.LightManager
 import com.google.ar.core.AugmentedImage
 import com.jssdvv.ara.core.domain.utility.forEachApply
+import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.type.Axis
 import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.normalize
 import io.github.sceneview.SceneView.Companion.DEFAULT_MAIN_LIGHT_COLOR
 import io.github.sceneview.SceneView.Companion.DEFAULT_MAIN_LIGHT_COLOR_INTENSITY
-import io.github.sceneview.ar.arcore.yDirection
-import io.github.sceneview.ar.node.AugmentedImageNode
 import io.github.sceneview.components.RenderableComponent
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.loaders.ModelLoader
@@ -30,7 +30,6 @@ import io.github.sceneview.math.halfExtentSize
 import io.github.sceneview.node.CubeNode
 import io.github.sceneview.node.LightNode
 import net.openhft.hashing.LongHashFunction
-import java.io.File
 
 /**
  * Node hierarchy for AR scene composition.
@@ -121,9 +120,14 @@ fun Node.setGizmoVisibility(visible: Boolean) {
 fun Node.findModelInContainerFromRenderable(
     onNodesFound: (ContainerNode, ModelNode) -> Unit
 ) {
-    if (this !is ModelNode.RenderableNode) return
-    val modelNode = findParent<ModelNode>() ?: return
-    modelNode.findParent<ContainerNode>()?.let { onNodesFound(it, modelNode) }
+    val modelNode = (this as? ModelNode.RenderableNode)?.findAncestor<ModelNode>() ?: return
+    modelNode.findAncestor<ContainerNode>()?.let { onNodesFound(it, modelNode) }
+}
+
+fun Node.findPivotFromRenderable(
+    onNodeFound: (PivotNode) -> Unit
+) {
+    onNodeFound((this as? ModelNode.RenderableNode)?.findAncestor<PivotNode>() ?: return)
 }
 
 fun Node.safeTerminate() {
@@ -197,20 +201,18 @@ fun createContainerNode(
     engine: Engine,
     modelLoader: ModelLoader,
     materialLoader: MaterialLoader,
-    modelFile: File,
-    modelId: Int,
+    model: Model,
     modelColor: FloatArray = MODEL_UNSELECTED_COLOR,
 ): ContainerNode {
     val containerNode = ContainerNode(engine).apply {
-        id = modelId
-        generateGizmoNode(materialLoader)
+        this.modelId = model.id
     }
 
     val modelNode = ModelNode(
-        modelInstance = modelLoader.createModelInstance(modelFile),
+        modelInstance = modelLoader.createModelInstance(model.glbUri.toFile()),
         autoAnimate = false
     ).apply {
-        name = modelId.toString()
+        name = model.id.toString()
         isHittable = false
         isTouchable = false
         position = -(quaternion * boundingBox.centerPosition)
@@ -244,6 +246,10 @@ fun ModelNode.RenderableNode.setSelectedMaterialInstance(materialLoader: Materia
     materialInstance = materialLoader.createModelColorMaterialInstance(MODEL_SELECTED_COLOR)
 }
 
+fun ModelNode.RenderableNode.setPlayingMaterialInstance(materialLoader: MaterialLoader) {
+    materialInstance = materialLoader.createModelColorMaterialInstance(MODEL_PLAYING_COLOR)
+}
+
 fun ModelNode.RenderableNode.setUnselectedMaterialInstance(materialLoader: MaterialLoader) {
     materialInstance = materialLoader.createModelColorMaterialInstance(MODEL_UNSELECTED_COLOR)
 }
@@ -273,6 +279,7 @@ fun generateBoxNode(
 }
 
 fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
+    val modelId = this.name?.toInt() ?: 0
     renderableNodes.forEach { renderableNode ->
         val center = renderableNode.axisAlignedBoundingBox.centerPosition
         val position = renderableNode.position
@@ -280,6 +287,7 @@ fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
         val pivotPosition = position + quaternion * center
 
         val pivotNode = PivotNode(engine).apply {
+            this.modelId = modelId
             this.hash = LongHashFunction.xx3().hashChars(renderableNode.name ?: "")
             this.name = renderableNode.name
             this.position = pivotPosition
@@ -340,12 +348,13 @@ fun Node.removeAxisNodes() {
 }
 
 fun Node.isolateAxisVisibility(
-    axis: Axis,
+    axis: Axis?,
     materialLoader: MaterialLoader,
 ) {
     val axisNodes = childNodes.filterAxisNodes().also { nodes ->
         nodes.forEach { it.isVisible = false }
     }
+    if(axis == null) return
     val node = axisNodes.firstOrNull { it.axis == axis }
     if (node != null) {
         node.isVisible = true
@@ -389,14 +398,9 @@ fun AugmentedImage.detectMarkerNode(
     onMarkerDetected: (MarkerNode) -> Unit
 ) {
     var planeNode: PlaneNode? = null
-
-    val (full, last, lost) = with(materialLoader) {
-        Triple(
-            createMarkerColorMaterialInstance(fullTrackingColor),
-            createMarkerColorMaterialInstance(lastPositionColor),
-            createMarkerColorMaterialInstance(lostTrackingColor)
-        )
-    }
+    val full = materialLoader.createMarkerColorMaterialInstance(fullTrackingColor)
+    val last = materialLoader.createMarkerColorMaterialInstance(lastPositionColor)
+    val lost = materialLoader.createMarkerColorMaterialInstance(lostTrackingColor)
 
     val markerNode = MarkerNode(
         engine = engine,
@@ -412,10 +416,7 @@ fun AugmentedImage.detectMarkerNode(
         }
     )
 
-    if (markerNode.planeNode != null) {
-        planeNode = markerNode.planeNode
-        onMarkerDetected(markerNode)
-    }
+    planeNode = markerNode.planeNode?.also { onMarkerDetected(markerNode) }
 }
 
 fun createMainLightNode(engine: Engine): LightNode {
@@ -431,7 +432,7 @@ fun createMainLightNode(engine: Engine): LightNode {
     )
 }
 
-inline fun <reified T : Node> Node.findParent(): T? {
+inline fun <reified T : Node> Node.findAncestor(): T? {
     var current: Node? = parent
     while (current != null) {
         if (current is T) return current
