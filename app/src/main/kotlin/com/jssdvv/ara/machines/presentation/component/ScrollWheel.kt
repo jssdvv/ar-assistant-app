@@ -3,7 +3,7 @@ package com.jssdvv.ara.machines.presentation.component
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.core.domain.utility.hue
 import com.jssdvv.ara.core.domain.utility.saturation
@@ -33,6 +34,7 @@ fun OutlinedScrollWheel(
     color: Color,
     modifier: Modifier = Modifier,
     sides: Int = 16,
+    onPressedChange: (Boolean) -> Unit = {},
     onDrag: (Int) -> Unit
 ) {
     Box(
@@ -44,6 +46,7 @@ fun OutlinedScrollWheel(
             sides = sides,
             modifier = Modifier.padding(MaterialTheme.spacing.small),
             color = color,
+            onPressedChange = onPressedChange,
             onDrag = onDrag
         )
     }
@@ -56,6 +59,7 @@ fun ScrollWheel(
     @FloatRange(from = 0.0, to = 1.0) minLightness: Float = 0.1F,
     @FloatRange(from = 0.0, to = 1.0) maxLightness: Float = 0.7F,
     color: Color = Color(0xFF888888),
+    onPressedChange: (Boolean) -> Unit = {},
     onDrag: (Int) -> Unit
 ) {
     // The stored rotation every angle step.
@@ -74,25 +78,39 @@ fun ScrollWheel(
         modifier = modifier
             .size(250.dp, 40.dp)
             .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        onPressedChange(true)
 
-                // The radius of a circumscribed circle that passes
-                // through all the vertices of the polygon.
-                val circumradius = size.width / 2F
+                        // The radius of a circumscribed circle that passes
+                        // through all the vertices of the polygon.
+                        var fullRotationRad = 0F
+                        var previousTicks = 0
+                        val pointerId = down.id
+                        val circumradius = size.width / 2F
 
-                var fullRotationRad = 0F
-                var previousTicks = 0
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.find { it.id == pointerId }
+                            if (change == null || !change.pressed) break
 
-                detectHorizontalDragGestures { _, dragAmount ->
+                            val dragAmount = change.positionChange().x
+                            if (dragAmount != 0f) {
 
-                    // The polygon rotation is similar every angle step
-                    rotationRad = (rotationRad + dragAmount / circumradius) % centralAngleRad
-                    fullRotationRad += dragAmount / circumradius
+                                // The polygon rotation is similar every angle step
+                                rotationRad = (rotationRad + dragAmount / circumradius) % centralAngleRad
+                                fullRotationRad += dragAmount / circumradius
 
-                    val ticks = (fullRotationRad / centralAngleRad).toInt()
-
-                    if (ticks != previousTicks) {
-                        onDrag(ticks - previousTicks)
-                        previousTicks = ticks
+                                val ticks = (fullRotationRad / centralAngleRad).toInt()
+                                if (ticks != previousTicks) {
+                                    onDrag(ticks - previousTicks)
+                                    previousTicks = ticks
+                                }
+                                change.consume()
+                            }
+                        }
+                        onPressedChange(false)
                     }
                 }
             }
