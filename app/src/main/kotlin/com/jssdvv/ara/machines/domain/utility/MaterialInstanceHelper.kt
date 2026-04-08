@@ -6,6 +6,7 @@ const val MODEL_FILAMAT = "material/toon.filamat"
 const val COLOR_FILAMAT = "material/color.filamat"
 
 val MODEL_SELECTED_COLOR = floatArrayOf(1.00F, 0.60F, 0.40F)
+val MODEL_PLAYING_COLOR = floatArrayOf(0.80F, 0.20F, 0.20F)
 val MODEL_UNSELECTED_COLOR = floatArrayOf(0.20F, 0.68F, 1.00F)
 
 val DISABLED_COLOR = floatArrayOf(0.50F, 0.50F, 0.50F)
