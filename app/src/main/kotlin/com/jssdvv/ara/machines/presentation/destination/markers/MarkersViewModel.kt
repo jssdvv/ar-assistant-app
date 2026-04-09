@@ -1,6 +1,7 @@
 package com.jssdvv.ara.machines.presentation.destination.markers
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -289,6 +290,7 @@ class MarkersViewModel @Inject constructor(
                         id = it?.id ?: 0,
                         machineId = machineId,
                         name = markerDocName,
+                        previewUri = Uri.EMPTY,
                         fileUri = fileUri
                     )
 
