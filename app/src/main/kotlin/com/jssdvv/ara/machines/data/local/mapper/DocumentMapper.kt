@@ -7,12 +7,18 @@ fun Document.toEntity() = DocumentEntity(
     id = id,
     machineId = machineId,
     name = name,
-    fileUri = fileUri
+    category = category,
+    previewUri = previewUri,
+    fileUri = fileUri,
+    createdAt = createdAt
 )
 
 fun DocumentEntity.toDomain() = Document(
     id = id,
     machineId = machineId,
     name = name,
-    fileUri = fileUri
+    category = category,
+    previewUri = previewUri,
+    fileUri = fileUri,
+    createdAt = createdAt
 )

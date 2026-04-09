@@ -7,6 +7,8 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
+import com.jssdvv.ara.machines.domain.model.DocumentCategory
+import java.util.Date
 
 @Entity(
     tableName = DocumentEntity.TABLE_NAME,
@@ -33,17 +35,29 @@ data class DocumentEntity(
     @ColumnInfo(name = COLUMN_MACHINE_ID)
     val machineId: Int,
 
+    @ColumnInfo(name = COLUMN_CATEGORY)
+    val category: DocumentCategory = DocumentCategory.UNKNOWN,
+
     @ColumnInfo(name = COLUMN_NAME)
     val name: String,
 
+    @ColumnInfo(name = COLUMN_PREVIEW_URI)
+    val previewUri: Uri,
+
     @ColumnInfo(name = COLUMN_FILE_URI)
     val fileUri: Uri,
+
+    @ColumnInfo(name = COLUMN_CREATED_AT)
+    val createdAt: Date = Date()
 ) {
     companion object {
         const val TABLE_NAME = "document"
         const val COLUMN_ID = "id"
         const val COLUMN_MACHINE_ID = "machine_id"
+        const val COLUMN_CATEGORY = "category"
         const val COLUMN_NAME = "name"
+        const val COLUMN_PREVIEW_URI = "preview_uri"
         const val COLUMN_FILE_URI = "file_uri"
+        const val COLUMN_CREATED_AT = "created_at"
     }
 }
