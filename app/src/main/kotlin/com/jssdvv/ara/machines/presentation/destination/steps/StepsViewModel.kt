@@ -43,8 +43,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class StepsViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val modelsDataManager: ModelsDataManager,
+    savedStateHandle: SavedStateHandle,
+    modelsDataManager: ModelsDataManager,
     private val stepsDataManager: StepsDataManager,
     private val opsDataManager: OperationDataManager,
     private val filesManager: FilesManager,
@@ -167,7 +167,7 @@ class StepsViewModel @Inject constructor(
 
     fun onExternalEvent(event: StepsExternalEvent) {
         when (event) {
-            is StepsExternalEvent.OnToggleSelection -> {
+            is StepsExternalEvent.OnChangeSelectionState -> {
                 _isSelectionEnabled.value = event.isEnabled
             }
 
@@ -454,7 +454,7 @@ sealed interface StepsEvent {
 }
 
 sealed interface StepsExternalEvent {
-    data class OnToggleSelection(val isEnabled: Boolean) : StepsExternalEvent
+    data class OnChangeSelectionState(val isEnabled: Boolean) : StepsExternalEvent
     data class OnLoadRenderables(
         val infoStates: Map<RenderableInfo, RenderableState>
     ) : StepsExternalEvent

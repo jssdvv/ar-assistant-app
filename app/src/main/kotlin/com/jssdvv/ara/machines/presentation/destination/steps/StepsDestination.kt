@@ -31,6 +31,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -167,13 +168,14 @@ fun StepsContent(
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val view = rememberView(engine).apply { isStencilBufferEnabled = true }
     val environmentLoader = rememberEnvironmentLoader(engine)
-    val environment = environmentLoader.createMainEnvironment()
+    val environment = remember{ environmentLoader.createMainEnvironment() }
 
     // Nodes
     val nodes = rememberNodes()
@@ -183,17 +185,31 @@ fun StepsContent(
     val cameraNode = rememberCameraNode(engine)
     val mainLightNode = rememberNode { createMainLightNode(engine) }
 
-    // On Touch
-    val cameraManipulator = rememberCustomCameraManipulator(cameraNode.worldPosition)
-    val gestureDetector = GestureDetector(LocalContext.current, rememberOnGestureListener())
-    val gestureCameraDetector = remember(view, cameraManipulator) {
-        CustomCameraGestureDetector({ view.viewport.height }, cameraManipulator)
-    }
-
     // Components Visibility
     val drawerState = rememberDraggableDrawerState()
     var showSideSheet by remember { mutableStateOf(false) }
     var isEditionEnabled by remember { mutableStateOf(false) } // To show bottom sheet
+
+    val updatedEditionState by rememberUpdatedState(isEditionEnabled)
+    val updatedSelectionState by rememberUpdatedState(isSelectionEnabled)
+
+    // On Touch
+    val cameraManipulator = rememberCustomCameraManipulator(cameraNode.worldPosition)
+    val gestureListener = rememberOnGestureListener(
+        onSingleTapConfirmed = { _, node ->
+            if (updatedEditionState && updatedSelectionState) {
+                node?.findPivotFromRenderable { pivotNode ->
+                    val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
+                    onExternalEvent(StepsExternalEvent.OnSelectRenderable(info))
+                }
+            }
+        }
+    )
+
+    val gestureDetector = remember(gestureListener) { GestureDetector(context, gestureListener) }
+    val gestureCameraDetector = remember(view, cameraManipulator) {
+        CustomCameraGestureDetector({ view.viewport.height }, cameraManipulator)
+    }
 
     models.forEach { model ->
         key(model.id) {
@@ -290,7 +306,7 @@ fun StepsContent(
         }
     }
 
-    val operations = operationsTargets.map { it.operation }
+    val operations = remember(operationsTargets) { operationsTargets.map { it.operation } }
 
     LaunchedEffect(selectedOperation, selectedRenderableItems, isEditionEnabled) {
         applyOperationsOffsetsBeforeTo(
@@ -345,19 +361,9 @@ fun StepsContent(
                 cameraNode = cameraNode,
                 cameraManipulator = cameraManipulator,
                 childNodes = nodes,
-                onGestureListener = rememberOnGestureListener(
-                    onSingleTapConfirmed = { _, node ->
-                        if (isEditionEnabled && isSelectionEnabled) {
-                            node?.findPivotFromRenderable { pivotNode ->
-                                val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
-                                onExternalEvent(StepsExternalEvent.OnSelectRenderable(info))
-                            }
-                        }
-                    }
-                ),
                 onTouchEvent = { event, hitResult ->
-                    gestureCameraDetector.onTouchEvent(event)
                     gestureDetector.onTouchEvent(event, hitResult)
+                    gestureCameraDetector.onTouchEvent(event)
                     true
                 }
             )
@@ -544,7 +550,7 @@ fun StepsContent(
                     selectedRenderablesStates = selectedRenderableItems,
                     onUnselectItem = { onExternalEvent(StepsExternalEvent.OnUnselectRenderable(it)) },
                     onSelectionChange = {
-                        onExternalEvent(StepsExternalEvent.OnToggleSelection(it))
+                        onExternalEvent(StepsExternalEvent.OnChangeSelectionState(it))
                     },
                     onSaveClick = {
                         onEvent(StepsEvent.OnSaveOperation(it))
