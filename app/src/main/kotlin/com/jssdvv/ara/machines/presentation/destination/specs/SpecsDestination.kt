@@ -21,21 +21,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +39,7 @@ import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
 import com.jssdvv.ara.core.presentation.navigation.ActivitiesIcon
 import com.jssdvv.ara.core.presentation.navigation.DocumentsIcon
+import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.model.machine.MotorIdentity
@@ -89,7 +82,7 @@ internal fun MachineDetailsScreen(
     lazyListState: LazyListState = rememberLazyListState(),
 ) {
     val onShowTitle by remember {
-        derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
+        derivedStateOf { lazyListState.firstVisibleItemIndex >= 2 }
     }
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -145,193 +138,146 @@ fun MachineDetailsSuccessScreen(
     onNavigateToActivities: (Int) -> Unit,
     onNavigateToDocuments: (Int) -> Unit,
     lazyListState: LazyListState,
+    aspectRatio: AspectRatio = AspectRatio(16F, 9F)
 ) {
-    val configuration = LocalConfiguration.current
-    val aspectRatio = AspectRatio(16f, 9f)
-
-    val maxImageHeight: Dp = configuration.screenWidthDp.dp * aspectRatio.aspectRatioInverse
-    val minImageHeight: Dp = 0.dp
-    val midImageHeight = (maxImageHeight + minImageHeight) / 2
-    val alphaSlope = 1f / (maxImageHeight.value - midImageHeight.value)
-
-    var currentImageHeight by remember { mutableStateOf(maxImageHeight) }
-    val currentImageScale by remember { derivedStateOf { currentImageHeight / maxImageHeight } }
-    val currentImageAlpha by remember {
-        derivedStateOf {
-            (alphaSlope * (currentImageHeight.value - midImageHeight.value)).coerceIn(0f, 1f)
-        }
-    }
-
     // TODO: Add editing of machine title and image, also add a delete button at the end of the screen
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        state = lazyListState,
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(aspectRatio.aspectRatio),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            val scrollOffset =
+                                if (lazyListState.firstVisibleItemIndex == 0)
+                                    lazyListState.firstVisibleItemScrollOffset.toFloat()
+                                else size.height
 
-    val canScrollBackward by remember { derivedStateOf { lazyListState.canScrollBackward } }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(
-                available: Offset,
-                source: NestedScrollSource,
-            ): Offset = handleScroll(available.y.dp)
+                            val height = size.height - scrollOffset
+                            val scale = (height / size.height).coerceIn(0F, 1F)
+                            val alpha = (scale * 2 - 1F).coerceIn(0F, 1F)
 
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource,
-            ): Offset = handleScroll(available.y.dp)
+                            scaleX = scale
+                            scaleY = scale
+                            this.alpha = alpha
 
-            private fun handleScroll(availableY: Dp): Offset {
-                return if (!canScrollBackward) {
-                    val previousImageHeight = currentImageHeight
-                    currentImageHeight = (currentImageHeight + availableY)
-                        .coerceIn(minImageHeight, maxImageHeight)
-
-                    val heightConsumed = currentImageHeight - previousImageHeight
-                    Offset(0f, heightConsumed.value)
-                } else Offset.Zero
+                            translationY = (size.height - height) / 2F
+                        },
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(machine?.imageUri)
+                        .build(),
+                    contentScale = ContentScale.FillWidth,
+                    contentDescription = stringResource(R.string.machine_image_content_desc)
+                )
             }
         }
-    }
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection),
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .height(maxImageHeight)
-                .aspectRatio(aspectRatio.aspectRatio)
-                .align(Alignment.TopCenter)
-                .graphicsLayer {
-                    scaleX = currentImageScale
-                    scaleY = currentImageScale
-                    alpha = currentImageAlpha
-                    translationY = -(maxImageHeight.toPx() - currentImageHeight.toPx()) / 2f
-                },
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(machine?.imageUri)
-                .build(),
-            contentScale = ContentScale.FillWidth,
-            contentDescription = stringResource(R.string.machine_image_content_desc)
-        )
-        LazyColumn(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = currentImageHeight),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            state = lazyListState,
-        ) {
-            stickyHeader {
-                // Titles
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy")
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = machine?.name.orEmpty(),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Text(
-                            text = "Created on ${machine?.createdAt?.let { dateFormat.format(it) }}",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
-            }
-            stickyHeader {
-                // Buttons
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        CounterButton(
-                            onClick = { machine?.id?.let { onNavigateToActivities(it) } },
-                            title = stringResource(R.string.counter_button_activities_label),
-                            count = counters.activitiesCount,
-                            icon = { ActivitiesIcon() }
-                        )
-                        CounterButton(
-                            onClick = { machine?.id?.let { onNavigateToDocuments(it) } },
-                            title = stringResource(R.string.counter_button_documents_label),
-                            count = counters.documentsCount,
-                            icon = { DocumentsIcon() }
-                        )
-                    }
-                }
-            }
 
-            // Info Cards
-            item {
-                MachineIdentityCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    machine = machine,
-                    editingCard = card,
-                    onClickEditCard = {
-                        uiEvent(MachineDetailsUiEvent.OnEditCard(it))
-                    },
-                    onClickSaveCard = { machine ->
-                        uiEvent(MachineDetailsUiEvent.OnSaveMachineIdentificationCard(machine))
-                    }
+        item {
+            // Titles
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy")
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = MaterialTheme.spacing.medium),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(
+                    MaterialTheme.spacing.small,
+                    Alignment.CenterVertically
                 )
-                Spacer(Modifier.height(16.dp))
-            }
-            item {
-                MachineSpecsCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    machineSpecs = machineSpecs,
-                    editingCard = card,
-                    onClickEditCard = {
-                        uiEvent(MachineDetailsUiEvent.OnEditCard(it))
-                    },
-                    onClickSaveCard = { machineSpecs ->
-                        uiEvent(MachineDetailsUiEvent.OnSaveMachineSpecificationsCard(machineSpecs))
-                    }
+            ) {
+                Text(
+                    text = machine?.name.orEmpty(),
+                    style = MaterialTheme.typography.titleLarge
                 )
-                Spacer(Modifier.height(16.dp))
-            }
-            item {
-                MotorIdentityCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    motorIdentity = motorIdentity,
-                    editingCard = card,
-                    onClickEditCard = {
-                        uiEvent(MachineDetailsUiEvent.OnEditCard(it))
-                    },
-                    onClickSaveCard = { motor ->
-                        uiEvent(MachineDetailsUiEvent.OnSaveMotorIdentificationCard(motor))
-                    }
+                Text(
+                    text = "Created on ${machine?.createdAt?.let { dateFormat.format(it) }}",
+                    style = MaterialTheme.typography.labelMedium
                 )
-                Spacer(Modifier.height(16.dp))
             }
-            item {
-                MotorSpecsCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    motorSpecs = motorSpecs,
-                    editingCard = card,
-                    onClickEditCard = {
-                        uiEvent(MachineDetailsUiEvent.OnEditCard(it))
-                    },
-                    onClickSaveCard = { motorSpecs ->
-                        uiEvent(MachineDetailsUiEvent.OnSaveMotorSpecificationsCard(motorSpecs))
-                    }
+        }
+
+        // Navigation Buttons
+        stickyHeader {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CounterButton(
+                    onClick = { machine?.id?.let { onNavigateToActivities(it) } },
+                    title = stringResource(R.string.counter_button_activities_label),
+                    count = counters.activitiesCount,
+                    icon = { ActivitiesIcon() }
                 )
-                Spacer(Modifier.height(16.dp))
+                CounterButton(
+                    onClick = { machine?.id?.let { onNavigateToDocuments(it) } },
+                    title = stringResource(R.string.counter_button_documents_label),
+                    count = counters.documentsCount,
+                    icon = { DocumentsIcon() }
+                )
             }
+        }
+
+        // Info Cards
+        item {
+            MachineIdentityCard(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                machine = machine,
+                editingCard = card,
+                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickSaveCard = { machine ->
+                    uiEvent(MachineDetailsUiEvent.OnSaveMachineIdentificationCard(machine))
+                }
+            )
+            Spacer(Modifier.height(MaterialTheme.spacing.medium))
+        }
+        item {
+            MachineSpecsCard(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                machineSpecs = machineSpecs,
+                editingCard = card,
+                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickSaveCard = { machineSpecs ->
+                    uiEvent(MachineDetailsUiEvent.OnSaveMachineSpecificationsCard(machineSpecs))
+                }
+            )
+            Spacer(Modifier.height(MaterialTheme.spacing.medium))
+        }
+        item {
+            MotorIdentityCard(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                motorIdentity = motorIdentity,
+                editingCard = card,
+                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickSaveCard = { motor ->
+                    uiEvent(MachineDetailsUiEvent.OnSaveMotorIdentificationCard(motor))
+                }
+            )
+            Spacer(Modifier.height(MaterialTheme.spacing.medium))
+        }
+        item {
+            MotorSpecsCard(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                motorSpecs = motorSpecs,
+                editingCard = card,
+                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickSaveCard = { motorSpecs ->
+                    uiEvent(MachineDetailsUiEvent.OnSaveMotorSpecificationsCard(motorSpecs))
+                }
+            )
         }
     }
 }
