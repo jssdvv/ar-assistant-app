@@ -1,6 +1,5 @@
 package com.jssdvv.ara.machines.data.repository
 
-import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.core.domain.type.getOrderTypeAsString
@@ -15,8 +14,6 @@ import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.repository.OperationRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.collections.map
-import kotlin.collections.toTypedArray
 
 class OperationRepositoryImpl(
     private val dao: OperationDao

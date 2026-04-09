@@ -25,12 +25,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -44,12 +42,12 @@ import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.CheckIcon
 import com.jssdvv.ara.core.presentation.common.CloseIcon
+import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
-import com.jssdvv.ara.machines.domain.type.OperationType
-import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.Measurement
+import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.domain.utility.RenderableInfo
 import com.jssdvv.ara.machines.domain.utility.extractSingleAxisDegrees
 import com.jssdvv.ara.machines.domain.utility.rememberMultiRotationState
@@ -60,13 +58,9 @@ import com.jssdvv.ara.machines.domain.utility.rememberTimeState
 import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTransformPair
 import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
-import dev.romainguy.kotlin.math.Quaternion
+import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
 import dev.romainguy.kotlin.math.max
-import io.github.sceneview.math.Position
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.math.roundToInt
 
 enum class BottomSheetScreen { MAIN, ENTITIES, OPERATIONS }
 
@@ -91,7 +85,7 @@ fun OperationBottomSheet(
     val focus2 = interactionSource2.collectIsFocusedAsState().value
 
     LaunchedEffect(focus, focus2) {
-        if(currentSheetScreen == BottomSheetScreen.MAIN) {
+        if (currentSheetScreen == BottomSheetScreen.MAIN) {
             onSelectionChange(focus)
         }
         if (focus2) currentSheetScreen = BottomSheetScreen.OPERATIONS
@@ -164,8 +158,7 @@ fun OperationBottomSheet(
                     onOperationChange
                 )
 
-                OperationType.JOINT -> jointSettings(selectedOperation, onOperationChange)
-                else -> visibilitySettings(selectedOperation, onOperationChange)
+                else -> jointSettings(selectedOperation, onOperationChange)
             }
 
             val lazyListContent = when (currentScreen) {
@@ -224,11 +217,8 @@ fun stepsMainBottomScreen(
     operationsInteractionSource: MutableInteractionSource,
     settingsContent: LazyListScope.() -> Unit
 ): LazyListScope.() -> Unit {
-
-    var isGlobalOffset by remember { mutableStateOf(false) }
     val delayState = rememberTimeState(operation.delay)
     val durationState = rememberTimeState(operation.duration)
-
     val updatedCurrentOperation = rememberUpdatedState(operation)
 
     LaunchedEffect(Unit) {
@@ -285,25 +275,27 @@ fun stepsMainBottomScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        if (operation.type != OperationType.VISIBILITY) {
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Checkbox(
-                        checked = isGlobalOffset,
-                        onCheckedChange = {
-                            isGlobalOffset = it
-                            onOperationChange(
-                                operation.copy(
-                                    isGlobal = it
-                                )
-                            )
-                        }
-                    )
-                    Text("Movel en coordenadas globales")
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val (text, drawableId) = if (operation.isGlobal) {
+                    "Orientación global" to R.drawable.ic_orientation_global
+                } else {
+                    "Orientación local" to R.drawable.ic_orientation_local
                 }
+                ButtonWithIcon(
+                    onClick = { onOperationChange(operation.copy(isGlobal = !operation.isGlobal)) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(drawableId),
+                            contentDescription = null
+                        )
+                    },
+                    content = { Text(text) }
+                )
             }
         }
         settingsContent(this)
@@ -443,46 +435,84 @@ fun screwSettings(
 ): LazyListScope.() -> Unit {
 
     var selectedAxis by remember { mutableStateOf(operation.axis) }
-    var useTurns by remember { mutableStateOf(false) }
+    var usePitch by remember { mutableStateOf(false) }
 
     val translationState =
         rememberSingleTranslationState(initialMeters = max(operation.offsetPosition))
-    val pitchState = rememberSingleTranslationState(initialMeters = operation.pitch)
+    val pitchState = rememberSingleTranslationState(
+        initialMeters = if (operation.turns == 0F) 0F else max(operation.offsetPosition) / operation.turns
+    )
     val turnsState = rememberSingleTranslationState(
         initialMeters = operation.turns,
         initialMeasurement = Measurement.METERS
     )
 
+    fun updateFromDistance() {
+        val distance = translationState.meters
+        val pitch = pitchState.meters
+        val turns = turnsState.numeric
+
+        when {
+            distance == 0F -> return
+            usePitch -> {
+                val calculatedTurns = if (pitch == 0F) 0F else distance / pitch
+                turnsState.updateUnits(calculatedTurns.toString())
+            }
+
+            else -> {
+                val calculatedPitch = if (turns == 0F) 0F else distance / turns
+                pitchState.updateMeters(calculatedPitch)
+            }
+        }
+    }
+
     fun updateFromPitch() {
         val pitch = pitchState.meters
-        if (pitch != 0f) {
-            val calculatedTurns = translationState.meters / pitch
-            turnsState.updateUnits(calculatedTurns.toString())
-        } else {
-            turnsState.updateUnits("0")
+        val distance = translationState.meters
+
+        when {
+            pitch > distance -> turnsState.updateUnits("1")
+            distance != 0F && pitch != 0f -> {
+                val calculatedTurns = translationState.meters / pitch
+                turnsState.updateUnits(calculatedTurns.toString())
+            }
         }
     }
 
     fun updateFromTurns() {
         val turns = turnsState.numeric
-        if (turns != 0f) {
-            val calculatedPitchMeters = translationState.meters / turns
-            pitchState.updateMeters(calculatedPitchMeters)
-        } else {
-            pitchState.updateUnits("0")
+        val distance = translationState.meters
+
+        when {
+            distance != 0F && turns != 0F -> {
+                val calculatedPitchMeters = distance / turns
+                pitchState.updateMeters(calculatedPitchMeters)
+            }
+
+            else -> {
+                pitchState.updateUnits("0")
+            }
         }
     }
 
-    LaunchedEffect(translationState.meters, pitchState.meters, turnsState.numeric, selectedAxis) {
-        val turns = turnsState.numeric
+    LaunchedEffect(
+        translationState.meters,
+        pitchState.meters,
+        turnsState.numeric,
+        selectedAxis,
+        usePitch
+    ) {
         val pitch = pitchState.meters
         val distance = translationState.meters
+        val turns = when {
+            usePitch -> if(pitch != 0F) distance / pitch else 0F
+            else -> turnsState.numeric
+        }
 
         onOperationChange(
             operation.copy(
                 offsetPosition = unidirectionalTranslation(selectedAxis, distance),
                 offsetRotation = unidirectionalRotation(selectedAxis, turns * 360F),
-                pitch = pitch,
                 turns = turns,
                 axis = selectedAxis
             )
@@ -501,39 +531,48 @@ fun screwSettings(
             TranslationTextField(
                 name = selectedAxis.name,
                 state = translationState,
+                onValueChange = {
+                    updateFromDistance()
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             PitchTextField(
-                name = if (useTurns) "Turns" else "Pitch", // TODO create strings
-                state = if (useTurns) turnsState else pitchState,
+                name = if (usePitch) "Pitch" else "Revs", // TODO create strings
+                state = if (usePitch) pitchState else turnsState,
                 onValueChange = { units ->
-                    if (useTurns) {
-                        turnsState.updateUnits(units)
-                        updateFromTurns()
-                    } else {
+                    if (usePitch) {
                         pitchState.updateUnits(units)
                         updateFromPitch()
+                    } else {
+                        turnsState.updateUnits(units)
+                        updateFromTurns()
                     }
                 },
-                isPitch = !useTurns,
+                isPitch = usePitch,
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        val checked = !usePitch
+                        usePitch = checked
+                        if (checked) updateFromPitch() else updateFromTurns()
+                    }
             ) {
                 Checkbox(
-                    checked = useTurns,
+                    checked = usePitch,
                     onCheckedChange = { checked ->
-                        useTurns = checked
+                        usePitch = checked
                         if (checked) updateFromPitch() else updateFromTurns()
                     }
                 )
-                Text(stringResource(R.string.operation_checkbox_use_turns_supporting_text))
+                Text(stringResource(R.string.operation_checkbox_use_pitch_supporting_text))
             }
         }
     }
@@ -640,45 +679,6 @@ fun jointSettings(
                 name = axis.name,
                 state = state,
                 modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
-fun visibilitySettings(
-    operation: Operation,
-    onOperationChange: (Operation) -> Unit
-): LazyListScope.() -> Unit {
-    val steps = 4
-    var alphaPercent by remember { mutableFloatStateOf(operation.alpha * 100F) }
-
-    return {
-        item {
-            Text(
-                text = "Transparency = ${alphaPercent.roundToInt()}%",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(
-                    horizontal = MaterialTheme.spacing.extraSmall,
-                    vertical = MaterialTheme.spacing.small
-                )
-            )
-        }
-        item {
-            Slider(
-                value = alphaPercent,
-                onValueChange = {
-                    alphaPercent = it
-                    onOperationChange(
-                        operation.copy(
-                            alpha = (it / 100F).coerceIn(0F..1F),
-                            offsetPosition = Position(),
-                            offsetRotation = Quaternion()
-                        )
-                    )
-                },
-                valueRange = 0F..100F,
-                steps = steps - 1
             )
         }
     }

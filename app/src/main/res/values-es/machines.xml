@@ -144,11 +144,15 @@
 
     <string name="screen_editor_activity_title">Editor de actividades</string>
 
-    <string name="button_editor_no_steps_label">Sin pasos</string>
-    <string name="button_editor_step_count_label">Paso: %1$d / %2$d</string>
+    <plurals name="button_editor_step_count_label">
+        <item quantity="zero">Sin pasos</item>
+        <item quantity="other">Paso: %1$d / %2$d</item>
+    </plurals>
 
-    <string name="button_editor_no_operations_label">Sin operaciones</string>
-    <string name="button_editor_operation_count_label">Operación: %1$d / %2$d</string>
+    <plurals name="button_editor_operation_count_label">
+        <item quantity="zero">Sin operaciones</item>
+        <item quantity="other">Operación: %1$d / %2$d</item>
+    </plurals>
 
     <!--AXIS [ENUM]-->
 
@@ -187,7 +191,7 @@
 
     <!--OPERATION SETTINGS [COMPONENT]-->
 
-    <string name="operation_checkbox_use_turns_supporting_text">Use turns instead of pitch</string>
+    <string name="operation_checkbox_use_pitch_supporting_text">Usar paso en lugar de revoluciones</string>
 
     <!--OPERATION TEXT FIELD [COMPONENT]-->
 

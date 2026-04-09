@@ -2,7 +2,6 @@ package com.jssdvv.ara.machines.domain.model
 
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.OperationType
-import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.math.Position
 
@@ -18,10 +17,7 @@ data class Operation(
     val duration: Float = 8F, // Seconds
 
     // Renderables
-    val axis: Axis = Axis.X,
-    val pivot: Float3 = Float3(), // todo, delete this
-    val alpha: Float = 1F, // Restarts Every Step
-    val pitch: Float = 2F, // Millis
+    val axis: Axis = Axis.Y,
     val turns: Float = 2F,
     val isGlobal: Boolean = false,
     val offsetPosition: Position = Position(),

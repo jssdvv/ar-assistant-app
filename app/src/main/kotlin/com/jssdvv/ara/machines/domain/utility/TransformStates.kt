@@ -20,7 +20,6 @@ import kotlin.math.atan2
 private val translationFormat = DecimalFormat("0.######", DecimalFormatSymbols(Locale.US))
 private val rotationFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
 private val timeFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale.US))
-val alphaFormat = DecimalFormat("0.#", DecimalFormatSymbols(Locale.US))
 
 @Stable
 class TimeState(

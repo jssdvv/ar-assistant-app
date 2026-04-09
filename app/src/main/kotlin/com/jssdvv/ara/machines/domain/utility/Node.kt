@@ -1,6 +1,5 @@
 package com.jssdvv.ara.machines.domain.utility
 
-import io.github.sceneview.math.Position
 import com.google.android.filament.Engine
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.RenderableManager
@@ -11,17 +10,16 @@ import io.github.sceneview.ar.arcore.yDirection
 import io.github.sceneview.ar.node.AugmentedImageNode
 import io.github.sceneview.geometries.Geometry
 import io.github.sceneview.loaders.MaterialLoader
-import io.github.sceneview.node.GeometryNode
-import io.github.sceneview.node.Node
-import io.github.sceneview.node.PlaneNode
+import io.github.sceneview.math.Position
+import io.github.sceneview.math.Scale
 import io.github.sceneview.math.Size
 import io.github.sceneview.node.CylinderNode
-import io.github.sceneview.node.SphereNode
-import io.github.sceneview.math.Scale
-import io.github.sceneview.node.ModelNode.RenderableNode
+import io.github.sceneview.node.GeometryNode
 import io.github.sceneview.node.ModelNode
-
-const val INFINITE_AXIS_PREFIX = "axis_"
+import io.github.sceneview.node.ModelNode.RenderableNode
+import io.github.sceneview.node.Node
+import io.github.sceneview.node.PlaneNode
+import io.github.sceneview.node.SphereNode
 
 class ArrowNode private constructor(
     engine: Engine,
@@ -99,7 +97,8 @@ class ArrowNode private constructor(
     )
 }
 
-/** Sphere with three [ArrowNode] children aligned to
+/**
+ * Sphere with three [ArrowNode] children aligned to
  * [Axis.X], [Axis.Y], [Axis.Z]. Hidden by default.
  */
 class GizmoNode(
@@ -248,6 +247,8 @@ class PivotNode(engine: Engine) : Node(engine) {
  * Groups a [ModelNode] with its editor overlays.
  */
 class ContainerNode(engine: Engine) : Node(engine) {
+    var renderableNodes: List<RenderableNode> = emptyList()
+    var pivotNodes: List<PivotNode> = emptyList()
     var modelId: Int = 0
 
     init {

@@ -165,7 +165,7 @@ suspend fun PivotNode.animate(
     initialQuaternion: Quaternion,
     speed: Speed,
     isPlaying: Boolean,
-    isLoopingEnabled: Boolean,
+    isLoopingEnabled: Boolean
 ) {
     val finalPosition = calculateWorldPosition(operation.offsetPosition, operation.isGlobal)
     val finalQuaternion = calculateWorldQuaternion(operation.offsetRotation, operation.isGlobal)
@@ -203,7 +203,11 @@ suspend fun PivotNode.animate(
     }
 
     fun animationQuaternion(ratio: Float): Quaternion = if (isScrew) {
-        initialQuaternion * unidirectionalRotation(operation.axis, ratio * totalDegrees)
+        if (operation.isGlobal) {
+            unidirectionalRotation(operation.axis, ratio * totalDegrees) * initialQuaternion
+        } else {
+            initialQuaternion * unidirectionalRotation(operation.axis, ratio * totalDegrees)
+        }
     } else {
         slerp(initialQuaternion, finalQuaternion, ratio)
     }

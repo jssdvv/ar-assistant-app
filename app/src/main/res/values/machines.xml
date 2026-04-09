@@ -170,11 +170,15 @@
 
     <string name="screen_editor_activity_title">Activity\'s Editor</string>
 
-    <string name="button_editor_no_steps_label">No steps</string>
-    <string name="button_editor_step_count_label">Step: %1$d / %2$d</string>
+    <plurals name="button_editor_step_count_label">
+        <item quantity="zero">No steps</item>
+        <item quantity="other">Step: %1$d / %2$d</item>
+    </plurals>
 
-    <string name="button_editor_no_operations_label">No operations</string>
-    <string name="button_editor_operation_count_label">Operation: %1$d / %2$d</string>
+    <plurals name="button_editor_operation_count_label">
+        <item quantity="zero">No operations</item>
+        <item quantity="other">Operation: %1$d / %2$d</item>
+    </plurals>
 
     <!--AXIS [ENUM]-->
 
@@ -220,7 +224,7 @@
 
     <!--OPERATION SETTINGS [COMPONENT]-->
 
-    <string name="operation_checkbox_use_turns_supporting_text">Use turns instead of pitch</string>
+    <string name="operation_checkbox_use_pitch_supporting_text">Use pitch instead of revolutions</string>
 
     <!--OPERATION TEXT FIELD [COMPONENT]-->
 

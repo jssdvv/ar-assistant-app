@@ -6,7 +6,6 @@ import com.jssdvv.ara.machines.data.local.relation.OperationWithTargets
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.RenderableTarget
-import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.math.Position
 
@@ -19,9 +18,6 @@ fun OperationEntity.toDomain() = Operation(
     delay = delay,
     duration = duration,
     axis = axis,
-    pivot = Float3(pivotX, pivotY, pivotZ),
-    alpha = alpha,
-    pitch = pitch,
     turns = turns,
     isGlobal = isGlobal,
     offsetPosition = Position(offsetVx, offsetVy, offsetVz),
@@ -37,11 +33,6 @@ fun Operation.toEntity() = OperationEntity(
     delay = delay,
     duration = duration,
     axis = axis,
-    pivotX = pivot.x,
-    pivotY = pivot.y,
-    pivotZ = pivot.z,
-    alpha = alpha,
-    pitch = pitch,
     turns = turns,
     isGlobal = isGlobal,
     offsetVy = offsetPosition.y,

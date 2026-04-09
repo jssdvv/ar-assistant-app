@@ -1,8 +1,5 @@
 package com.jssdvv.ara.machines.domain.utility
 
-import com.jssdvv.ara.machines.presentation.destination.ar_session.ARSessionDestination
-import com.jssdvv.ara.machines.presentation.destination.steps.StepsDestination
-import com.jssdvv.ara.machines.presentation.destination.calibration.CalibrationDestination
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.core.net.toFile
@@ -12,6 +9,9 @@ import com.google.ar.core.AugmentedImage
 import com.jssdvv.ara.core.domain.utility.forEachApply
 import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.presentation.destination.ar_session.ARSessionDestination
+import com.jssdvv.ara.machines.presentation.destination.calibration.CalibrationDestination
+import com.jssdvv.ara.machines.presentation.destination.steps.StepsDestination
 import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.normalize
 import io.github.sceneview.SceneView.Companion.DEFAULT_MAIN_LIGHT_COLOR
@@ -21,14 +21,14 @@ import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.managers.color
 import io.github.sceneview.math.Position
-import io.github.sceneview.math.centerPosition
-import io.github.sceneview.node.ModelNode
-import io.github.sceneview.node.Node
-import io.github.sceneview.node.PlaneNode
 import io.github.sceneview.math.Size
+import io.github.sceneview.math.centerPosition
 import io.github.sceneview.math.halfExtentSize
 import io.github.sceneview.node.CubeNode
 import io.github.sceneview.node.LightNode
+import io.github.sceneview.node.ModelNode
+import io.github.sceneview.node.Node
+import io.github.sceneview.node.PlaneNode
 import net.openhft.hashing.LongHashFunction
 
 /**
@@ -164,17 +164,8 @@ val ContainerNode.gizmoNode: GizmoNode?
 val ContainerNode.boxNode: CubeNode?
     get() = childNodes.filterBoxNodes().firstOrNull()
 
-val ContainerNode.pivotNodes: List<PivotNode>
-    get() = modelNode?.pivotNodes ?: emptyList()
-
-val ContainerNode.renderableNodes: List<ModelNode.RenderableNode>
-    get() = modelNode?.renderableNodes ?: emptyList()
-
 val ModelNode.pivotNodes: List<PivotNode>
     get() = childNodes.filterPivotNodes()
-
-val ModelNode.renderablePivotedNodes: List<ModelNode.RenderableNode>
-    get() = pivotNodes.mapNotNull { it.renderableNode }
 
 val PivotNode.renderableNode: ModelNode.RenderableNode?
     get() = childNodes.filterRenderableNodes().firstOrNull()
@@ -184,9 +175,6 @@ val PivotNode.gizmoNode: GizmoNode?
 
 val PivotNode.boxNode: CubeNode?
     get() = childNodes.filterBoxNodes().firstOrNull()
-
-val PivotNode.infiniteAxisNodes: List<InfiniteAxisNode>
-    get() = childNodes.filterIsInstance<InfiniteAxisNode>()
 
 val SnapshotStateList<Node>.originNode: OriginNode?
     get() = filterIsInstance<OriginNode>().firstOrNull()
@@ -280,7 +268,9 @@ fun generateBoxNode(
 
 fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
     val modelId = this.name?.toInt() ?: 0
-    renderableNodes.forEach { renderableNode ->
+    val containerNode = parent as? ContainerNode
+    containerNode?.renderableNodes = renderableNodes
+    val pivotNodes = renderableNodes.mapIndexed {_, renderableNode ->
         val center = renderableNode.axisAlignedBoundingBox.centerPosition
         val position = renderableNode.position
         val quaternion = renderableNode.quaternion
@@ -295,7 +285,7 @@ fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
         }
 
         renderableNode.apply {
-            parent = pivotNode
+            this.parent = pivotNode
             this.position = -center
             this.quaternion = Quaternion()
         }
@@ -305,11 +295,13 @@ fun ModelNode.generatePivotNodes(materialLoader: MaterialLoader) {
             size = renderableNode.axisAlignedBoundingBox.halfExtentSize * 2F,
             materialLoader = materialLoader
         ).apply {
-            parent = pivotNode
+            this.parent = pivotNode
         }
 
-        addChildNode(pivotNode)
+        pivotNode
     }
+    containerNode?.pivotNodes = pivotNodes
+    addChildNodes(pivotNodes.toSet())
 }
 
 fun Node.generateSingeAxisNode(
@@ -365,14 +357,16 @@ fun Node.isolateAxisVisibility(
 
 fun Node.generateGizmoNode(
     materialLoader: MaterialLoader,
+    isGlobal: Boolean? = null,
     startVisible: Boolean = false
 ) {
     GizmoNode(
         engine = engine,
         materialLoader = materialLoader,
     ).apply {
-        parent = this@generateGizmoNode
-        isVisible = startVisible
+        if(isGlobal == true) this.worldQuaternion = Quaternion()
+        this.isVisible = startVisible
+        this.parent = this@generateGizmoNode
     }
 }
 

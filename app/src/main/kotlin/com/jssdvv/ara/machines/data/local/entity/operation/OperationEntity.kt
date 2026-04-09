@@ -53,21 +53,6 @@ data class OperationEntity(
     @ColumnInfo(name = COLUMN_AXIS)
     val axis: Axis,
 
-    @ColumnInfo(name = COLUMN_PIVOT_X)
-    val pivotX: Float,
-
-    @ColumnInfo(name = COLUMN_PIVOT_Y)
-    val pivotY: Float,
-
-    @ColumnInfo(name = COLUMN_PIVOT_Z)
-    val pivotZ: Float,
-
-    @ColumnInfo(name = COLUMN_ALPHA)
-    val alpha: Float,
-
-    @ColumnInfo(name = COLUMN_PITCH)
-    val pitch: Float,
-
     @ColumnInfo(name = COLUMN_TURNS)
     val turns: Float,
 
@@ -109,11 +94,6 @@ data class OperationEntity(
 
         // Renderables
         const val COLUMN_AXIS = "axis"
-        const val COLUMN_PIVOT_X = "pivot_x"
-        const val COLUMN_PIVOT_Y = "pivot_y"
-        const val COLUMN_PIVOT_Z = "pivot_z"
-        const val COLUMN_ALPHA = "alpha"
-        const val COLUMN_PITCH = "pitch"
         const val COLUMN_TURNS = "turns"
         const val COLUMN_IS_GLOBAL = "is_global"
         const val COLUMN_OFFSET_VX = "offset_vx"

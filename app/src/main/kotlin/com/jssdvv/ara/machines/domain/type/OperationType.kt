@@ -18,7 +18,7 @@ enum class OperationType(
      * with 3 degrees of freedom for translation and rotation (LERP).
      */
     POINT_TO_POINT(
-        iconResId = R.drawable.ic_operation_type_free,
+        iconResId = R.drawable.ic_operation_type_point_to_point,
         iconContentDescResId = R.string.icon_operation_type_free_content_desc,
         labelResId = R.string.operation_type_free_label
     ),
@@ -54,14 +54,5 @@ enum class OperationType(
         iconResId = R.drawable.ic_operation_type_joint,
         iconContentDescResId = R.string.icon_operation_type_joint_content_desc,
         labelResId = R.string.operation_type_joint_label
-    ),
-
-    /**
-     *
-     */
-    VISIBILITY(
-        iconResId = R.drawable.ic_operation_type_visibility,
-        iconContentDescResId = R.string.icon_operation_type_visibility_content_desc,
-        labelResId = R.string.operation_type_visibility_label
     )
 }

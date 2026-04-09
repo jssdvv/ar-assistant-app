@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -69,8 +70,8 @@ import com.jssdvv.ara.machines.domain.utility.filterModelNodes
 import com.jssdvv.ara.machines.domain.utility.findPivotFromRenderable
 import com.jssdvv.ara.machines.domain.utility.generateGizmoNode
 import com.jssdvv.ara.machines.domain.utility.generatePivotNodes
+import com.jssdvv.ara.machines.domain.utility.gizmoNode
 import com.jssdvv.ara.machines.domain.utility.launchOperationAnimation
-import com.jssdvv.ara.machines.domain.utility.pivotNodes
 import com.jssdvv.ara.machines.domain.utility.removeGizmoNodes
 import com.jssdvv.ara.machines.domain.utility.renderableNode
 import com.jssdvv.ara.machines.domain.utility.safeTerminate
@@ -88,6 +89,7 @@ import com.jssdvv.ara.machines.presentation.destination.steps.component.StepsSid
 import com.jssdvv.ara.machines.presentation.destination.steps.component.rememberDraggableDrawerState
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.CustomCameraGestureDetector
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberCustomCameraManipulator
+import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.Scene
 import io.github.sceneview.gesture.GestureDetector
 import io.github.sceneview.rememberCameraNode
@@ -256,15 +258,16 @@ fun StepsContent(
                     val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
                     val state = renderableInfoStates[info] ?: return@forEach
 
-                    pivotNode.boxNode?.apply {
-                        isVisible = state.isSelected
+                    pivotNode.apply {
                         if (state.isSelected && state.isVisible) {
-                            generateGizmoNode(materialLoader, true)
+                            if (gizmoNode == null) {
+                                generateGizmoNode(materialLoader, selectedOperation?.isGlobal, true)
+                            }
                         } else {
                             removeGizmoNodes()
                         }
                     }
-
+                    pivotNode.boxNode?.apply { isVisible = state.isSelected }
                     pivotNode.renderableNode?.apply {
                         isVisible = state.isVisible
                         isTouchable = state.isVisible && !state.isSelected
@@ -318,6 +321,22 @@ fun StepsContent(
         )
 
         if (selectedOperation == null) return@LaunchedEffect
+
+        val isGlobal = selectedOperation.isGlobal
+
+        if(updatedEditionState) {
+            selectedRenderableItems.forEach { (info, state) ->
+                val container = containersMap[info.modelId] ?: return@forEach
+                val pivot = container.pivotNodes[state.index]
+                pivot.gizmoNode?.apply {
+                    if(isGlobal) {
+                        worldQuaternion = Quaternion()
+                    } else {
+                        quaternion = Quaternion()
+                    }
+                }
+            }
+        }
 
         launchOperationAnimation(
             currentOperation = selectedOperation,
@@ -384,18 +403,13 @@ fun StepsContent(
                     onClick = { showSideSheet = true },
                     icon = { StepIcon() },
                     content = {
-                        val stepText = if (steps.isEmpty()) {
-                            stringResource(R.string.button_editor_no_steps_label)
-                        } else {
-                            stringResource(
-                                R.string.button_editor_step_count_label,
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.button_editor_step_count_label,
+                                steps.size,
                                 selectedStep?.order ?: 0,
                                 steps.size
-                            )
-                        }
-
-                        Text(
-                            text = stepText,
+                            ),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -421,24 +435,17 @@ fun StepsContent(
                 }
 
                 ButtonWithIcon(
-                    onClick = {
-                        showSideSheet = true
-                        // todo add expand current step to op
-                    },
+                    onClick = { showSideSheet = true },
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     icon = { AnimationIcon() },
                     content = {
-                        val opText = if (operations.isEmpty()) {
-                            stringResource(R.string.button_editor_no_operations_label)
-                        } else {
-                            stringResource(
-                                R.string.button_editor_operation_count_label,
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.button_editor_operation_count_label,
+                                operations.size,
                                 selectedOperation?.order ?: 0,
                                 operations.size
-                            )
-                        }
-                        Text(
-                            text = opText,
+                            ),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
