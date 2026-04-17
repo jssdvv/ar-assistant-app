@@ -2,9 +2,9 @@ package com.jssdvv.ara.machines.domain.type
 
 import androidx.annotation.StringRes
 import com.jssdvv.ara.R
-import com.jssdvv.ara.machines.domain.utility.GIZMO_X_COLOR
-import com.jssdvv.ara.machines.domain.utility.GIZMO_Y_COLOR
-import com.jssdvv.ara.machines.domain.utility.GIZMO_Z_COLOR
+import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_X_COLOR
+import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_Y_COLOR
+import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_Z_COLOR
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.abs

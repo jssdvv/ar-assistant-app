@@ -32,18 +32,18 @@
         &package_name;.&preference_permissions_file_key;
     </string>
 
-    <!--permission value key>
+    <!--manifestString value key>
 
-        %1$s is the permission value key string followed by the value type or descriptive name. This
-        is done to avoid another value-key stored for the same permission file key of being override
+        %1$s is the manifestString value key string followed by the value type or descriptive name. This
+        is done to avoid another value-key stored for the same manifestString file key of being override
         by this value. All of this is typed as a string in SCREAMING_SNAKE_CASE.
 
-        Examples using CAMERA permission value key:
+        Examples using CAMERA manifestString value key:
 
             - com.jssdvv.ara.PREFERENCE_PERMISSIONS_FILE_KEY.CAMERA_INT
             - com.jssdvv.ara.PREFERENCE_PERMISSIONS_FILE_KEY.CAMERA_FIRST_INTERACTION
 
-    </permission value key-->
+    </manifestString value key-->
     <string name="preference_permission_value_key" translatable="false">
         &package_name;.&preference_permissions_file_key;.%1$s
     </string>

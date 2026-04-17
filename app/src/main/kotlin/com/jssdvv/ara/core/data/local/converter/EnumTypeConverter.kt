@@ -7,7 +7,6 @@ import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.MachineType
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.domain.type.ToolType
-import org.w3c.dom.DocumentType
 
 /**
  * Converts [Enum] objects to [Int] ordinals and vice versa for Room database storage.

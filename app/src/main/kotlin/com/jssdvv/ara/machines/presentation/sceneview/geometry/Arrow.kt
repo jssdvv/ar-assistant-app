@@ -1,15 +1,15 @@
-package com.jssdvv.ara.machines.domain.utility.geometry
+package com.jssdvv.ara.machines.presentation.sceneview.geometry
 
 import com.google.android.filament.Engine
 import com.google.android.filament.RenderableManager.PrimitiveType
 import dev.romainguy.kotlin.math.Float3
+import dev.romainguy.kotlin.math.TWO_PI
 import dev.romainguy.kotlin.math.normalize
 import io.github.sceneview.geometries.Geometry
 import io.github.sceneview.geometries.Geometry.Vertex
 import io.github.sceneview.geometries.UvCoordinate
 import io.github.sceneview.math.Direction
 import io.github.sceneview.math.Position
-import dev.romainguy.kotlin.math.TWO_PI
 import kotlin.math.cos
 import kotlin.math.sin
 

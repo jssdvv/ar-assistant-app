@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machines.domain.utility
+package com.jssdvv.ara.machines.presentation.sceneview.utility
 
 import android.content.Context
 import android.graphics.Bitmap

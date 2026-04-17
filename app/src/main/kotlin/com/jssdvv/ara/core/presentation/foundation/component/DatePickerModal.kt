@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CheckIcon
-import com.jssdvv.ara.core.presentation.common.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.CheckIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

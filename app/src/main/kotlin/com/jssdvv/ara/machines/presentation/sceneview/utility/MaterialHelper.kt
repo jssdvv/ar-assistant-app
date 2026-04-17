@@ -1,5 +1,6 @@
-package com.jssdvv.ara.machines.domain.utility
+package com.jssdvv.ara.machines.presentation.sceneview.utility
 
+import androidx.compose.ui.graphics.Color
 import io.github.sceneview.loaders.MaterialLoader
 
 const val MODEL_FILAMAT = "material/toon.filamat"
@@ -46,3 +47,10 @@ fun MaterialLoader.createMarkerColorMaterialInstance(color: FloatArray = DISABLE
     createInstance(createMaterial(COLOR_FILAMAT)).apply {
         setParameter("baseColor", color[0], color[1], color[2])
     }
+
+fun MaterialLoader.createBoxMaterialInstance() = this.createColorInstance(
+    color = Color(1F, 1F, 1F, 0.2F),
+    metallic = 0F,
+    roughness = 0F,
+    reflectance = 0F
+)

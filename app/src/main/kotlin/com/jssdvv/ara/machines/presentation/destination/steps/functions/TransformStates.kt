@@ -1,4 +1,4 @@
-package com.jssdvv.ara.machines.domain.utility
+package com.jssdvv.ara.machines.presentation.destination.steps.functions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.jssdvv.ara.machines.domain.type.Axis
-import com.jssdvv.ara.machines.domain.type.Measurement
+import com.jssdvv.ara.machines.domain.type.measurement.Translation
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.dot
@@ -51,15 +51,15 @@ fun rememberTimeState(
 @Stable
 class SingleTranslationState(
     initialUnits: String = "0",
-    initialMeasurement: Measurement = Measurement.CENTIMETERS
+    initialTranslation: Translation = Translation.CENTIMETERS
 ) {
     private var _units by mutableStateOf(initialUnits)
-    private var _measurement by mutableStateOf(initialMeasurement)
+    private var _measurement by mutableStateOf(initialTranslation)
 
     val units: String
         get() = _units
 
-    val measurement: Measurement
+    val translation: Translation
         get() = _measurement
 
     val numeric: Float
@@ -80,19 +80,19 @@ class SingleTranslationState(
         _units = updateNumericString(_units, toCurrentMeasurement.toString())
     }
 
-    fun updateMeasurement(measurement: Measurement) {
-        _measurement = measurement
+    fun updateMeasurement(translation: Translation) {
+        _measurement = translation
     }
 }
 
 @Composable
 fun rememberSingleTranslationState(
     initialMeters: Float = 0F,
-    initialMeasurement: Measurement = Measurement.CENTIMETERS
+    initialTranslation: Translation = Translation.CENTIMETERS
 ): SingleTranslationState = remember {
     SingleTranslationState(
-        translationFormat.format(initialMeters.toDouble() / initialMeasurement.metersPerUnit),
-        initialMeasurement
+        translationFormat.format(initialMeters.toDouble() / initialTranslation.metersPerUnit),
+        initialTranslation
     )
 }
 
@@ -130,13 +130,13 @@ class MultiTranslationState(
     initialXUnits: String = "0",
     initialYUnits: String = "0",
     initialZUnits: String = "0",
-    initialXMeasurement: Measurement = Measurement.CENTIMETERS,
-    initialYMeasurement: Measurement = Measurement.CENTIMETERS,
-    initialZMeasurement: Measurement = Measurement.CENTIMETERS,
+    initialXTranslation: Translation = Translation.CENTIMETERS,
+    initialYTranslation: Translation = Translation.CENTIMETERS,
+    initialZTranslation: Translation = Translation.CENTIMETERS,
 ) {
-    val x = SingleTranslationState(initialXUnits, initialXMeasurement)
-    val y = SingleTranslationState(initialYUnits, initialYMeasurement)
-    val z = SingleTranslationState(initialZUnits, initialZMeasurement)
+    val x = SingleTranslationState(initialXUnits, initialXTranslation)
+    val y = SingleTranslationState(initialYUnits, initialYTranslation)
+    val z = SingleTranslationState(initialZUnits, initialZTranslation)
 
     val position: Position
         get() = Position(x.meters, y.meters, z.meters)
@@ -147,17 +147,17 @@ fun rememberMultiTranslationState(
     initialXMeters: Float = 0F,
     initialYMeters: Float = 0F,
     initialZMeters: Float = 0F,
-    initialXMeasurement: Measurement = Measurement.CENTIMETERS,
-    initialYMeasurement: Measurement = Measurement.CENTIMETERS,
-    initialZMeasurement: Measurement = Measurement.CENTIMETERS,
+    initialXTranslation: Translation = Translation.CENTIMETERS,
+    initialYTranslation: Translation = Translation.CENTIMETERS,
+    initialZTranslation: Translation = Translation.CENTIMETERS,
 ): MultiTranslationState = remember {
     MultiTranslationState(
-        translationFormat.format(initialXMeters.toDouble() / initialXMeasurement.metersPerUnit),
-        translationFormat.format(initialYMeters.toDouble() / initialYMeasurement.metersPerUnit),
-        translationFormat.format(initialZMeters.toDouble() / initialZMeasurement.metersPerUnit),
-        initialXMeasurement,
-        initialYMeasurement,
-        initialZMeasurement
+        translationFormat.format(initialXMeters.toDouble() / initialXTranslation.metersPerUnit),
+        translationFormat.format(initialYMeters.toDouble() / initialYTranslation.metersPerUnit),
+        translationFormat.format(initialZMeters.toDouble() / initialZTranslation.metersPerUnit),
+        initialXTranslation,
+        initialYTranslation,
+        initialZTranslation
     )
 }
 

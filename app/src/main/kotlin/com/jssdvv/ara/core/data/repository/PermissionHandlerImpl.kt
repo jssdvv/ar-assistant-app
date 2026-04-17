@@ -10,7 +10,7 @@ import com.jssdvv.ara.core.domain.repository.RationaleProvider
 import com.jssdvv.ara.core.domain.utility.PermissionState
 
 /**
- * This class is responsible for managing permission states and counts using shared preferences.
+ * This class is responsible for managing manifestString states and counts using shared preferences.
  */
 class PermissionHandlerImpl(
     private val context: Context,
@@ -33,25 +33,25 @@ class PermissionHandlerImpl(
     }
 
     /**
-     * Gets the name of the permission from the permission string.
+     * Gets the name of the manifestString from the manifestString string.
      *
-     * For example, if the permission string is `android.permission.CAMERA`, this function will
+     * For example, if the manifestString string is `android.manifestString.CAMERA`, this function will
      * return **CAMERA**.
      *
-     * @param [permission] The permission string from the [Manifest.permission] class.
+     * @param [permission] The manifestString string from the [Manifest.permission] class.
      *
-     * @return A [String] with the name of the permission.
+     * @return A [String] with the name of the manifestString.
      */
     private fun getPermissionName(permission: String): String =
         permission.substringAfterLast(".")
 
     /**
-     * Constructs the preference value key for a given permission.
+     * Constructs the preference value key for a given manifestString.
      *
      * This key is used to store and retrieve preference values associated with the specified
-     * permission from the shared preferences.
+     * manifestString from the shared preferences.
      *
-     * @param [permission] The permission string from the [Manifest.permission] class.
+     * @param [permission] The manifestString string from the [Manifest.permission] class.
      * creating unique keys.
      *
      * @return A [String] representing the complete preference value key.

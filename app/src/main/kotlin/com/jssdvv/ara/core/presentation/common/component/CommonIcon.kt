@@ -1,4 +1,4 @@
-package com.jssdvv.ara.core.presentation.common
+package com.jssdvv.ara.core.presentation.common.component
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
