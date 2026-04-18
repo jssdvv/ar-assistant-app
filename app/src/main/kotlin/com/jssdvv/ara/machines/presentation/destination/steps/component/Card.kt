@@ -48,13 +48,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.ArrowDownIcon
-import com.jssdvv.ara.core.presentation.common.WarningIcon
+import com.jssdvv.ara.core.presentation.common.component.ArrowDownIcon
+import com.jssdvv.ara.core.presentation.common.component.WarningIcon
 import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.Step
-import com.jssdvv.ara.machines.domain.utility.RenderableInfo
+import com.jssdvv.ara.machines.domain.utility.PivotInfo
 import kotlinx.coroutines.launch
 
 @Composable
@@ -197,9 +197,9 @@ fun StepCard(
 @Composable
 fun SelectableRenderablesCard(
     modifier: Modifier = Modifier,
-    items: List<RenderableInfo>,
+    items: List<PivotInfo>,
     onActivateSelection: () -> Unit,
-    onDeleteItem : (RenderableInfo) -> Unit
+    onDeleteItem : (PivotInfo) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val itemHeight = 56.dp

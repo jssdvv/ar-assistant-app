@@ -16,26 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.AddIcon
-import com.jssdvv.ara.core.presentation.common.EditIcon
+import com.jssdvv.ara.core.presentation.common.component.AddIcon
+import com.jssdvv.ara.core.presentation.common.component.EditIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
-
-@Composable
-fun ChangeImageButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isOutlined: Boolean = false
-) {
-    ButtonWithIcon(
-        onClick = onClick,
-        modifier = modifier,
-        colors = if (isOutlined) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors(),
-        border = if (isOutlined) ButtonDefaults.outlinedButtonBorder() else null,
-        icon = { ChangeIcon() },
-        content = { Text(stringResource(R.string.button_image_change_select_action)) }
-    )
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

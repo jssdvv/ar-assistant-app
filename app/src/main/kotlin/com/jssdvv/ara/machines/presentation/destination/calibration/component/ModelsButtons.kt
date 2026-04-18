@@ -18,8 +18,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.jssdvv.ara.core.presentation.common.AddIcon
-import com.jssdvv.ara.core.presentation.common.RemoveIcon
+import com.jssdvv.ara.core.presentation.common.component.AddIcon
+import com.jssdvv.ara.core.presentation.common.component.RemoveIcon
 
 @Composable
 fun SubtractButton(

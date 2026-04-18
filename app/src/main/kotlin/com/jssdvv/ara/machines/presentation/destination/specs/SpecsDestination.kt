@@ -36,7 +36,7 @@ import coil.request.ImageRequest
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.AspectRatio
 import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
-import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
+import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.navigation.ActivitiesIcon
 import com.jssdvv.ara.core.presentation.navigation.DocumentsIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
@@ -97,11 +97,7 @@ internal fun MachineDetailsScreen(
         }
     ) { paddingValues ->
         when (cardUiState) {
-            MachineDetailsCardsUiState.Loading -> {
-                LoadingWheel(
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
+            MachineDetailsCardsUiState.Loading -> LoadingWheelScreen()
 
             is MachineDetailsCardsUiState.Success -> {
                 MachineDetailsSuccessScreen(

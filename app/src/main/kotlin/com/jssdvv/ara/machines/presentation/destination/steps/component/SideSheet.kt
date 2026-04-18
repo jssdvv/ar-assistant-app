@@ -20,7 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.SideSheet
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation

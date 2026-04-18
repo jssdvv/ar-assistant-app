@@ -20,22 +20,27 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.ArrowPreviousItemIcon
+import com.jssdvv.ara.core.presentation.common.component.ArrowPreviousItemIcon
+import com.jssdvv.ara.machines.domain.model.Tool
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
-import com.jssdvv.ara.machines.domain.utility.SingleRotationState
-import com.jssdvv.ara.machines.domain.utility.SingleTranslationState
-import com.jssdvv.ara.machines.domain.utility.TimeState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.SingleRotationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.SingleTranslationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.TimeState
 
 
 @Composable
 fun TranslationTextField(
     name: String,
     state: SingleTranslationState,
+    onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
     value = state.units,
-    onValueChange = { state.updateUnits(it) },
+    onValueChange = {
+        state.updateUnits(it)
+        onValueChange(it)
+    },
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
@@ -50,7 +55,7 @@ fun TranslationTextField(
     },
     trailingIcon = {
         TranslationMeasurementMenu(
-            measurement = state.measurement,
+            translation = state.translation,
             onMeasurementChange = { state.updateMeasurement(it) }
         )
     }
@@ -81,7 +86,7 @@ fun PitchTextField(
     trailingIcon = if (isPitch) {
         {
             TranslationMeasurementMenu(
-                measurement = state.measurement,
+                translation = state.translation,
                 onMeasurementChange = { state.updateMeasurement(it) }
             )
         }
@@ -165,6 +170,41 @@ fun OperationsTextField(
             Icon(
                 painter = painterResource(it.iconResId),
                 contentDescription = stringResource(it.iconContentDescResId)
+            )
+        }
+    },
+    trailingIcon = {
+        IconButton(
+            onClick = onClick,
+            content = { ArrowPreviousItemIcon(Modifier.rotate(180F)) }
+        )
+    },
+    interactionSource = interactionSource
+)
+
+@Composable
+fun ToolsTextField(
+    currentTool: Tool?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource? = null
+) = OutlinedTextField(
+    modifier = modifier
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = onClick
+        ),
+    value = currentTool?.type?.let { stringResource(it.labelResId) }
+        ?: stringResource(R.string.text_field_operation_empty_message), // todo change string
+    onValueChange = {},
+    label = { Text(stringResource(R.string.text_field_operation_selected_label)) }, // todo change string
+    readOnly = true,
+    leadingIcon = currentTool?.let {
+        {
+            Icon(
+                painter = painterResource(it.type.iconResId),
+                contentDescription = stringResource(it.type.iconContentDescResId)
             )
         }
     },

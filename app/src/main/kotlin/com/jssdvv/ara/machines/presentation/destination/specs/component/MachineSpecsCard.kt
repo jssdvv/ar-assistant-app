@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.TextIcon
+import com.jssdvv.ara.core.presentation.common.component.TextIcon
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.presentation.component.DetailListItem
 import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard

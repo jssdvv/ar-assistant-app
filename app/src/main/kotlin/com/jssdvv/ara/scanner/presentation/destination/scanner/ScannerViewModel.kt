@@ -32,8 +32,8 @@ class ScannerViewModel @Inject constructor(
         onCheckPermissionState(CAMERA_PERMISSION, true)
     }
 
-    // Camera permissions are requested up to twice. If the user decline in the second time,
-    // it must manually grant permissions in the system settings to proceed with scanning.
+    // Camera permissionsManifestStrings are requested up to twice. If the user decline in the second time,
+    // it must manually grant permissionsManifestStrings in the system settings to proceed with scanning.
     val cameraPermissionState = _cameraPermissionState.asStateFlow()
 
     val uiState: StateFlow<ScannerUiState> = combine(
@@ -85,13 +85,13 @@ sealed class ScannerEvent {
 sealed interface ScannerUiState {
 
     /**
-     * Represents the state after the user has granted required permissions. This shows a loading
+     * Represents the state after the user has granted required permissionsManifestStrings. This shows a loading
      * indicator and then navigates to the [Success] state.
      */
     data object Loading : ScannerUiState
 
     /**
-     * Represents the state when the camera permissions have been successfully granted,
+     * Represents the state when the camera permissionsManifestStrings have been successfully granted,
      * and the user can start using the scanning functionality.
      *
      * In this state, the screen displays various UI controls to manage the camera, such as enabling

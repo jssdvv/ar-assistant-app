@@ -68,12 +68,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import com.jssdvv.ara.core.presentation.common.ArrowPreviousItemIcon
-import com.jssdvv.ara.core.presentation.common.CheckIcon
-import com.jssdvv.ara.core.presentation.common.CloseIcon
-import com.jssdvv.ara.core.presentation.common.MenuCloseIcon
-import com.jssdvv.ara.core.presentation.common.MenuIcon
-import com.jssdvv.ara.core.presentation.common.NavigationUpIconButton
+import com.jssdvv.ara.core.presentation.common.component.ArrowPreviousItemIcon
+import com.jssdvv.ara.core.presentation.common.component.CheckIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.MenuCloseIcon
+import com.jssdvv.ara.core.presentation.common.component.MenuIcon
+import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.theme.spacing
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -396,7 +396,7 @@ fun BottomSheetMainHeader(
 @Composable
 fun BottomSheetSubHeader(
     title: String,
-    onNavigateUp: () -> Unit,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -409,7 +409,7 @@ fun BottomSheetSubHeader(
         contentAlignment = Alignment.Center
     ) {
         NavigationUpIconButton(
-            onNavigationUp = onNavigateUp,
+            onNavigationUp = onNavigateBack,
             modifier = Modifier.align(Alignment.CenterStart),
             icon = { ArrowPreviousItemIcon() }
         )

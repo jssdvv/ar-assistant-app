@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.EditButtonWithIcon
+import com.jssdvv.ara.core.presentation.common.component.EditButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.BadgeIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.HeroImageCard

@@ -6,12 +6,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.Alignment
-import com.jssdvv.ara.core.domain.utility.asContentColor
 import com.jssdvv.ara.core.domain.utility.asContainerColor
+import com.jssdvv.ara.core.domain.utility.asContentColor
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.type.Axis
 
@@ -19,8 +18,7 @@ import com.jssdvv.ara.machines.domain.type.Axis
 fun AxisSelector(
     axis: Axis,
     onAxisChange: (Axis) -> Unit,
-    modifier: Modifier = Modifier,
-    isRotation: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     FlowRow(
         modifier = modifier

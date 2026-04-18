@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CheckListIcon
-import com.jssdvv.ara.core.presentation.common.CloseIcon
-import com.jssdvv.ara.core.presentation.common.ShareIcon
+import com.jssdvv.ara.core.presentation.common.component.CheckListIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.ShareIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

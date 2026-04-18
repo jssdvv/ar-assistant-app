@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--MACHINES SEARCH BAR [COMPONENT]-->
 
@@ -131,9 +131,10 @@
 
     <string name="button_editor_restore_defaults_action">Restaurar valores</string>
 
-    <!--MARKER DIALOG [COMPONENT]-->
+    <!--CALIBRATION MARKER DIALOG [COMPONENT]-->
 
-    <string name="dialog_selected_marker_title">Selecciona un marcador</string>
+    <string name="calibration_dialog_selected_marker_title">Selecciona un marcador</string>
+    <string name="calibration_dialog_uncalibrated_trailing_label">No calibrado</string>
 
     <!--MARKER BUTTON [COMPONENT]-->
 
@@ -144,12 +145,12 @@
 
     <string name="screen_editor_activity_title">Editor de actividades</string>
 
-    <plurals name="button_editor_step_count_label">
+    <plurals name="button_editor_step_count_label" tools:ignore="MissingQuantity,UnusedQuantity">
         <item quantity="zero">Sin pasos</item>
         <item quantity="other">Paso: %1$d / %2$d</item>
     </plurals>
 
-    <plurals name="button_editor_operation_count_label">
+    <plurals name="button_editor_operation_count_label" tools:ignore="MissingQuantity,UnusedQuantity">
         <item quantity="zero">Sin operaciones</item>
         <item quantity="other">Operación: %1$d / %2$d</item>
     </plurals>
@@ -159,6 +160,23 @@
     <string name="enum_axis_x_name">X</string>
     <string name="enum_axis_y_name">Y</string>
     <string name="enum_axis_z_name">Z</string>
+
+    <!--CALIBRATION DESTINATION [COMPONENT]-->
+
+    <string name="calibration_shutter_button_models_label">Modelos</string>
+    <string name="calibration_no_markers_title">No hay marcadores para calibrar modelos</string>
+    <string name="calibration_button_go_to_markers_creation_action">Crear marcador</string>
+
+    <!--CALIBRATION MODELS DIALOG [COMPONENT]-->
+
+    <string name="calibration_dialog_models_title">Selecciona un modelo para editar</string>
+
+    <!--CALIBRATION UNSAVED CHANGES DIALOG [COMPONENT]-->
+
+    <string name="calibration_dialog_unsaved_changes_title">¿Estás seguro que deseas salir?</string>
+    <string name="calibration_dialog_unsaved_changes_warning">Los modelos que no han sido calibrados serán eliminados</string>
+    <string name="calibration_dialog_unsaved_changes_dismiss_action">Borrar y salir</string>
+    <string name="calibration_dialog_unsaved_changes_open_models_action">Abrir modelos</string>
 
     <!--STEPS CARD [COMPONENT]-->
 
@@ -211,5 +229,9 @@
     <string name="notification_chip_message_speed_half">Velocidad media</string>
     <string name="notification_chip_message_speed_normal">Velocidad normal</string>
     <string name="notification_chip_message_speed_double">Velocidad doble</string>
+
+    <string name="notification_chip_message_origin_repositioned">Modelos reposicionados a %s</string>
+    <string name="notification_chip_message_origin_calibrated">Modelos calibrados a %s</string>
+    <string name="notification_chip_message_model_calibrated">Modelo: %1$s calibrado a %2$s</string>
 
 </resources>

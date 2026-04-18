@@ -26,8 +26,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.AddIcon
-import com.jssdvv.ara.core.presentation.common.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.AddIcon
+import com.jssdvv.ara.core.presentation.common.component.ChangeImageButton
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.MinimalDialog
 import com.jssdvv.ara.core.presentation.theme.spacing

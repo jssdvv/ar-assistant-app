@@ -1,9 +1,12 @@
 package com.jssdvv.ara.machines.presentation.component
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -16,15 +19,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,9 +46,12 @@ fun ShutterButton(
     onClick: () -> Unit,
     onPress: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = false,
-    colorEnabled: Color = Color.White,
-    colorDisabled: Color = Color.DarkGray,
+    enabledClick: Boolean = true,
+    enabledPress: Boolean = true,
+    containerColor: Color = Color.White,
+    disabledContainerColor: Color = Color.White.copy(alpha = 0.1F),
+    contentColor: Color = Color.Black,
+    disabledContentColor: Color = Color.White.copy(alpha = 0.38F),
     ringSize: Dp = 72.dp,
     circleSize: Dp = 56.dp,
     strokeWidth: Dp = 5.dp,
@@ -54,6 +59,10 @@ fun ShutterButton(
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
+
+    LaunchedEffect(enabledPress) {
+        if (!enabledPress) isPressed = false
+    }
 
     val ringScale by animateFloatAsState(
         targetValue = if (isPressed) 1.4F else 1F,
@@ -64,14 +73,17 @@ fun ShutterButton(
         targetValue = if (isPressed) 0.4F else 1F,
         animationSpec = tween(200, 0, LinearOutSlowInEasing)
     )
+
+    val enabled = enabledClick || enabledPress
+
     Box(
         modifier = modifier
             .size(ringSize)
             .graphicsLayer { scaleX = ringScale; scaleY = ringScale }
             .clip(CircleShape)
-            .pointerInput(enabled) {
+            .pointerInput(enabledClick, enabledPress) {
                 awaitPointerEventScope {
-                    while (enabled) {
+                    while (enabledClick || enabledPress) {
                         val down = awaitFirstDown()
 
                         val press = PressInteraction.Press(down.position)
@@ -83,11 +95,13 @@ fun ShutterButton(
                         }
 
                         if (upBeforeTimeout == null) {
-                            isPressed = true
-                            onPress()
-                            waitForUpOrCancellation()
+                            if (enabledPress) {
+                                isPressed = true
+                                onPress()
+                                waitForUpOrCancellation()
+                            }
                         } else {
-                            onClick()
+                            if (enabledClick) onClick()
                         }
 
                         isPressed = false
@@ -98,12 +112,18 @@ fun ShutterButton(
             },
         contentAlignment = Alignment.Center
     ) {
+        val (currentContainerColor, currentContentColor) = if(enabled){
+            containerColor to contentColor
+        } else {
+            disabledContainerColor to disabledContentColor
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .border(
                     strokeWidth,
-                    if (enabled) colorEnabled else colorDisabled,
+                    currentContainerColor,
                     CircleShape
                 )
         )
@@ -112,13 +132,13 @@ fun ShutterButton(
                 .size(circleSize)
                 .graphicsLayer { scaleX = circleScale; scaleY = circleScale }
                 .background(
-                    if (enabled) colorEnabled else colorDisabled,
+                    currentContainerColor,
                     CircleShape
                 )
                 .clip(CircleShape)
                 .indication(
                     interactionSource = interactionSource,
-                    indication = ripple(color = Color.Black)
+                    indication = ripple(color = contentColor)
                 )
         )
         iconDrawableId?.let { drawableId ->
@@ -135,7 +155,7 @@ fun ShutterButton(
                 Icon(
                     painter = painterResource(id = drawableId),
                     contentDescription = null,
-                    tint = if (enabled) Color.Black else Color.White.copy(alpha = .5F)
+                    tint = currentContentColor
                 )
             }
         }
@@ -144,7 +164,9 @@ fun ShutterButton(
 
 @Composable
 fun ShutterSection(
-    shutterEnabled: Boolean,
+    visible: Boolean,
+    shutterClickEnabled: Boolean,
+    shutterPressEnabled: Boolean,
     onClickShutter: () -> Unit,
     onPressShutter: () -> Unit,
     modifier: Modifier = Modifier,
@@ -154,26 +176,38 @@ fun ShutterSection(
     leftSection: @Composable BoxScope.() -> Unit = {},
     containerColor: Color = Color.Black.copy(alpha = 0.4F),
     @DrawableRes iconDrawableId: Int? = null,
-) = Row(
-    modifier = modifier
-        .fillMaxWidth()
-        .defaultMinSize(minHeight = 136.dp)
-        .background(containerColor),
-    horizontalArrangement = Arrangement.Center,
-    verticalAlignment = Alignment.CenterVertically
 ) {
-    Box(
-        modifier = leftModifier.weight(1F),
-        content = leftSection
-    )
-    ShutterButton(
-        onClick = onClickShutter,
-        onPress = onPressShutter,
-        enabled = shutterEnabled,
-        iconDrawableId = iconDrawableId
-    )
-    Box(
-        modifier = rightModifier.weight(1F),
-        content = rightSection
-    )
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = expandVertically(tween(), Alignment.Top),
+        exit = shrinkVertically(tween(), Alignment.Top)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 136.dp)
+                .background(containerColor),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = leftModifier.weight(1F),
+                contentAlignment = Alignment.CenterStart,
+                content = leftSection
+            )
+            ShutterButton(
+                onClick = onClickShutter,
+                onPress = onPressShutter,
+                enabledClick = shutterClickEnabled,
+                enabledPress = shutterPressEnabled,
+                iconDrawableId = iconDrawableId
+            )
+            Box(
+                modifier = rightModifier.weight(1F),
+                contentAlignment = Alignment.CenterEnd,
+                content = rightSection
+            )
+        }
+    }
 }

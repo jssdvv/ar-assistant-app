@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -18,49 +19,54 @@ import androidx.compose.material3.TextFieldLabelPosition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CloseIcon
-import com.jssdvv.ara.core.presentation.common.SearchIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.SearchIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
 
 @Composable
 fun SearchBar(
-    state: TextFieldState = rememberTextFieldState(),
     modifier: Modifier = Modifier,
-    onKeyboardAction: KeyboardActionHandler? = null
-) = TextField(
-    state = state,
-    modifier = modifier
-        .padding(MaterialTheme.spacing.small)
-        .height(36.dp),
-    labelPosition = TextFieldLabelPosition.Attached(),
-    contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall),
-    textStyle = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-    colors = TextFieldDefaults.colors(
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-    ),
-    leadingIcon = { SearchIcon(Modifier.size(16.dp)) },
-    shape = MaterialTheme.shapes.small,
-    lineLimits = TextFieldLineLimits.SingleLine,
-    placeholder = {
-        Text(
-            text = stringResource(R.string.text_search_action),
-            softWrap = false,
-            maxLines = 1
-        )
-    },
-    trailingIcon = if (state.text.isNotEmpty()) {
-        {
-            IconButton(
-                onClick = { state.clearText() },
-                content = { CloseIcon(Modifier.size(16.dp)) }
+    state: TextFieldState = rememberTextFieldState(),
+) {
+    val focusManager = LocalFocusManager.current
+    TextField(
+        state = state,
+        modifier = modifier
+            .padding(MaterialTheme.spacing.small)
+            .height(36.dp),
+        labelPosition = TextFieldLabelPosition.Attached(),
+        contentPadding = PaddingValues(MaterialTheme.spacing.extraSmall),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+        colors = TextFieldDefaults.colors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+        ),
+        leadingIcon = { SearchIcon(Modifier.size(16.dp)) },
+        shape = MaterialTheme.shapes.small,
+        lineLimits = TextFieldLineLimits.SingleLine,
+        placeholder = {
+            Text(
+                text = stringResource(R.string.text_search_action),
+                softWrap = false,
+                maxLines = 1
             )
-        }
-    } else null,
-    onKeyboardAction = onKeyboardAction
-)
+        },
+        trailingIcon = if (state.text.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { state.clearText() },
+                    content = { CloseIcon(Modifier.size(16.dp)) }
+                )
+            }
+        } else null,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        onKeyboardAction = KeyboardActionHandler { focusManager.clearFocus() }
+    )
+}

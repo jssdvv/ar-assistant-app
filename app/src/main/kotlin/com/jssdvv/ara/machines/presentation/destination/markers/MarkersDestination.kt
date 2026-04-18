@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jssdvv.ara.core.presentation.common.AddIcon
-import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
+import com.jssdvv.ara.core.presentation.common.component.AddIcon
+import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.presentation.destination.markers.component.MarkerDialog
 import com.jssdvv.ara.machines.presentation.destination.markers.component.MarkersTopBar
@@ -78,7 +78,7 @@ internal fun MarkersScreen(
     ) { paddingValues ->
         when (uiState) {
             MarkersUiState.Loading -> {
-                LoadingWheel(
+                LoadingWheelScreen(
                     modifier = modifier.padding(paddingValues)
                 )
             }

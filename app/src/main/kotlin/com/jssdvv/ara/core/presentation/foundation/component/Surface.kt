@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.jssdvv.ara.core.presentation.common.NavigationUpIconButton
+import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.theme.cornerRadius
 
 @Composable

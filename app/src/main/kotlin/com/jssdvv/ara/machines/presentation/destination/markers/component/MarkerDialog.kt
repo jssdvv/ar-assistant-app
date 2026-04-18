@@ -30,8 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.DeleteIcon
-import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
+import com.jssdvv.ara.core.presentation.common.component.DeleteIcon
+import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.machines.domain.model.Marker
 
 @Composable
@@ -93,7 +93,7 @@ fun MarkerDialog(
                         bitmap = it.asImageBitmap(),
                         contentDescription = stringResource(R.string.marker_dialog_barcode_content_desc)
                     )
-                } ?: LoadingWheel(modifier = Modifier.size(210.dp))
+                } ?: LoadingWheelScreen(modifier = Modifier.size(210.dp))
 
                 // The marker codification, e.g. M1P1
                 Text(

@@ -24,7 +24,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
-import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
+import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.navigation.CalibrationIcon
 import com.jssdvv.ara.core.presentation.navigation.MarkerIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
@@ -41,10 +41,9 @@ fun ActivitiesDestination(
     onNavigateToAnimations: (Int, Int) -> Unit,
     viewModel: ActivitiesViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     ActivitiesScreen(
         machineId = viewModel.machineId,
-        uiState = uiState,
+        uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
         onNavigateBack = onNavigateBack,
         onNavigateToMarkers = onNavigateToMarkers,
         onNavigateToModels = onNavigateToCalibration,
@@ -74,9 +73,7 @@ fun ActivitiesScreen(
         floatingActionButton = {}
     ) { paddingValues ->
         when (uiState) {
-            ActivitiesUiState.Loading -> {
-                LoadingWheel()
-            }
+            ActivitiesUiState.Loading -> LoadingWheelScreen()
 
             is ActivitiesUiState.Success -> {
                 ActivitiesContent(

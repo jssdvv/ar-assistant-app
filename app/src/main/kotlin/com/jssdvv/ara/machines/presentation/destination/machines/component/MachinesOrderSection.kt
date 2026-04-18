@@ -29,7 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.type.OrderType
-import com.jssdvv.ara.core.presentation.common.ArrowDropDownIcon
+import com.jssdvv.ara.core.presentation.common.component.ArrowDropDownIcon
 import com.jssdvv.ara.machines.domain.type.MachineOrderKey
 
 @Composable

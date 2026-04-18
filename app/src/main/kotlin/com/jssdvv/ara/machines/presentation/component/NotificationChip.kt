@@ -50,6 +50,7 @@ fun NotificationChip(
 
     var currentPainter by remember { mutableStateOf<Int?>(null) }
     var currentText by remember { mutableStateOf<Int?>(null) }
+    var currentArgs by remember { mutableStateOf<List<Any?>>(emptyList()) }
 
     var visible by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
@@ -80,6 +81,7 @@ fun NotificationChip(
 
         currentPainter = event.iconRes
         currentText = event.message
+        currentArgs = event.args
 
         expanded = true
         delay(duration)
@@ -126,7 +128,7 @@ fun NotificationChip(
                         )
                     }
                     Text(
-                        text = stringResource(text),
+                        text = stringResource(text, *currentArgs.filterNotNull().toTypedArray()),
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
                     )

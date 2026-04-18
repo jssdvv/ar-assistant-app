@@ -47,7 +47,7 @@
 
         Explanatory: Texts that clarify system behavior, intentions, or requirements.
 
-            - [rationale] Explains the need for a permission or specific behavior.
+            - [rationale] Explains the need for a manifestString or specific behavior.
             - [supporting_text] Additional details that reinforce or explain a component’s purpose.
             - [warning] Highlights potential risks or issues to avoid.
 
@@ -82,6 +82,7 @@
     <string name="button_cancel_action">Cancel</string>
     <string name="button_save_action">Save</string>
     <string name="button_edit_action">Edit</string>
+    <string name="button_add_action">Add</string>
 
     <!--COMMON ICON [COMPONENT]-->
 

@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.core.domain.type.OrderType
-import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
+import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.type.MachineOrderKey
@@ -85,13 +85,7 @@ internal fun MachinesScreen(
         floatingActionButton = {}
     ) { paddingValues ->
         when (uiState) {
-            MachinesUiState.Loading -> {
-                LoadingWheel(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                )
-            }
+            MachinesUiState.Loading -> LoadingWheelScreen()
 
             is MachinesUiState.Success -> {
                 MachinesContent(

@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.core.domain.utility.horizontalMirrored
-import com.jssdvv.ara.core.presentation.common.ArrowDownIcon
+import com.jssdvv.ara.core.presentation.common.component.ArrowDownIcon
 
 @Composable
 fun MenuTextButton(

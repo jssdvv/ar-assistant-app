@@ -25,9 +25,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.type.OrderType
-import com.jssdvv.ara.core.presentation.common.ArrowBackIcon
-import com.jssdvv.ara.core.presentation.common.CloseIcon
-import com.jssdvv.ara.core.presentation.common.SearchIcon
+import com.jssdvv.ara.core.presentation.common.component.ArrowBackIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.SearchIcon
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.type.MachineOrderKey
 

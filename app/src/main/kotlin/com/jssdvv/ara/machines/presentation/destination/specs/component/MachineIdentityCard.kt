@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CheckIcon
+import com.jssdvv.ara.core.presentation.common.component.CheckIcon
 import com.jssdvv.ara.core.presentation.foundation.component.DatePickerModal
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.type.MachineType

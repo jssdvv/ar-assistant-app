@@ -34,7 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.PermissionState
-import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheel
+import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.scanner.data.repository.MLKitBarcodeAnalyzer
 import com.jssdvv.ara.scanner.presentation.destination.scanner.component.CameraPreview
 import com.jssdvv.ara.scanner.presentation.destination.scanner.component.QRSquareCanvas
@@ -82,7 +82,7 @@ fun ScannerScreen(
         PermissionState.Granted -> {
             when (uiState) {
                 ScannerUiState.Loading -> {
-                    LoadingWheel(
+                    LoadingWheelScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }

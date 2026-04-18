@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CloseIcon
-import com.jssdvv.ara.core.presentation.common.EditIcon
-import com.jssdvv.ara.core.presentation.common.ToggleVisibleIconButton
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.EditIcon
+import com.jssdvv.ara.core.presentation.common.component.ToggleVisibleIconButton
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.type.OperationType
