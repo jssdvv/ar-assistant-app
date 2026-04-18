@@ -20,8 +20,8 @@ fun OperationEntity.toDomain() = Operation(
     axis = axis,
     turns = turns,
     isGlobal = isGlobal,
-    offsetPosition = Position(offsetVx, offsetVy, offsetVz),
-    offsetRotation = Quaternion(offsetQx, offsetQy, offsetQz, offsetQw)
+    containerOffsetPosition = Position(offsetVx, offsetVy, offsetVz),
+    containerOffsetQuaternion = Quaternion(offsetQx, offsetQy, offsetQz, offsetQw)
 )
 
 fun Operation.toEntity() = OperationEntity(
@@ -35,13 +35,13 @@ fun Operation.toEntity() = OperationEntity(
     axis = axis,
     turns = turns,
     isGlobal = isGlobal,
-    offsetVy = offsetPosition.y,
-    offsetVx = offsetPosition.x,
-    offsetVz = offsetPosition.z,
-    offsetQx = offsetRotation.x,
-    offsetQy = offsetRotation.y,
-    offsetQz = offsetRotation.z,
-    offsetQw = offsetRotation.w,
+    offsetVy = containerOffsetPosition.y,
+    offsetVx = containerOffsetPosition.x,
+    offsetVz = containerOffsetPosition.z,
+    offsetQx = containerOffsetQuaternion.x,
+    offsetQy = containerOffsetQuaternion.y,
+    offsetQz = containerOffsetQuaternion.z,
+    offsetQw = containerOffsetQuaternion.w,
 )
 
 fun OperationWithTargets.toDomain() = OperationTargets(

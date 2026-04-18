@@ -24,8 +24,7 @@ import com.jssdvv.ara.machines.data.local.entity.ModelEntity
             entity = ModelEntity::class,
             parentColumns = [ModelEntity.COLUMN_ID],
             childColumns = [RenderableTargetComposite.COLUMN_MODEL_ID],
-            onDelete = ForeignKey.NO_ACTION,
-            onUpdate = ForeignKey.NO_ACTION
+            onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [

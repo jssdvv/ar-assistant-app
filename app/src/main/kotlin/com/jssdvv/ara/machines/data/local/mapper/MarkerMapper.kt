@@ -4,6 +4,8 @@ import com.jssdvv.ara.machines.data.local.entity.MarkerEntity
 import com.jssdvv.ara.machines.domain.model.Marker
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.math.Position
+import io.github.sceneview.math.Transform
+import io.github.sceneview.math.quaternion
 
 fun MarkerEntity.toDomain() = Marker(
     id = id,
@@ -12,8 +14,10 @@ fun MarkerEntity.toDomain() = Marker(
     sizeCentimeters = sizeCentimeters,
     imageUri = imageUri,
     calibrated = calibrated,
-    originOffsetPosition = Position(originOffsetVx, originOffsetVy, originOffsetVz),
-    originOffsetRotation = Quaternion(originOffsetQx, originOffsetQy, originOffsetQz, originOffsetQw)
+    originOffsetTransform = Transform(
+        position = Position(originOffsetVx, originOffsetVy, originOffsetVz),
+        quaternion = Quaternion(originOffsetQx, originOffsetQy, originOffsetQz, originOffsetQw)
+    )
 )
 
 fun Marker.toEntity() = MarkerEntity(
@@ -23,11 +27,11 @@ fun Marker.toEntity() = MarkerEntity(
     sizeCentimeters = sizeCentimeters,
     imageUri = imageUri,
     calibrated = calibrated,
-    originOffsetVx = originOffsetPosition.x,
-    originOffsetVy = originOffsetPosition.y,
-    originOffsetVz = originOffsetPosition.z,
-    originOffsetQx = originOffsetRotation.x,
-    originOffsetQy = originOffsetRotation.y,
-    originOffsetQz = originOffsetRotation.z,
-    originOffsetQw = originOffsetRotation.w
+    originOffsetVx = originOffsetTransform.position.x,
+    originOffsetVy = originOffsetTransform.position.y,
+    originOffsetVz = originOffsetTransform.position.z,
+    originOffsetQx = originOffsetTransform.quaternion.x,
+    originOffsetQy = originOffsetTransform.quaternion.y,
+    originOffsetQz = originOffsetTransform.quaternion.z,
+    originOffsetQw = originOffsetTransform.quaternion.w
 )

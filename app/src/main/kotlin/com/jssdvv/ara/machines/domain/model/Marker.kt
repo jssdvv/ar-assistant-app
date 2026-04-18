@@ -1,8 +1,7 @@
 package com.jssdvv.ara.machines.domain.model
 
 import android.net.Uri
-import dev.romainguy.kotlin.math.Quaternion
-import io.github.sceneview.math.Position
+import io.github.sceneview.math.Transform
 
 data class Marker(
     val id: Int = 0,
@@ -13,6 +12,5 @@ data class Marker(
     val calibrated: Boolean = false,
 
     // Origin transform in the current Marker's local space.
-    val originOffsetPosition: Position = Position(),
-    val originOffsetRotation: Quaternion = Quaternion(),
+    val originOffsetTransform: Transform = Transform()
 )

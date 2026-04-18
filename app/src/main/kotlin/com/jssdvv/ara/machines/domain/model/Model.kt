@@ -1,8 +1,7 @@
 package com.jssdvv.ara.machines.domain.model
 
 import android.net.Uri
-import dev.romainguy.kotlin.math.Quaternion
-import io.github.sceneview.math.Position
+import io.github.sceneview.math.Transform
 
 data class Model(
     val id: Int = 0,
@@ -12,6 +11,5 @@ data class Model(
     val calibrated: Boolean = false,
 
     // Model's position and rotation in Origin's local space.
-    val offsetPosition: Position = Position(),
-    val offsetRotation: Quaternion = Quaternion(),
+    val offsetTransform: Transform  = Transform()
 )

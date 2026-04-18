@@ -20,8 +20,10 @@ data class Operation(
     val axis: Axis = Axis.Y,
     val turns: Float = 2F,
     val isGlobal: Boolean = false,
-    val offsetPosition: Position = Position(),
-    val offsetRotation: Quaternion = Quaternion()
+
+    // Relative to container coordinate system
+    val containerOffsetPosition: Position = Position(),
+    val containerOffsetQuaternion: Quaternion = Quaternion()
 )
 
 // Cross-Ref table 1-N
