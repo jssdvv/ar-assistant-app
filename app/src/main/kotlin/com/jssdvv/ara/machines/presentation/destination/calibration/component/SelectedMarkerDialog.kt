@@ -6,15 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CheckIcon
+import com.jssdvv.ara.core.presentation.common.component.CancelButtonWithIcon
+import com.jssdvv.ara.core.presentation.common.component.CheckIcon
 import com.jssdvv.ara.core.presentation.navigation.MarkerIcon
+import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Marker
 
 @Composable
@@ -30,10 +31,10 @@ fun SelectedMarkerDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
                 MarkerIcon()
-                Text(stringResource(R.string.dialog_selected_marker_title))
+                Text(stringResource(R.string.calibration_dialog_selected_marker_title))
             }
         },
         text = {
@@ -50,11 +51,11 @@ fun SelectedMarkerDialog(
                         modifier = Modifier.clickable { onMarkerClick(marker) },
                         headlineContent = { Text(text = markerName) },
                         leadingContent = { if (currentMarker == marker) CheckIcon() },
-                        trailingContent = { if (!isCalibrated) Text("Uncalibrated") }
+                        trailingContent = { if (!isCalibrated) Text(stringResource(R.string.calibration_dialog_uncalibrated_trailing_label)) }
                     )
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismissRequest) { Text(text = "Cancel") } },
+        confirmButton = { CancelButtonWithIcon(onDismissRequest) }
     )
 }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import androidx.compose.runtime.Immutable
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,16 +13,28 @@ import androidx.navigation.toRoute
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.presentation.common.state.ManifestString
+import com.jssdvv.ara.core.presentation.common.state.Permission
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
+import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.domain.type.measurement.Measurement
+import com.jssdvv.ara.machines.domain.type.measurement.MeasurementMode
 import com.jssdvv.ara.machines.domain.usecase.MarkersDataManager
 import com.jssdvv.ara.machines.domain.usecase.ModelsDataManager
 import com.jssdvv.ara.machines.presentation.destination.ar_session.NotificationEvent
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalRotation
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTranslation
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
+import com.jssdvv.ara.machines.presentation.sceneview.node.ContainerNode
+import com.jssdvv.ara.machines.presentation.sceneview.node.MarkerNode
+import com.jssdvv.ara.machines.presentation.sceneview.node.OriginNode
+import com.jssdvv.ara.machines.presentation.sceneview.utility.applyObjectPositionOffset
+import com.jssdvv.ara.machines.presentation.sceneview.utility.applyObjectQuaternionOffset
+import com.jssdvv.ara.machines.presentation.sceneview.utility.setUnselectedMaterialInstance
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.romainguy.kotlin.math.Quaternion
-import io.github.sceneview.math.Position
+import io.github.sceneview.loaders.MaterialLoader
+import io.github.sceneview.math.Transform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,18 +45,18 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ModelsCalibrationViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val permissionHandler: PermissionHandler,
     private val filesManager: FilesManager,
     private val markersDataManager: MarkersDataManager,
@@ -51,20 +64,20 @@ class ModelsCalibrationViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-
         private val isMinSdk33 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         private val isMinSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
-        val permissions = when {
-            isMinSdk33 -> arrayOf(
+        val permissionsManifestStrings = when {
+            isMinSdk33 -> arrayOf<ManifestString>(
                 Manifest.permission.CAMERA
             )
 
-            isMinSdk29 -> arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA
+            isMinSdk29 -> arrayOf<ManifestString>(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
             )
 
-            else -> arrayOf(
+            else -> arrayOf<ManifestString>(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
@@ -74,9 +87,15 @@ class ModelsCalibrationViewModel @Inject constructor(
 
     val machineId = savedStateHandle.toRoute<MachinesGraph.CalibrationRoute>().machineId
 
-    // Permissions Pair<Permission string, Permission state>
-    private val _permissionsStates = MutableStateFlow(emptyList<Pair<String, PermissionState>>())
-    private val options = MutableStateFlow(CalibrationOptions())
+    private val _permissions = MutableStateFlow<Set<Permission>>(
+        permissionsManifestStrings.mapTo(mutableSetOf()) { manifestString ->
+            Permission(
+                manifestString = manifestString,
+                state = permissionHandler.getPermissionState(manifestString, true)
+            )
+        }
+    )
+
     private val _notification = MutableSharedFlow<NotificationEvent>(extraBufferCapacity = 1)
 
     private val markers: StateFlow<List<Marker>> = markersDataManager
@@ -95,35 +114,65 @@ class ModelsCalibrationViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    private val data: StateFlow<CalibrationData> = combine(
+        markers,
+        models,
+        ::CalibrationData
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = CalibrationData()
+    )
+
+    private val previousModelTransform = MutableStateFlow(Transform())
+    private val selectedContainerId = MutableStateFlow<Int?>(null)
+    private val selectedMeasurement = MutableStateFlow(Measurement.TRANSLATION)
+    private val selectedMode = MutableStateFlow(MeasurementMode())
     private val selectedMarker = MutableStateFlow<Marker?>(null)
-    private val selectedMarkerBitmap: StateFlow<BitmapInfo?> = selectedMarker
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val currentBitmapInfo: StateFlow<BitmapInfo?> = selectedMarker
         .mapNotNull { it?.let { marker -> marker.id to marker.imageUri } }
         .distinctUntilChanged()
         .mapLatest { (id, imageUri) ->
-            withContext(Dispatchers.IO) {
-                filesManager.getBitmapFromInputStream(filesManager.getInputStreamFromUri(imageUri))
-            }?.let { bitmap ->
-                BitmapInfo(id, bitmap)
-            }
+            filesManager.getBitmapFromInputStream(filesManager.getInputStreamFromUri(imageUri))
+                ?.let { BitmapInfo(id, it) }
         }
+        .flowOn(Dispatchers.IO)
         .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            null
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = null
         )
 
-    init { onCheckPermissionsStates(permissions.map { it to true }) }
-
-    val notification = _notification.asSharedFlow()
-    val permissionsStates = _permissionsStates.asStateFlow()
-    val uiState: StateFlow<ModelsCalibrationUiState> = combine(
-        markers,
-        models,
+    private val items: StateFlow<CalibrationItems> = combine(
+        selectedContainerId,
+        selectedMeasurement,
+        selectedMode,
         selectedMarker,
-        selectedMarkerBitmap,
-        options,
-        ModelsCalibrationUiState::Success
+        currentBitmapInfo,
+        ::CalibrationItems
     ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = CalibrationItems()
+    )
+
+    private val options = MutableStateFlow(CalibrationOptions())
+
+    val permissions = _permissions.asStateFlow()
+    val notification = _notification.asSharedFlow()
+    val uiState: StateFlow<ModelsCalibrationUiState> = combine(
+        data,
+        items,
+        options
+    ) { data, items, options ->
+        if (data.markers.isEmpty()) {
+            ModelsCalibrationUiState.EmptyMarkers
+        } else {
+            ModelsCalibrationUiState.Success(data, items, options)
+        }
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
         initialValue = ModelsCalibrationUiState.Loading
@@ -131,76 +180,142 @@ class ModelsCalibrationViewModel @Inject constructor(
 
     fun onEvent(event: ModelsEvent) {
         when (event) {
-            is ModelsEvent.OnCheckPermissionsStates -> onCheckPermissionsStates(event.permissions)
-            is ModelsEvent.OnPermissionInteraction -> onPermissionInteraction(event.permission)
+            is ModelsEvent.OnCheckPermissionsStates -> onCheckPermissionsStates()
+            is ModelsEvent.OnPermissionInteraction -> onPermissionInteraction(event.manifestString)
             is ModelsEvent.OnSelectMarker -> selectedMarker.update { event.marker }
-            is ModelsEvent.OnCalibrateOriginToMarker -> calibrateOriginToMarker(
-                event.markerId,
-                event.newOriginPosition,
-                event.newOriginQuaternion
+
+            is ModelsEvent.OnRepositionOrigin -> repositionOrigin(
+                event.originNode,
+                event.markerNode
             )
 
-            is ModelsEvent.OnCalibrateModelsToOrigin -> calibrateSelectedModelToOrigin(
-                event.modelId,
-                event.newModelPosition,
-                event.newModelQuaternion
+            is ModelsEvent.OnCalibrateOriginToMarker -> calibrateOriginToMarker(
+                event.originNode,
+                event.markerNode
+            )
+
+            is ModelsEvent.OnSelectContainer -> selectContainer(
+                event.containerNode,
+                event.materialLoader
+            )
+
+            is ModelsEvent.OnCancelContainerCalibration -> cancelContainerCalibration(
+                event.containerNode,
+                event.materialLoader
+            )
+
+            is ModelsEvent.OnCalibrateContainerToOrigin -> calibrateContainerToOrigin(
+                event.containerNode,
+                event.materialLoader
             )
 
             is ModelsEvent.OnInsertModel -> insertModel(event.contentUri)
             ModelsEvent.OnDeleteModel -> deleteSelectedModel()
+
+            is ModelsEvent.OnChangeMeasurement -> selectedMeasurement.update { event.measurement }
+            is ModelsEvent.OnChangeMeasurementMode -> selectedMode.update { event.mode }
+
+            is ModelsEvent.OnRestoreContainerDefaults -> restoreContainerDefaults(event.container)
+            is ModelsEvent.OnTickDragged -> tickDragged(event.container, event.axis, event.tick)
+
             ModelsEvent.OnToggleTorch -> toggleTorch()
             ModelsEvent.OnTogglePlane -> togglePlane()
         }
     }
 
-
-    /**
-     * This method checks the permissions states and updates the [_permissionsStates] value.
-     *
-     * @param [permissions] List of pairs of <Permission string, Permission state>
-     */
-    private fun onCheckPermissionsStates(
-        permissions: List<Pair<String, Boolean>>,
-    ) {
-        _permissionsStates.value = permissions.map {
-            it.first to permissionHandler.getPermissionState(it.first, it.second)
+    private fun onCheckPermissionsStates() {
+        this._permissions.update {
+            permissionsManifestStrings.mapTo(mutableSetOf()) { string ->
+                Permission(
+                    manifestString = string,
+                    state = permissionHandler.getPermissionState(string, true)
+                )
+            }
         }
     }
 
-    private fun onPermissionInteraction(permission: String) =
+    private fun onPermissionInteraction(permission: ManifestString) {
         permissionHandler.onPermissionDialogInteraction(permission)
-
-    private fun calibrateOriginToMarker(
-        markerId: Int,
-        newOriginPosition: Position,
-        newOriginQuaternion: Quaternion,
-    ) {
-        val markerToUpdate = markers.value.find { it.id == markerId }?.copy(
-            calibrated = true,
-            originOffsetPosition = newOriginPosition,
-            originOffsetRotation = newOriginQuaternion
-        ) ?: return
-
-        viewModelScope.launch {
-            markersDataManager.upsert(markerToUpdate)
-        }
     }
 
-    private fun calibrateSelectedModelToOrigin(
-        modelId: Int,
-        newModelPosition: Position,
-        newModelQuaternion: Quaternion
-    ) {
-        val modelToUpdate = models.value.find { it.id == modelId }?.copy(
+    private fun repositionOrigin(originNode: OriginNode?, markerNode: MarkerNode?) {
+        originNode?.repositionToMarker(markerNode, selectedMarker.value?.originOffsetTransform)
+        val positionNumber = selectedMarker.value?.index ?: return
+        emitNotification(
+            NotificationEvent(
+                message = R.string.notification_chip_message_origin_repositioned,
+                args = listOf("M${machineId}P${positionNumber}")
+            )
+        )
+    }
+
+    private fun calibrateOriginToMarker(originNode: OriginNode?, markerNode: MarkerNode?) {
+        if (markerNode == null || originNode == null) return
+        val currentMarker = selectedMarker.value ?: return
+        val markerToUpdate = markers.value.find { it.id == currentMarker.id }?.copy(
             calibrated = true,
-            offsetPosition = newModelPosition,
-            offsetRotation = newModelQuaternion
+            originOffsetTransform = markerNode.getLocalTransform(originNode.transform)
+        ) ?: return
+        val positionNumber = currentMarker.index
+        emitNotification(
+            NotificationEvent(
+                message = R.string.notification_chip_message_origin_calibrated,
+                args = listOf("M${machineId}P${positionNumber}")
+            )
         )
 
-        if (modelToUpdate == null) return
+        viewModelScope.launch { markersDataManager.upsert(markerToUpdate) }
+    }
 
+    private fun selectContainer(
+        containerNode: ContainerNode,
+        materialLoader: MaterialLoader
+    ) {
+        containerNode.apply {
+            selectedContainerId.value = modelId
+            previousModelTransform.value = transform
+            setGizmoVisibility(true, materialLoader)
+        }
+    }
+
+    private fun calibrateContainerToOrigin(
+        containerNode: ContainerNode?,
+        materialLoader: MaterialLoader
+    ) {
         viewModelScope.launch {
-            modelsDataManager.upsert.upsertModels(modelToUpdate)
+            containerNode?.apply {
+                modelNode?.setUnselectedMaterialInstance(materialLoader)
+                setGizmoVisibility(false, materialLoader)
+
+                val modelToUpdate = models.value.find { it.id == this.modelId }?.copy(
+                    calibrated = true,
+                    offsetTransform = containerNode.transform
+                ) ?: return@apply
+
+                modelsDataManager.upsert.upsertModels(modelToUpdate)
+                val positionNumber = selectedMarker.value?.index ?: return@apply
+                emitNotification(
+                    NotificationEvent(
+                        message = R.string.notification_chip_message_model_calibrated,
+                        args = listOf(modelToUpdate.name, "M${machineId}P${positionNumber}")
+                    )
+                )
+            }
+            selectedContainerId.value = null
+        }
+    }
+
+    private fun cancelContainerCalibration(
+        containerNode: ContainerNode?,
+        materialLoader: MaterialLoader
+    ) {
+        viewModelScope.launch {
+            containerNode?.apply {
+                transform = previousModelTransform.value
+                modelNode?.setUnselectedMaterialInstance(materialLoader)
+                setGizmoVisibility(false, materialLoader)
+            }
+            selectedContainerId.value = null
         }
     }
 
@@ -245,13 +360,29 @@ class ModelsCalibrationViewModel @Inject constructor(
         viewModelScope.launch { modelsDataManager.upsert.upsertModels(modelToInsert) }
     }
 
-    // TODO: delete from internal storage the model
-    // 1. Fix implemented maybe
     private fun deleteSelectedModel() {
-        //val currentModelPosition = currentModelPose.value ?: return
+        val currentModel = models.value.find { it.id == selectedContainerId.value } ?: return
+        viewModelScope.launch { modelsDataManager.delete.deleteModels(currentModel) }
+    }
 
-//        val modelToDelete = models.value.find { it.id == currentModelPosition.id } ?: return
-//        viewModelScope.launch { modelsDataManager.delete.deleteModels(modelToDelete) }
+    private fun restoreContainerDefaults(container: ContainerNode?) {
+        if (selectedMeasurement.value == Measurement.TRANSLATION) {
+            container?.restorePositionDefaults()
+        } else {
+            container?.restoreQuaternionDefaults()
+        }
+    }
+
+    private fun tickDragged(container: ContainerNode?, axis: Axis, tick: Int) {
+        if (selectedMeasurement.value == Measurement.TRANSLATION) {
+            val millis = selectedMode.value.translation.millisPerUnit * tick / 1000F
+            val offset = unidirectionalTranslation(axis, millis)
+            container?.applyObjectPositionOffset(offset)
+        } else {
+            val degrees = selectedMode.value.rotation.halfDegreesPerUnit * tick / 2F
+            val offset = unidirectionalRotation(axis, degrees)
+            container?.applyObjectQuaternionOffset(offset)
+        }
     }
 
     private fun toggleTorch() {
@@ -289,50 +420,88 @@ class ModelsCalibrationViewModel @Inject constructor(
     }
 
     private fun emitNotification(event: NotificationEvent) {
-        viewModelScope.launch {
-            _notification.emit(event)
-        }
+        viewModelScope.launch { _notification.emit(event) }
     }
 }
 
-sealed class ModelsEvent {
-    data class OnCheckPermissionsStates(val permissions: List<Pair<String, Boolean>>) : ModelsEvent()
-    data class OnPermissionInteraction(val permission: String) : ModelsEvent()
-    data class OnSelectMarker(val marker: Marker) : ModelsEvent()
+sealed interface ModelsEvent {
+    data object OnCheckPermissionsStates : ModelsEvent
+    data class OnPermissionInteraction(val manifestString: ManifestString) : ModelsEvent
+
+    data class OnSelectMarker(val marker: Marker) : ModelsEvent
+
+    data class OnRepositionOrigin(val originNode: OriginNode?, val markerNode: MarkerNode?) :
+        ModelsEvent
+
     data class OnCalibrateOriginToMarker(
-        val markerId: Int,
-        val newOriginPosition: Position,
-        val newOriginQuaternion: Quaternion
-    ) : ModelsEvent()
+        val originNode: OriginNode?,
+        val markerNode: MarkerNode?
+    ) : ModelsEvent
 
-    data class OnCalibrateModelsToOrigin(
-        val modelId: Int,
-        val newModelPosition: Position,
-        val newModelQuaternion: Quaternion
-    ) : ModelsEvent()
+    data class OnSelectContainer(
+        val containerNode: ContainerNode,
+        val materialLoader: MaterialLoader
+    ) : ModelsEvent
 
-    data class OnInsertModel(val contentUri: Uri) : ModelsEvent()
-    data object OnDeleteModel : ModelsEvent()
-    data object OnToggleTorch: ModelsEvent()
-    data object OnTogglePlane: ModelsEvent()
+    data class OnCancelContainerCalibration(
+        val containerNode: ContainerNode?,
+        val materialLoader: MaterialLoader
+    ) : ModelsEvent
+
+    data class OnCalibrateContainerToOrigin(
+        val containerNode: ContainerNode?,
+        val materialLoader: MaterialLoader
+    ) : ModelsEvent
+
+    data class OnInsertModel(val contentUri: Uri) : ModelsEvent
+    data object OnDeleteModel : ModelsEvent
+
+    data class OnChangeMeasurement(val measurement: Measurement) : ModelsEvent
+    data class OnChangeMeasurementMode(val mode: MeasurementMode) : ModelsEvent
+
+    data class OnRestoreContainerDefaults(val container: ContainerNode?) : ModelsEvent
+    data class OnTickDragged(val container: ContainerNode?, val axis: Axis, val tick: Int) :
+        ModelsEvent
+
+    data object OnToggleTorch : ModelsEvent
+    data object OnTogglePlane : ModelsEvent
 }
 
 sealed interface ModelsCalibrationUiState {
     data object Loading : ModelsCalibrationUiState
+
+    data object EmptyMarkers : ModelsCalibrationUiState
+
+    @Immutable
     data class Success(
-        val markers: List<Marker>,
-        val models: List<Model>,
-        val selectedMarker: Marker? = null,
-        val selectedMarkerBitmap: BitmapInfo? = null,
+        val data: CalibrationData = CalibrationData(),
+        val items: CalibrationItems = CalibrationItems(),
         val options: CalibrationOptions = CalibrationOptions()
     ) : ModelsCalibrationUiState
 }
 
+@Immutable
+data class CalibrationData(
+    val markers: List<Marker> = emptyList(),
+    val models: List<Model> = emptyList()
+)
+
+@Immutable
+data class CalibrationItems(
+    val selectedModelId: Int? = null,
+    val currentMeasurement: Measurement = Measurement.TRANSLATION,
+    val currentMode: MeasurementMode = MeasurementMode(),
+    val selectedMarker: Marker? = null,
+    val currentBitmap: BitmapInfo? = null
+)
+
+@Immutable
 data class BitmapInfo(
     val markerId: Int,
     val bitmap: Bitmap
 )
 
+@Immutable
 data class CalibrationOptions(
     val isTorchEnabled: Boolean = false,
     val isPlaneEnabled: Boolean = false

@@ -1,46 +1,44 @@
 package com.jssdvv.ara.machines.presentation.destination.calibration.component
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.jssdvv.ara.core.presentation.common.WarningIcon
+import androidx.compose.ui.res.stringResource
+import com.jssdvv.ara.R
+import com.jssdvv.ara.core.presentation.common.component.WarningIcon
 
 @Composable
 fun UnsavedChangesDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
-    onOpenMarkers: () -> Unit,
+    onOpenModels: () -> Unit,
 ) {
     AlertDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
         icon = { WarningIcon() },
-        title = {
-            Text(text = "Are you sure you want to leave?")
-        },
-        text = {
-            Column {
-                Text("You got markers uncalibrated, if you leave these markers will be disabled for the activities")
-            }
-        },
+        title = { Text(stringResource(R.string.calibration_dialog_unsaved_changes_title)) },
+        text = { Text(stringResource(R.string.calibration_dialog_unsaved_changes_warning)) },
         dismissButton = {
-            OutlinedButton (
+            Button(
                 onClick = onConfirm,
-            ) {
-                Text(text = "Salir")
-            }
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                content = { Text(stringResource(R.string.calibration_dialog_unsaved_changes_dismiss_action)) }
+            )
         },
         confirmButton = {
-            Button (
-                onClick = onOpenMarkers,
-            ) {
-                Text(text = "Abrir Marcadores")
-            }
+            Button(
+                onClick = onOpenModels,
+                content = { Text(stringResource(R.string.calibration_dialog_unsaved_changes_open_models_action)) }
+            )
         },
     )
 }
