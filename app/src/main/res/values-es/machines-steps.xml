@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--STEPS SCREEN-->
+
+    <string name="top_bar_steps_title">Pasos</string>
+
+    <!--EDITOR OPTIONS [COMPONENT]-->
+
+    <string name="button_editor_restore_defaults_action">Restaurar valores</string>
+
+    <!--ACTIVITY'S EDITOR INSIDE STEPS[COMPONENT]-->
+
+    <string name="screen_editor_activity_title">Editor de actividades</string>
+
+    <plurals name="button_editor_step_count_label" tools:ignore="MissingQuantity,UnusedQuantity">
+        <item quantity="zero">Sin pasos</item>
+        <item quantity="other">Paso: %1$d / %2$d</item>
+    </plurals>
+
+    <plurals name="button_editor_operation_count_label" tools:ignore="MissingQuantity,UnusedQuantity">
+        <item quantity="zero">Sin operaciones</item>
+        <item quantity="other">Operación: %1$d / %2$d</item>
+    </plurals>
+
+    <!--STEPS DIALOG [COMPONENT]-->
+
+    <string name="step_dialog_create_title">Nuevo paso</string>
+    <string name="step_dialog_edit_title">Editar paso</string>
+    <string name="text_field_step_dialog_name_label">Nombre</string>
+    <string name="text_field_step_dialog_description_label">Descripción</string>
+
+    <string name="button_step_dialog_cancel_action">Cancelar</string>
+    <string name="button_step_dialog_create_action">Crear</string>
+    <string name="button_step_dialog_save_action">Guardar cambios</string>
+
+    <!--STEPS SIDE SHEET [COMPONENT]-->
+
+    <string name="steps_side_sheet_title">Pasos y operaciones</string>
+
+    <!--STEPS TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_entities_selected_label">Entidades seleccionadas</string>
+
+    <plurals name="text_field_entities_count_value" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d entidad</item>
+        <item quantity="other">%1$d entidades</item>
+    </plurals>
+
+    <string name="text_field_entities_empty">Ninguna entidad seleccionada</string>
+
+    <!--OPERATION ITEM [COMPONENT]-->
+
+    <string name="operation_item_duration_label">Duración: %1$s s</string>
+    <string name="operation_item_starting_delay_label">Retraso inicial: %1$s s</string>
+
+    <!--OPERATION SETTINGS [COMPONENT]-->
+
+    <string name="operation_checkbox_use_pitch_supporting_text">Usar paso en lugar de revoluciones</string>
+
+    <!--OPERATION TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_operation_selected_label">Operación seleccionada</string>
+    <string name="text_field_operation_empty_message">Ninguna operación seleccionada</string>
+
+    <!--AXIS [ENUM]-->
+
+    <string name="enum_axis_x_name">X</string>
+    <string name="enum_axis_y_name">Y</string>
+    <string name="enum_axis_z_name">Z</string>
+
+</resources>

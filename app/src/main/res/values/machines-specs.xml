@@ -1,37 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--MACHINES SEARCH BAR [COMPONENT]-->
+    <!--MACHINE DETAILS SCREEN-->
 
-    <string name="search_bar_machines_supporting_text">Search machines</string>
-
-    <!--MACHINE ORDER KEY [ENUM]-->
-
-    <string name="machine_order_key_code_label">Code</string>
-    <string name="machine_order_key_name_label">Name</string>
-    <string name="machine_order_key_type_label">Type</string>
-    <string name="machine_order_key_creation_date_label">Creation date</string>
-    <string name="machine_order_key_modification_date_label">Modification date</string>
-    
-    <!--MACHINE TYPE [ENUM]-->
-    
-    <string name="machine_type_electrical_label">Electrical</string>
-    <string name="machine_type_hydraulic_label">Hydraulic</string>
-    <string name="machine_type_mechanical_label">Mechanical</string>
-    <string name="machine_type_pneumatic_label">Pneumatic</string>
-    <string name="machine_type_thermal_label">Thermal</string>
-    <string name="machine_type_unknown_label">Unknown</string>
-
-    <string name="icon_electrical_content_desc">Electrical Machine</string>
-    <string name="icon_hydraulic_content_desc">Hydraulic Machine</string>
-    <string name="icon_mechanical_content_desc">Mechanical Machine</string>
-    <string name="icon_pneumatic_content_desc">Pneumatic Machine</string>
-    <string name="icon_thermal_content_desc">Thermal Machine</string>
-    <string name="icon_unknown_content_desc">Unknown Machine</string>
-
-    <!--MACHINE DETAILS [SCREEN]-->
-
-    <string name="machine_image_content_desc">Image Of The Machine</string>
+    <string name="top_bar_machine_details_title">Machine Details</string>
 
     <!--MACHINE AND MOTOR IDENTIFICATION CARD [COMPONENT]-->
 
@@ -45,7 +17,7 @@
     <string name="text_field_fabrication_year_label">Fabrication year</string>
     <string name="text_field_price_label">Price</string>
     <string name="text_field_acquisition_date_label">Acquisition date</string>
-    
+
     <string name="icon_machine_code_content_desc">Enter the Machine Code</string>
     <string name="icon_machine_name_content_desc">Enter the Machine Name</string>
     <string name="icon_machine_type_content_desc">Enter the Machine Type</string>
@@ -70,7 +42,7 @@
     <string name="card_machine_identity_not_available_message">No machine information available</string>
 
     <!--MACHINE SPECIFICATIONS CARDS [COMPONENT]-->
-    
+
     <string name="text_field_machine_service_capacity_label">Service capacity</string>
     <string name="text_field_machine_speed_label">Machine speed</string>
     <string name="text_field_machine_lubricant_label">Lubricant</string>
@@ -103,7 +75,7 @@
     <string name="text_field_motor_phases_number_label">Number of phases</string>
     <string name="text_field_motor_nominal_power_label">Nominal power</string>
     <string name="text_field_motor_frequency_label">Frequency</string>
-    <string name="text_field_motor_rpm_label">text_field speed</string>
+    <string name="text_field_motor_rpm_label">Speed</string>
     <string name="text_field_motor_rpm_range_label">Speed range</string>
     <string name="text_field_motor_nominal_voltage_label">Nominal voltage</string>
     <string name="text_field_motor_nominal_current_label">Nominal current</string>
@@ -117,12 +89,12 @@
     <string name="text_field_motor_mounting_type_label">Mounting type</string>
     <string name="text_field_motor_frame_type_label">Frame type</string>
     <string name="text_field_motor_cooling_method_label">Cooling method</string>
-    <string name="text_field_motor_drive_end_label">text_field drive end</string>
-    <string name="text_field_motor_non_drive_end_label">text_field non drive end</string>
+    <string name="text_field_motor_drive_end_label">Drive end</string>
+    <string name="text_field_motor_non_drive_end_label">Non drive end</string>
     <string name="text_field_motor_insulation_class_label">Insulation class</string>
     <string name="text_field_motor_insulation_class_temp_label">Insulation class temperature</string>
-    <string name="text_field_motor_weight_label">text_field weight</string>
-    
+    <string name="text_field_motor_weight_label">Weight</string>
+
     <!--MOTOR SYMBOLS DESIGNATIONS [TEXT]-->
 
     <string name="motor_efficiency_class_symbol_designation" translatable="false">IE</string>
@@ -149,123 +121,20 @@
     <string name="motor_insulation_class_rise_temp_symbol_designation" translatable="false">ΔT</string>
     <string name="motor_weight_symbol_designation" translatable="false">Kg (lb)</string>
 
-    <!--CONFIRMATION TOAST [TEXT]-->
+    <!--MACHINE TYPE [ENUM]-->
 
-    <string name="toast_marker_calibration_success">Marker M%1$sP%2$d calibrated</string>
+    <string name="machine_type_electrical_label">Electrical</string>
+    <string name="machine_type_hydraulic_label">Hydraulic</string>
+    <string name="machine_type_mechanical_label">Mechanical</string>
+    <string name="machine_type_pneumatic_label">Pneumatic</string>
+    <string name="machine_type_thermal_label">Thermal</string>
+    <string name="machine_type_unknown_label">Unknown</string>
 
-    <!--EDITOR OPTIONS [COMPONENT]-->
-
-    <string name="button_editor_restore_defaults_action">Restore defaults</string>
-
-    <!--CALIBRATION MARKER DIALOG [COMPONENT]-->
-
-    <string name="calibration_dialog_selected_marker_title">Select a marker</string>
-    <string name="calibration_dialog_uncalibrated_trailing_label">Uncalibrated</string>
-
-    <!--MARKER BUTTON [COMPONENT]-->
-
-    <string name="button_image_change_select_action">Select image</string>
-    <string name="button_editor_add_step_action">Add step</string>
-
-    <!--ACTIVITY'S EDITOR INSIDE STEPS[COMPONENT]-->
-
-    <string name="screen_editor_activity_title">Activity\'s Editor</string>
-
-    <plurals name="button_editor_step_count_label">
-        <item quantity="zero">No steps</item>
-        <item quantity="other">Step: %1$d / %2$d</item>
-    </plurals>
-
-    <plurals name="button_editor_operation_count_label">
-        <item quantity="zero">No operations</item>
-        <item quantity="other">Operation: %1$d / %2$d</item>
-    </plurals>
-
-    <!--AXIS [ENUM]-->
-
-    <string name="enum_axis_x_name">Roll</string>
-    <string name="enum_axis_y_name">Pitch</string>
-    <string name="enum_axis_z_name">Yaw</string>
-
-    <!--CALIBRATION DESTINATION [COMPONENT]-->
-
-    <string name="calibration_shutter_button_models_label">Models</string>
-    <string name="calibration_no_markers_title">There is not any marker to calibrate models</string>
-    <string name="calibration_button_go_to_markers_creation_action">Create marker</string>
-
-    <!--CALIBRATION MODELS DIALOG [COMPONENT]-->
-
-    <string name="calibration_dialog_models_title">Select a model to edit</string>
-
-    <!--CALIBRATION UNSAVED CHANGES DIALOG [COMPONENT]-->
-
-    <string name="calibration_dialog_unsaved_changes_title">Are you sure you want to leave?</string>
-    <string name="calibration_dialog_unsaved_changes_warning">Uncalibrated models will be deleted</string>
-    <string name="calibration_dialog_unsaved_changes_dismiss_action">Delete and exit</string>
-    <string name="calibration_dialog_unsaved_changes_open_models_action">Open models</string>
-
-    <!--STEPS CARD [COMPONENT]-->
-
-    <string name="card_step_operations_empty_message">No operations yet</string>
-
-    <!--STEPS DIALOG [COMPONENT]-->
-
-    <string name="step_dialog_create_title">New step</string>
-    <string name="step_dialog_edit_title">Edit step</string>
-
-    <string name="text_field_step_dialog_name_label">Name</string>
-    <string name="text_field_step_dialog_description_label">Description</string>
-
-    <string name="button_step_dialog_cancel_action">Cancel</string>
-    <string name="button_step_dialog_create_action">Create</string>
-    <string name="button_step_dialog_save_action">Save changes</string>
-
-    <!--STEPS SIDE SHEET [COMPONENT]-->
-
-    <string name="steps_side_sheet_title">Steps &amp; operations</string>
-
-    <!--STEPS TEXT FIELD [COMPONENT]-->
-
-    <string name="text_field_entities_selected_label">Selected entities</string>
-
-    <plurals name="text_field_entities_count_value">
-        <item quantity="one">%1$d entity</item>
-        <item quantity="other">%1$d entities</item>
-    </plurals>
-
-    <string name="text_field_entities_empty">No selected entities</string>
-
-    <!--OPERATION ITEM [COMPONENT]-->
-
-    <string name="operation_item_duration_label">Duration: %1$s[s]</string>
-    <string name="operation_item_starting_delay_label">Starting delay: %1$s[s]</string>
-
-    <!--OPERATION SETTINGS [COMPONENT]-->
-
-    <string name="operation_checkbox_use_pitch_supporting_text">Use pitch instead of revolutions</string>
-
-    <!--OPERATION TEXT FIELD [COMPONENT]-->
-
-    <string name="text_field_operation_selected_label">Selected operation</string>
-    <string name="text_field_operation_empty_message">No selected operation</string>
-
-    <!--NOTIFICATION CHIP MESSAGE [TEXT]-->
-
-    <string name="notification_chip_message_play">Playing animations</string>
-    <string name="notification_chip_message_pause">Stoping animations</string>
-    <string name="notification_chip_message_torch_enabled">Torch enabled</string>
-    <string name="notification_chip_message_torch_disabled">Torch disabled</string>
-    <string name="notification_chip_message_loop_enabled">Looping playback animation</string>
-    <string name="notification_chip_message_loop_disabled">Linear animation</string>
-    <string name="notification_chip_message_plane_enabled">Plane renderer enabled</string>
-    <string name="notification_chip_message_plane_disabled">Plane renderer disabled</string>
-    <string name="notification_chip_message_speed_half">Speed set to half</string>
-    <string name="notification_chip_message_speed_normal">Speed set to normal</string>
-    <string name="notification_chip_message_speed_double">Speed set to double</string>
-
-    <string name="notification_chip_message_origin_repositioned">Models repositioned to %s</string>
-    <string name="notification_chip_message_origin_calibrated">Models calibrated to %s</string>
-    <string name="notification_chip_message_model_calibrated">Model: %1$s calibrated to %2$s</string>
-
+    <string name="icon_electrical_content_desc">Electrical Machine</string>
+    <string name="icon_hydraulic_content_desc">Hydraulic Machine</string>
+    <string name="icon_mechanical_content_desc">Mechanical Machine</string>
+    <string name="icon_pneumatic_content_desc">Pneumatic Machine</string>
+    <string name="icon_thermal_content_desc">Thermal Machine</string>
+    <string name="icon_unknown_content_desc">Unknown Machine</string>
 
 </resources>

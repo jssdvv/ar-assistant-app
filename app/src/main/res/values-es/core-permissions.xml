@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--RATIONALE PROVIDER [CLASS]-->
+
+    <string name="permission_denied_generic_rationale">
+        Esta aplicación requiere este permiso para usar esta funcionalidad.</string>
+    <string name="permission_denied_camera_rationale">
+        Esta aplicación requiere acceso a la cámara para escanear códigos.</string>
+    <string name="permission_denied_read_media_images_rationale">
+        Esta aplicación requiere acceso a la galería.</string>
+    <string name="permission_denied_read_media_visual_user_selected_rationale">
+        Esta aplicación requiere acceso a la galería.</string>
+    <string name="permission_denied_read_external_storage_rationale">
+        Esta aplicación requiere acceso de lectura de archivos.</string>
+    <string name="permission_denied_write_external_storage_rationale">
+        Esta aplicación requiere acceso para guardar archivos en este dispositivo.</string>
+
+    <string name="permission_permanently_denied_generic_rationale">
+        Esta aplicación requiere este permiso para usar esta funcionalidad. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_camera_rationale">
+        Esta aplicación requiere acceso a la cámara para escanear códigos. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_read_media_images_rationale">
+        Esta aplicación requiere acceso a la galería. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_read_media_visual_user_selected_rationale">
+        Esta aplicación requiere acceso a la galería. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_read_external_storage_rationale">
+        Esta aplicación requiere acceso de lectura de archivos. Ve a ajustes para permitirlo.</string>
+    <string name="permission_permanently_denied_write_external_storage_rationale">
+        Esta aplicación requiere acceso para guardar archivos en este dispositivo. Ve a ajustes para permitirlo.</string>
+
+    <!--PERMISSIONS BUTTON [COMPONENT]-->
+
+    <string name="button_permissions_grant_action">Conceder permisos</string>
+    <string name="button_permissions_request_again_action">Solicitar de nuevo</string>
+
+</resources>

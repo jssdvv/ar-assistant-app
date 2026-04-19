@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--STEPS SCREEN-->
+
+    <string name="top_bar_steps_title">Steps</string>
+
+    <!--EDITOR OPTIONS [COMPONENT]-->
+
+    <string name="button_editor_restore_defaults_action">Restore defaults</string>
+
+    <!--ACTIVITY'S EDITOR INSIDE STEPS[COMPONENT]-->
+
+    <string name="screen_editor_activity_title">Activity\'s Editor</string>
+
+    <plurals name="button_editor_step_count_label">
+        <item quantity="zero">No steps</item>
+        <item quantity="other">Step: %1$d / %2$d</item>
+    </plurals>
+
+    <plurals name="button_editor_operation_count_label">
+        <item quantity="zero">No operations</item>
+        <item quantity="other">Operation: %1$d / %2$d</item>
+    </plurals>
+
+    <!--STEPS DIALOG [COMPONENT]-->
+
+    <string name="step_dialog_create_title">New step</string>
+    <string name="step_dialog_edit_title">Edit step</string>
+    <string name="text_field_step_dialog_name_label">Name</string>
+    <string name="text_field_step_dialog_description_label">Description</string>
+
+    <string name="button_step_dialog_cancel_action">Cancel</string>
+    <string name="button_step_dialog_create_action">Create</string>
+    <string name="button_step_dialog_save_action">Save changes</string>
+
+    <!--STEPS SIDE SHEET [COMPONENT]-->
+
+    <string name="steps_side_sheet_title">Steps &amp; operations</string>
+
+    <!--STEPS TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_entities_selected_label">Selected entities</string>
+
+    <plurals name="text_field_entities_count_value">
+        <item quantity="one">%1$d entity</item>
+        <item quantity="other">%1$d entities</item>
+    </plurals>
+
+    <string name="text_field_entities_empty">No selected entities</string>
+
+    <!--OPERATION ITEM [COMPONENT]-->
+
+    <string name="operation_item_duration_label">Duration: %1$s s</string>
+    <string name="operation_item_starting_delay_label">Starting delay: %1$s s</string>
+
+    <!--OPERATION SETTINGS [COMPONENT]-->
+
+    <string name="operation_checkbox_use_pitch_supporting_text">Use pitch instead of revolutions</string>
+
+    <!--OPERATION TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_operation_selected_label">Selected operation</string>
+    <string name="text_field_operation_empty_message">No selected operation</string>
+
+    <!--AXIS [ENUM]-->
+
+    <string name="enum_axis_x_name">Roll</string>
+    <string name="enum_axis_y_name">Pitch</string>
+    <string name="enum_axis_z_name">Yaw</string>
+
+</resources>

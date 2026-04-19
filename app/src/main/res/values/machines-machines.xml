@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--MACHINES LIST SCREEN-->
+
+    <string name="top_bar_machines_title">Machines</string>
+
+    <!--MACHINES SEARCH BAR [COMPONENT]-->
+
+    <string name="search_bar_machines_supporting_text">Search machines</string>
+
+    <!--MACHINE ORDER KEY [ENUM]-->
+
+    <string name="machine_order_key_code_label">Code</string>
+    <string name="machine_order_key_name_label">Name</string>
+    <string name="machine_order_key_type_label">Type</string>
+    <string name="machine_order_key_creation_date_label">Creation date</string>
+    <string name="machine_order_key_modification_date_label">Modification date</string>
+
+    <!--MACHINE CARD [COMPONENT]-->
+
+    <string name="card_machine_image_content_desc">Image of the machine</string>
+
+</resources>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--TOOLS LIST SCREEN-->
+
+    <string name="top_bar_tools_title">Herramientas</string>
+
+    <!--TOOL TYPE [ENUM]-->
+
+    <string name="tool_type_wrenches_label">Llave</string>
+    <string name="tool_type_screw_drivers_label">Destornillador</string>
+    <string name="tool_type_pliers_label">Alicates</string>
+    <string name="tool_type_hammers_label">Martillo</string>
+    <string name="tool_type_saw_label">Sierra</string>
+    <string name="tool_type_measuring_label">Medición</string>
+    <string name="tool_type_other_label">Otro</string>
+
+    <string name="icon_tool_type_wrench_content_desc">Llave</string>
+    <string name="icon_tool_type_screw_driver_content_desc">Destornillador</string>
+    <string name="icon_tool_type_pliers_content_desc">Alicates</string>
+    <string name="icon_tool_type_hammer_content_desc">Martillo</string>
+    <string name="icon_tool_type_saw_content_desc">Sierra</string>
+    <string name="icon_tool_type_measuring_content_desc">Medición</string>
+    <string name="icon_tool_type_other_content_desc">Otro</string>
+
+    <!--TOOL CARD [COMPONENT]-->
+
+    <string name="card_tool_image_content_desc">Imagen de la herramienta</string>
+
+    <!--TOOL NAVIGATION [COMPONENT]-->
+
+    <string name="button_navigate_to_tool_detail_label">Ver detalles</string>
+
+    <!--TOOL DETAIL SCREEN-->
+
+    <string name="top_bar_tool_detail_title">Detalles de la Herramienta</string>
+
+    <!--TOOL IDENTIFICATION CARD [COMPONENT]-->
+
+    <string name="text_field_tool_name_label">Nombre</string>
+    <string name="text_field_tool_code_label">Código</string>
+    <string name="text_field_tool_type_label">Tipo</string>
+
+    <string name="icon_tool_name_content_desc">Ingrese el Nombre de la Herramienta</string>
+    <string name="icon_tool_code_content_desc">Ingrese el Código de la Herramienta</string>
+    <string name="icon_tool_type_content_desc">Ingrese el Tipo de Herramienta</string>
+
+    <!--TOOL BODY IMAGE [COMPONENT]-->
+
+    <string name="image_tool_body_content_desc">Imagen del cuerpo de la herramienta</string>
+
+    <!--TOOL SYMBOL IMAGE [COMPONENT]-->
+
+    <string name="image_tool_symbol_content_desc">Imagen del símbolo de la herramienta</string>
+
+
+</resources>

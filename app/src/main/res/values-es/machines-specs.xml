@@ -1,40 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <!--MACHINES SEARCH BAR [COMPONENT]-->
+    <!--MACHINE DETAILS SCREEN-->
 
-    <string name="search_bar_machines_supporting_text">Buscar máquinas</string>
-
-    <!--MACHINE ORDER KEY [ENUM]-->
-
-    <string name="machine_order_key_code_label">Código</string>
-    <string name="machine_order_key_name_label">Nombre</string>
-    <string name="machine_order_key_type_label">Tipo</string>
-    <string name="machine_order_key_creation_date_label">Fecha de creación</string>
-    <string name="machine_order_key_modification_date_label">Fecha de modificación</string>
-
-    <!--MACHINE TYPE [ENUM]-->
-
-    <string name="machine_type_electrical_label">Eléctrica</string>
-    <string name="machine_type_hydraulic_label">Hidráulica</string>
-    <string name="machine_type_mechanical_label">Mecánica</string>
-    <string name="machine_type_pneumatic_label">Pneumática</string>
-    <string name="machine_type_thermal_label">Térmica</string>
-    <string name="machine_type_unknown_label">Desconocida</string>
-
-    <string name="icon_electrical_content_desc">Máquina Eléctrica</string>
-    <string name="icon_hydraulic_content_desc">Máquina Hidráulica</string>
-    <string name="icon_mechanical_content_desc">Máquina Mecánica</string>
-    <string name="icon_pneumatic_content_desc">Máquina Pneumática</string>
-    <string name="icon_thermal_content_desc">Máquina Térmica</string>
-    <string name="icon_unknown_content_desc">Máquina Desconocida</string>
-
-    <!--MACHINE DETAILS [SCREEN]-->
-    
-    <string name="machine_image_content_desc">Imagen De La Máquina</string>
+    <string name="top_bar_machine_details_title">Detalles de la Máquina</string>
 
     <!--MACHINE AND MOTOR IDENTIFICATION CARD [COMPONENT]-->
-    
+
     <string name="text_field_code_label">Código</string>
     <string name="text_field_name_label">Nombre</string>
     <string name="text_field_type_label">Tipo de maquina</string>
@@ -45,7 +17,7 @@
     <string name="text_field_fabrication_year_label">Año de fabricación</string>
     <string name="text_field_price_label">Precio</string>
     <string name="text_field_acquisition_date_label">Fecha de adquisición</string>
-    
+
     <string name="icon_machine_code_content_desc">Ingrese el Código de la Máquina</string>
     <string name="icon_machine_name_content_desc">Ingrese el Nombre de la Máquina</string>
     <string name="icon_machine_type_content_desc">Ingrese el Tipo de Máquina</string>
@@ -70,7 +42,7 @@
     <string name="card_machine_identity_not_available_message">No hay información de la máquina disponible</string>
 
     <!--MACHINE SPECIFICATIONS CARDS [COMPONENT]-->
-    
+
     <string name="text_field_machine_service_capacity_label">Capacidad de servicio</string>
     <string name="text_field_machine_speed_label">Velocidad de la máquina</string>
     <string name="text_field_machine_lubricant_label">Lubricante</string>
@@ -98,7 +70,7 @@
     <string name="icon_machine_additional_desc_content_desc">Ingrese la Descripción Adicional de la Máquina</string>
 
     <!--MOTOR SPECIFICATIONS CARD [COMPONENT]-->
-    
+
     <string name="text_field_motor_efficiency_class_label">Clase de eficiencia</string>
     <string name="text_field_motor_phases_number_label">Número de fases</string>
     <string name="text_field_motor_nominal_power_label">Potencia nominal</string>
@@ -123,115 +95,20 @@
     <string name="text_field_motor_insulation_class_temp_label">Temperatura de clase de aislamiento</string>
     <string name="text_field_motor_weight_label">Peso del motor</string>
 
-    <!--CONFIRMATION TOAST [TEXT]-->
+    <!--MACHINE TYPE [ENUM]-->
 
-    <string name="toast_marker_calibration_success">Marcador M%1$sP%2$d calibrado</string>
+    <string name="machine_type_electrical_label">Eléctrica</string>
+    <string name="machine_type_hydraulic_label">Hidráulica</string>
+    <string name="machine_type_mechanical_label">Mecánica</string>
+    <string name="machine_type_pneumatic_label">Neumática</string>
+    <string name="machine_type_thermal_label">Térmica</string>
+    <string name="machine_type_unknown_label">Desconocida</string>
 
-    <!--EDITOR OPTIONS [COMPONENT]-->
-
-    <string name="button_editor_restore_defaults_action">Restaurar valores</string>
-
-    <!--CALIBRATION MARKER DIALOG [COMPONENT]-->
-
-    <string name="calibration_dialog_selected_marker_title">Selecciona un marcador</string>
-    <string name="calibration_dialog_uncalibrated_trailing_label">No calibrado</string>
-
-    <!--MARKER BUTTON [COMPONENT]-->
-
-    <string name="button_image_change_select_action">Seleccionar imagen</string>
-    <string name="button_editor_add_step_action">Añadir paso</string>
-
-    <!--ACTIVITY'S EDITOR INSIDE STEPS[COMPONENT]-->
-
-    <string name="screen_editor_activity_title">Editor de actividades</string>
-
-    <plurals name="button_editor_step_count_label" tools:ignore="MissingQuantity,UnusedQuantity">
-        <item quantity="zero">Sin pasos</item>
-        <item quantity="other">Paso: %1$d / %2$d</item>
-    </plurals>
-
-    <plurals name="button_editor_operation_count_label" tools:ignore="MissingQuantity,UnusedQuantity">
-        <item quantity="zero">Sin operaciones</item>
-        <item quantity="other">Operación: %1$d / %2$d</item>
-    </plurals>
-
-    <!--AXIS [ENUM]-->
-
-    <string name="enum_axis_x_name">X</string>
-    <string name="enum_axis_y_name">Y</string>
-    <string name="enum_axis_z_name">Z</string>
-
-    <!--CALIBRATION DESTINATION [COMPONENT]-->
-
-    <string name="calibration_shutter_button_models_label">Modelos</string>
-    <string name="calibration_no_markers_title">No hay marcadores para calibrar modelos</string>
-    <string name="calibration_button_go_to_markers_creation_action">Crear marcador</string>
-
-    <!--CALIBRATION MODELS DIALOG [COMPONENT]-->
-
-    <string name="calibration_dialog_models_title">Selecciona un modelo para editar</string>
-
-    <!--CALIBRATION UNSAVED CHANGES DIALOG [COMPONENT]-->
-
-    <string name="calibration_dialog_unsaved_changes_title">¿Estás seguro que deseas salir?</string>
-    <string name="calibration_dialog_unsaved_changes_warning">Los modelos que no han sido calibrados serán eliminados</string>
-    <string name="calibration_dialog_unsaved_changes_dismiss_action">Borrar y salir</string>
-    <string name="calibration_dialog_unsaved_changes_open_models_action">Abrir modelos</string>
-
-    <!--STEPS CARD [COMPONENT]-->
-
-    <string name="card_step_operations_empty_message">Aún no hay operaciones</string>
-
-    <!--STEPS DIALOG [COMPONENT]-->
-
-    <string name="step_dialog_create_title">Nuevo paso</string>
-    <string name="step_dialog_edit_title">Editar paso</string>
-    <string name="text_field_step_dialog_name_label">Nombre</string>
-    <string name="text_field_step_dialog_description_label">Descripción</string>
-    <string name="button_step_dialog_cancel_action">Cancelar</string>
-    <string name="button_step_dialog_create_action">Crear</string>
-    <string name="button_step_dialog_save_action">Guardar cambios</string>
-
-    <!--STEPS SIDE SHEET [COMPONENT]-->
-
-    <string name="steps_side_sheet_title">Pasos y operaciones</string>
-
-    <!--STEPS TEXT FIELD [COMPONENT]-->
-
-    <string name="text_field_entities_selected_label">Entidades seleccionadas</string>
-
-    <plurals name="text_field_entities_count_value">
-        <item quantity="one">%1$d entidad</item>
-        <item quantity="other">%1$d entidades</item>
-    </plurals>
-
-    <string name="text_field_entities_empty">Ninguna entidad seleccionada</string>
-
-    <!--OPERATION SETTINGS [COMPONENT]-->
-
-    <string name="operation_checkbox_use_pitch_supporting_text">Usar paso en lugar de revoluciones</string>
-
-    <!--OPERATION TEXT FIELD [COMPONENT]-->
-
-    <string name="text_field_operation_selected_label">Operación seleccionada</string>
-    <string name="text_field_operation_empty_message">Ninguna operación seleccionada</string>
-
-    <!--NOTIFICATION CHIP MESSAGE [TEXT]-->
-
-    <string name="notification_chip_message_play">Reproduciendo animaciones</string>
-    <string name="notification_chip_message_pause">Deteniendo animaciones</string>
-    <string name="notification_chip_message_torch_enabled">Linterna activada</string>
-    <string name="notification_chip_message_torch_disabled">Linterna desactivada</string>
-    <string name="notification_chip_message_loop_enabled">Animación en bucle</string>
-    <string name="notification_chip_message_loop_disabled">Animación lineal</string>
-    <string name="notification_chip_message_plane_enabled">Renderizador de plano habilitado</string>
-    <string name="notification_chip_message_plane_disabled">Renderizador de plano deshabilitado</string>
-    <string name="notification_chip_message_speed_half">Velocidad media</string>
-    <string name="notification_chip_message_speed_normal">Velocidad normal</string>
-    <string name="notification_chip_message_speed_double">Velocidad doble</string>
-
-    <string name="notification_chip_message_origin_repositioned">Modelos reposicionados a %s</string>
-    <string name="notification_chip_message_origin_calibrated">Modelos calibrados a %s</string>
-    <string name="notification_chip_message_model_calibrated">Modelo: %1$s calibrado a %2$s</string>
+    <string name="icon_electrical_content_desc">Máquina Eléctrica</string>
+    <string name="icon_hydraulic_content_desc">Máquina Hidráulica</string>
+    <string name="icon_mechanical_content_desc">Máquina Mecánica</string>
+    <string name="icon_pneumatic_content_desc">Máquina Neumática</string>
+    <string name="icon_thermal_content_desc">Máquina Térmica</string>
+    <string name="icon_unknown_content_desc">Máquina Desconocida</string>
 
 </resources>

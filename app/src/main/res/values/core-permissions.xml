@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--RATIONALE PROVIDER [CLASS]-->
+
+    <string name="permission_denied_generic_rationale">
+        This app requires this permission to use this feature.</string>
+    <string name="permission_denied_camera_rationale">
+        This app requires access to the camera to scan codes.</string>
+    <string name="permission_denied_read_media_images_rationale">
+        This app requires access to read media images.</string>
+    <string name="permission_denied_read_media_visual_user_selected_rationale">
+        This app requires access to read media images.</string>
+    <string name="permission_denied_read_external_storage_rationale">
+        This app requires access to read media images.</string>
+    <string name="permission_denied_write_external_storage_rationale">
+        This app requires access to save files in this device.</string>
+
+    <string name="permission_permanently_denied_generic_rationale">
+        This app requires this permission to use this feature. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_camera_rationale">
+        This app requires access to the camera to scan codes. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_read_media_images_rationale">
+        This app requires access to read media images. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_read_media_visual_user_selected_rationale">
+        This app requires access to read media images. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_read_external_storage_rationale">
+        This app requires access to read media images. Go to settings to allow access.</string>
+    <string name="permission_permanently_denied_write_external_storage_rationale">
+        This app requires access to save files in this device. Go to settings to allow access.</string>
+
+    <!--PERMISSIONS BUTTON [COMPONENT]-->
+
+    <string name="button_permissions_grant_action">Grant permissions</string>
+    <string name="button_permissions_request_again_action">Request again</string>
+
+</resources>

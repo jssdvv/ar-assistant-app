@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--APPLICATION [GLOBAL]-->
+
+    <string name="app_name">AR Assistant</string>
+
+    <!--COMMON ACTIONS-->
+
+    <string name="text_search_action">Search</string>
+
+    <!--COMMON BUTTON [COMPONENT]-->
+
+    <string name="button_check_action">Confirm</string>
+    <string name="button_cancel_action">Cancel</string>
+    <string name="button_save_action">Save</string>
+    <string name="button_edit_action">Edit</string>
+    <string name="button_add_action">Add</string>
+
+    <!--COMMON ICON [COMPONENT]-->
+
+    <string name="icon_check_content_desc">Confirm</string>
+    <string name="icon_add_content_desc">Add</string>
+    <string name="icon_arrow_back_content_desc">Go Back</string>
+    <string name="icon_arrow_back_opposite_content_desc">Go Forward</string>
+    <string name="icon_arrow_down_content_desc">Expand</string>
+    <string name="icon_arrow_down_opposite_content_desc">Collapse</string>
+    <string name="icon_arrow_drop_down_content_desc">Open</string>
+    <string name="icon_arrow_drop_down_opposite_content_desc">Close</string>
+    <string name="icon_arrow_downward_content_desc">Move Down</string>
+    <string name="icon_arrow_downward_opposite_content_desc">Move Up</string>
+    <string name="icon_arrow_previous_item_content_desc">Previous Item</string>
+    <string name="icon_arrow_previous_item_opposite_content_desc">Next Item</string>
+    <string name="icon_check_list_content_desc">Check List</string>
+    <string name="icon_close_content_desc">Close</string>
+    <string name="icon_edit_content_desc">Edit</string>
+    <string name="icon_remove_content_desc">Remove</string>
+    <string name="icon_search_content_desc">Search</string>
+    <string name="icon_share_content_desc">Share</string>
+    <string name="icon_text_content_desc">Description</string>
+    <string name="icon_menu_close_content_desc">Close Menu</string>
+    <string name="icon_menu_open_content_desc">Open Menu</string>
+    <string name="icon_delete_content_desc">Delete</string>
+    <string name="icon_warning_content_desc">Warning</string>
+
+    <!--ORDER TYPE [ENUM]-->
+
+    <string name="order_type_sort_action">Sort by</string>
+    <string name="order_type_ascending_label">Ascending</string>
+    <string name="order_type_descending_label">Descending</string>
+    <string name="order_type_ascending_alphabet_label">A to Z</string>
+    <string name="order_type_descending_alphabet_label">Z to A</string>
+    <string name="order_type_ascending_date_label">New to old</string>
+    <string name="order_type_descending_date_label">Old to new</string>
+
+    <!--BARCODE WRITER [CLASS]-->
+
+    <string name="barcode_writer_required_length_error" translatable="false">
+        Side length must be greater than 0 pixels.</string>
+    <string name="barcode_writer_required_content_error" translatable="false">
+        Text cannot be empty or blank.</string>
+
+</resources>

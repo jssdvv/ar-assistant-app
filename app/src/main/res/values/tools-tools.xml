@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--TOOLS LIST SCREEN-->
+
+    <string name="top_bar_tools_title">Tools</string>
+
+    <!--TOOL TYPE [ENUM]-->
+
+    <string name="tool_type_wrenches_label">Wrench</string>
+    <string name="tool_type_screw_drivers_label">Screwdriver</string>
+    <string name="tool_type_pliers_label">Pliers</string>
+    <string name="tool_type_hammers_label">Hammer</string>
+    <string name="tool_type_saw_label">Saw</string>
+    <string name="tool_type_measuring_label">Measuring</string>
+    <string name="tool_type_other_label">Other</string>
+
+    <string name="icon_tool_type_wrench_content_desc">Wrench</string>
+    <string name="icon_tool_type_screw_driver_content_desc">Screwdriver</string>
+    <string name="icon_tool_type_pliers_content_desc">Pliers</string>
+    <string name="icon_tool_type_hammer_content_desc">Hammer</string>
+    <string name="icon_tool_type_saw_content_desc">Saw</string>
+    <string name="icon_tool_type_measuring_content_desc">Measuring</string>
+    <string name="icon_tool_type_other_content_desc">Other</string>
+
+    <!--TOOL CARD [COMPONENT]-->
+
+    <string name="card_tool_image_content_desc">Image of the tool</string>
+
+    <!--TOOL NAVIGATION [COMPONENT]-->
+
+    <string name="button_navigate_to_tool_detail_label">View details</string>
+
+    <!--TOOL DETAIL SCREEN-->
+
+    <string name="top_bar_tool_detail_title">Tool Details</string>
+
+    <!--TOOL IDENTIFICATION CARD [COMPONENT]-->
+
+    <string name="text_field_tool_name_label">Name</string>
+    <string name="text_field_tool_code_label">Code</string>
+    <string name="text_field_tool_type_label">Type</string>
+
+    <string name="icon_tool_name_content_desc">Enter the Tool Name</string>
+    <string name="icon_tool_code_content_desc">Enter the Tool Code</string>
+    <string name="icon_tool_type_content_desc">Enter the Tool Type</string>
+
+    <!--TOOL BODY IMAGE [COMPONENT]-->
+
+    <string name="image_tool_body_content_desc">Image of the tool body</string>
+
+    <!--TOOL SYMBOL IMAGE [COMPONENT]-->
+
+    <string name="image_tool_symbol_content_desc">Tool symbol image</string>
+
+</resources>

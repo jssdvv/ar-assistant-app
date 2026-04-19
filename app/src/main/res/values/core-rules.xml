@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--description>
+
+        String resources are text strings used throughout the app. This file follows a custom naming
+        convention that reflects where the string is used, a unique identifier, and its textual
+        purpose, following the structure below:
+
+        Naming Structure: <place>_<identifier>_<textual_purpose>
+
+            - <place> The primary locations: class, function, object or component where the string
+                is used (e.g., screen, dialog, button, card, form, text field, enum, etc.).
+            - <identifier> A unique and contextual name that distinguishes this string
+                from others used in similar components (e.g., settings, filter).
+            - <textual_purpose> The communicative role or function of the text.
+
+        Some <textual_purpose> types examples:
+
+        Identificational: Texts used to name, label, or distinguish interface elements.
+
+            - [identifier] For internal labels like IDs or codes shown in UI.
+            - [label] A short text identifying a UI component, like a button or field.
+            - [name] A proper name for entities like users, items, or custom components.
+            - [role] A label describing the function or responsibility of a component.
+            - [section] For named parts of UI layouts, like "Profile", "Settings", or "Search".
+            - [status]: Text indicating a status, like "Online", "Busy", "Pending".
+            - [tag] A compact keyword used for categorization or quick identification.
+
+        Informational: Texts that communicate data, states, or facts for user understanding.
+
+            - [body] The main content text of a screen, dialog, or section.
+            - [date_format] A string representing formatted date, time, or both.
+            - [headline] A prominent, attention-grabbing text often at the top of a component.
+            - [subtitle] A supporting heading that provides additional context.
+            - [title] The main heading of a screen, dialog, or section.
+            - [tooltip] A brief popup description when hovering or long-pressing.
+
+        Instructional: Texts that guide users through actions, tasks, or interactions.
+
+            - [action] Text for interactive elements such as buttons or clickable links.
+            - [disclaimer] Legal or advisory instruction that users must read or accept.
+            - [hint] A short input guide that suggests expected user input.
+            - [instruction] Text that explains how to use a component or complete a task.
+            - [message] A general-purpose prompt or notice shown to the user.
+            - [step] Used in wizards or onboarding (e.g., "Step 1: Choose an option").
+
+        Explanatory: Texts that clarify system behavior, intentions, or requirements.
+
+            - [rationale] Explains the need for a manifestString or specific behavior.
+            - [supporting_text] Additional details that reinforce or explain a component's purpose.
+            - [warning] Highlights potential risks or issues to avoid.
+
+        Feedback: Texts that report outcomes of system or user actions.
+
+            - [error] Describes a problem, validation issue, or failure.
+            - [exception] Indicates an abnormal state or condition during execution.
+            - [failure] Reports a failed action or process.
+            - [snackbar] A notification displayed at the bottom of the screen temporarily.
+            - [success] Confirms that an action was completed successfully.
+            - [toast] A short, transient message typically shown briefly.
+
+        Descriptive: Texts that outline features, attributes, or visual aspects of an element.
+
+            - [caption] A brief text that describes or summarizes media or UI content.
+            - [summary] A brief overview or synopsis of a screen, feature, or component.
+            - [content_desc] Text used by accessibility services to describe a UI element's role.
+
+    </description-->
+
+</resources>

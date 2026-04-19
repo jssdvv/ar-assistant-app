@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--MARKERS SCREEN-->
+
+    <string name="top_bar_markers_title">Marcadores</string>
+
+    <!--MARKER DIALOG [COMPONENT]-->
+
+    <string name="marker_dialog_edit_title">Editar Marcador</string>
+    <string name="marker_dialog_create_title">Crear Marcador</string>
+    <string name="marker_dialog_barcode_content_desc">Código QR</string>
+
+    <!--MARKER BUTTON [COMPONENT]-->
+
+    <string name="button_image_change_select_action">Seleccionar imagen</string>
+
+</resources>

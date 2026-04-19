@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--SCANNER SCREEN-->
+
+    <string name="top_bar_scanner_title">Escáner</string>
+
+</resources>

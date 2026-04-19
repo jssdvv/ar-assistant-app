@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--AR SESSION SCREEN-->
+
+    <string name="top_bar_ar_session_title">Sesión RA</string>
+
+    <!--NOTIFICATION CHIP MESSAGE [TEXT]-->
+
+    <string name="notification_chip_message_play">Reproduciendo animaciones</string>
+    <string name="notification_chip_message_pause">Deteniendo animaciones</string>
+    <string name="notification_chip_message_torch_enabled">Linterna activada</string>
+    <string name="notification_chip_message_torch_disabled">Linterna desactivada</string>
+    <string name="notification_chip_message_loop_enabled">Animación en bucle</string>
+    <string name="notification_chip_message_loop_disabled">Animación lineal</string>
+    <string name="notification_chip_message_plane_enabled">Renderizador de plano habilitado</string>
+    <string name="notification_chip_message_plane_disabled">Renderizador de plano deshabilitado</string>
+    <string name="notification_chip_message_speed_half">Velocidad media</string>
+    <string name="notification_chip_message_speed_normal">Velocidad normal</string>
+    <string name="notification_chip_message_speed_double">Velocidad doble</string>
+
+    <string name="notification_chip_message_origin_repositioned">Modelos reposicionados a %s</string>
+    <string name="notification_chip_message_origin_calibrated">Modelos calibrados a %s</string>
+    <string name="notification_chip_message_model_calibrated">Modelo: %1$s calibrado a %2$s</string>
+
+    <!--STEPS CARD [COMPONENT]-->
+
+    <string name="card_step_operations_empty_message">Aún no hay operaciones</string>
+    <string name="button_editor_add_step_action">Añadir paso</string>
+
+</resources>

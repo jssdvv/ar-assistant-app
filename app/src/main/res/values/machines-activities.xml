@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--ACTIVITY SCREEN-->
+    <!--ACTIVITIES SCREEN-->
 
     <string name="top_bar_activities_title">Activities</string>
 
@@ -22,6 +22,20 @@
     <string name="icon_activity_type_restoration_content_desc">Restoration Activity</string>
     <string name="icon_activity_type_replacement_content_desc">Replacement Activity</string>
     <string name="icon_activity_type_other_content_desc">Other Activity Type</string>
+
+    <!--OPERATION TYPE [ENUM]-->
+
+    <string name="operation_type_free_label">Point To Point Operation</string>
+    <string name="operation_type_screw_label">Screw Operation</string>
+    <string name="operation_type_cylindrical_label">Cylindrical Operation</string>
+    <string name="operation_type_joint_label">Joint Operation</string>
+    <string name="operation_type_visibility_label">Visibility Animation</string>
+
+    <string name="icon_operation_type_free_content_desc">Adjust Point To Point Operation</string>
+    <string name="icon_operation_type_screw_content_desc">Adjust Screw Operation</string>
+    <string name="icon_operation_type_cylindrical_content_desc">Adjust Cylindrical Operation</string>
+    <string name="icon_operation_type_joint_content_desc">Adjust Joint Operation</string>
+    <string name="icon_operation_type_visibility_content_desc">Adjust Visibility Operation</string>
 
     <!--TRANSLATION MODE [ENUM]-->
 
@@ -56,45 +70,8 @@
     <string name="measurement_meters_symbol" translatable="false">m</string>
     <string name="measurement_degree_symbol" translatable="false">deg</string>
 
-    <!--MARKER DIALOG [COMPONENT]-->
-
-    <string name="marker_dialog_edit_title">Edit Marker</string>
-    <string name="marker_dialog_create_title">Create Marker</string>
-    <string name="marker_dialog_barcode_content_desc">QR Code</string>
-    <string name="marker_codification" translatable="false">M%1$dP%2$d</string>
-
     <!--ACTIVITY CARD [COMPONENT]-->
 
     <string name="activity_image_content_desc">Image Of The Maintenance Activity</string>
-
-    <!--TOOL TYPE [ENUM]-->
-
-    <string name="tool_type_wrenches_label">Wrench</string>
-    <string name="tool_type_screw_drivers_label">Screwdriver</string>
-    <string name="tool_type_pliers_label">Pliers</string>
-    <string name="tool_type_hammers_label">Hammer</string>
-    <string name="tool_type_saw_label">Saw</string>
-    <string name="tool_type_measuring_label">Measuring</string>
-    <string name="tool_type_other_label">Other</string>
-
-    <string name="icon_tool_type_wrench_content_desc">Wrench</string>
-    <string name="icon_tool_type_screw_driver_content_desc">Screwdriver</string>
-    <string name="icon_tool_type_pliers_content_desc">Pliers</string>
-    <string name="icon_tool_type_hammer_content_desc">Hammer</string>
-    <string name="icon_tool_type_saw_content_desc">Saw</string>
-    <string name="icon_tool_type_measuring_content_desc">Measuring</string>
-    <string name="icon_tool_type_other_content_desc">Other</string>
-
-    <string name="operation_type_free_label">Point To Point Operation</string>
-    <string name="operation_type_screw_label">Screw Operation</string>
-    <string name="operation_type_cylindrical_label">Cylindrical Operation</string>
-    <string name="operation_type_joint_label">Joint Operation</string>
-    <string name="operation_type_visibility_label">Visibility Animation</string>
-
-    <string name="icon_operation_type_free_content_desc">Adjust Point To Point Operation</string>
-    <string name="icon_operation_type_screw_content_desc">Adjust Screw Operation</string>
-    <string name="icon_operation_type_cylindrical_content_desc">Adjust Cylindrical Operation</string>
-    <string name="icon_operation_type_joint_content_desc">Adjust Joint Operation</string>
-    <string name="icon_operation_type_visibility_content_desc">Adjust Visibility Operation</string>
 
 </resources>

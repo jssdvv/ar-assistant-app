@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--CALIBRATION SCREEN-->
+
+    <string name="top_bar_calibration_title">Calibración</string>
+
+    <!--CALIBRATION DESTINATION [COMPONENT]-->
+
+    <string name="calibration_shutter_button_models_label">Modelos</string>
+    <string name="calibration_no_markers_title">No hay marcadores para calibrar modelos</string>
+    <string name="calibration_button_go_to_markers_creation_action">Crear marcador</string>
+
+    <!--CALIBRATION MODELS DIALOG [COMPONENT]-->
+
+    <string name="calibration_dialog_models_title">Selecciona un modelo para editar</string>
+
+    <!--CALIBRATION UNSAVED CHANGES DIALOG [COMPONENT]-->
+
+    <string name="calibration_dialog_unsaved_changes_title">¿Estás seguro que deseas salir?</string>
+    <string name="calibration_dialog_unsaved_changes_warning">Los modelos que no han sido calibrados serán eliminados</string>
+    <string name="calibration_dialog_unsaved_changes_dismiss_action">Borrar y salir</string>
+    <string name="calibration_dialog_unsaved_changes_open_models_action">Abrir modelos</string>
+
+    <!--CALIBRATION MARKER DIALOG [COMPONENT]-->
+
+    <string name="calibration_dialog_selected_marker_title">Selecciona un marcador</string>
+    <string name="calibration_dialog_uncalibrated_trailing_label">No calibrado</string>
+
+    <!--CONFIRMATION TOAST [TEXT]-->
+
+    <string name="toast_marker_calibration_success">Marcador M%1$sP%2$d calibrado</string>
+
+</resources>

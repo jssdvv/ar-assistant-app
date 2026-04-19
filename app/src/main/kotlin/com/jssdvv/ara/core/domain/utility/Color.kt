@@ -25,6 +25,14 @@ fun Color.saturation() : Float {
     return hsv[1]
 }
 
+fun FloatArray.toComposeColor(): Color {
+    return if (this.size >= 3) {
+        Color(this[0], this[1], this[2])
+    } else {
+        Color.Black
+    }
+}
+
 fun Color.asContentColor() : Color {
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(this.toArgb(), hsv)

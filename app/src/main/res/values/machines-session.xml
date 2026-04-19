@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--AR SESSION SCREEN-->
+
+    <string name="top_bar_ar_session_title">AR Session</string>
+
+    <!--NOTIFICATION CHIP MESSAGE [TEXT]-->
+
+    <string name="notification_chip_message_play">Playing animations</string>
+    <string name="notification_chip_message_pause">Stoping animations</string>
+    <string name="notification_chip_message_torch_enabled">Torch enabled</string>
+    <string name="notification_chip_message_torch_disabled">Torch disabled</string>
+    <string name="notification_chip_message_loop_enabled">Looping playback animation</string>
+    <string name="notification_chip_message_loop_disabled">Linear animation</string>
+    <string name="notification_chip_message_plane_enabled">Plane renderer enabled</string>
+    <string name="notification_chip_message_plane_disabled">Plane renderer disabled</string>
+    <string name="notification_chip_message_speed_half">Speed set to half</string>
+    <string name="notification_chip_message_speed_normal">Speed set to normal</string>
+    <string name="notification_chip_message_speed_double">Speed set to double</string>
+
+    <string name="notification_chip_message_origin_repositioned">Models repositioned to %s</string>
+    <string name="notification_chip_message_origin_calibrated">Models calibrated to %s</string>
+    <string name="notification_chip_message_model_calibrated">Model: %1$s calibrated to %2$s</string>
+
+    <!--STEPS CARD [COMPONENT]-->
+
+    <string name="card_step_operations_empty_message">No operations yet</string>
+    <string name="button_editor_add_step_action">Add step</string>
+
+</resources>

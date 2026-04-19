@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.domain.utility.toComposeColor
 import com.jssdvv.ara.core.presentation.common.component.DeleteIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
@@ -128,9 +129,9 @@ fun CalibrationBottomSheetContent(
         item {
             Column {
                 listOf(
-                    Axis.X to colorResource(R.color.gizmo_x),
-                    Axis.Z to colorResource(R.color.gizmo_z),
-                    Axis.Y to colorResource(R.color.gizmo_y)
+                    Axis.X to Axis.X.color.toComposeColor(),
+                    Axis.Z to Axis.Z.color.toComposeColor(),
+                    Axis.Y to Axis.Y.color.toComposeColor()
                 ).forEach { (axis, color) ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SubtractButton { onTickDragged(axis, -1) }
