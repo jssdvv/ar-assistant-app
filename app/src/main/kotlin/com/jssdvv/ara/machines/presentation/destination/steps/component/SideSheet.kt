@@ -28,22 +28,23 @@ import com.jssdvv.ara.machines.domain.model.Step
 
 @Composable
 fun StepsSideSheet(
-    isVisible: Boolean,
-    onDismiss: () -> Unit,
+    visible: Boolean,
     steps: List<Step>,
-    selectedStep: Step?,
-    onNewStep: () -> Unit,
-    onSaveStep: (Step) -> Unit,
-    onSelectStep: (Int?) -> Unit,
-    onUpdateStep: (Step) -> Unit,
     operations: List<Operation>,
-    selectedOperation: Operation?,
-    onNewOperation: (stepId: Int) -> Unit,
+    editingStep: Step?,
+    currentStep: Step?,
+    currentOperation: Operation?,
+    onDismiss: () -> Unit,
+    onEditStep: (Int?) -> Unit,
+    onCreateStep: () -> Unit,
+    onSaveEditingStep: (Step) -> Unit,
+    onChangeEditingStep: (Step) -> Unit,
+    onSelectOperation: (Int) -> Unit,
+    onCreateOperation: (stepId: Int) -> Unit,
     onEditOperation: (Operation) -> Unit,
-    onSelectOperation: (Int?) -> Unit,
     modifier: Modifier = Modifier,
 ) = SideSheet(
-    isVisible = isVisible,
+    isVisible = visible,
     onDismiss = onDismiss,
     modifier = modifier,
 ) {
@@ -76,44 +77,46 @@ fun StepsSideSheet(
                 items = steps,
                 key = { it.id }
             ) { step ->
-                val stepOperations =
-                    remember(operations) { operations.filter { it.stepId == step.id } }
+                val stepOperations = remember(operations) {
+                    operations.filter { it.stepId == step.id }
+                }
                 StepCard(
-                    onClick = { onSelectStep(step.id) },
+                    onClick = {
+                        if (currentOperation?.stepId != step.id && stepOperations.isNotEmpty()) {
+                            onSelectOperation(stepOperations.last().id)
+                        }
+                    },
                     step = step,
-                    isSelected = selectedStep?.id == step.id,
+                    isSelected = currentStep?.id == step.id,
                     onEditStep = {
-                        onSelectStep(it.id)
+                        onEditStep(it.id)
                         showStepDialog = true
                     },
                     operations = stepOperations,
-                    selectedOperation = selectedOperation,
+                    selectedOperation = currentOperation,
                     onSelectOperation = onSelectOperation,
-                    onAddOperation = {
-                        onSelectStep(step.id)
-                        onNewOperation(step.id)
-                    },
+                    onAddOperation = { onCreateOperation(step.id) },
                     onEditOperation = onEditOperation
                 )
             }
         }
 
         AddStepButton {
-            onNewStep()
+            onCreateStep()
             showStepDialog = true
         }
 
-        if (showStepDialog && selectedStep != null) {
+        if (showStepDialog && editingStep != null) {
             StepDialog(
-                currentStep = selectedStep,
-                onUpdateStep = onUpdateStep,
+                currentStep = editingStep,
+                onUpdateStep = onChangeEditingStep,
                 onDismissRequest = {
                     showStepDialog = false
-                    onSelectStep(null)
-                    onSelectOperation(null)
+                    onEditStep(null)
                 },
-                onSaveStep = { onSaveStep(it)
-                    onSelectStep(null)
+                onSaveStep = {
+                    onSaveEditingStep(it)
+                    onEditStep(null)
                 }
             )
         }

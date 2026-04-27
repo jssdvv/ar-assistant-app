@@ -2,69 +2,47 @@ package com.jssdvv.ara.machines.presentation.destination.steps
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.common.component.SearchIcon
+import com.jssdvv.ara.core.presentation.foundation.component.BoxedScaffold
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
-import com.jssdvv.ara.machines.domain.model.RenderableTarget
-import com.jssdvv.ara.machines.domain.utility.PivotInfo
-import com.jssdvv.ara.machines.domain.utility.applyOffsetBeforeTo
-import com.jssdvv.ara.machines.domain.utility.launchOperationAnimation
-import com.jssdvv.ara.machines.domain.utility.removeGizmoNodes
-import com.jssdvv.ara.machines.domain.utility.renderableNode
-import com.jssdvv.ara.machines.domain.utility.safeTerminate
-import com.jssdvv.ara.machines.domain.utility.setSelectedMaterialInstance
-import com.jssdvv.ara.machines.domain.utility.setUnselectedMaterialInstance
-import com.jssdvv.ara.machines.presentation.destination.ar_session.component.Speed
+import com.jssdvv.ara.machines.domain.model.OperationTargets
+import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.presentation.destination.steps.component.AnimatedToolBar
 import com.jssdvv.ara.machines.presentation.destination.steps.component.AnimationIcon
 import com.jssdvv.ara.machines.presentation.destination.steps.component.DraggableDrawer
+import com.jssdvv.ara.machines.presentation.destination.steps.component.InformationChips
 import com.jssdvv.ara.machines.presentation.destination.steps.component.OperationBottomSheet
 import com.jssdvv.ara.machines.presentation.destination.steps.component.RenderableItem
 import com.jssdvv.ara.machines.presentation.destination.steps.component.SearchBar
@@ -74,24 +52,28 @@ import com.jssdvv.ara.machines.presentation.destination.steps.component.remember
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.CustomCameraGestureDetector
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberCustomCameraManipulator
 import com.jssdvv.ara.machines.presentation.sceneview.node.PivotNode
+import com.jssdvv.ara.machines.presentation.sceneview.utility.PivotNodesMap
+import com.jssdvv.ara.machines.presentation.sceneview.utility.applyOffset
 import com.jssdvv.ara.machines.presentation.sceneview.utility.createMainEnvironment
 import com.jssdvv.ara.machines.presentation.sceneview.utility.findAncestorOrNull
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberCameraNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberContainerNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberLightNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberNodes
+import com.jssdvv.ara.machines.presentation.sceneview.utility.safeTerminate
 import io.github.sceneview.Scene
 import io.github.sceneview.gesture.GestureDetector
-import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.rememberNode
-import io.github.sceneview.rememberNodes
 import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 @Composable
@@ -99,16 +81,9 @@ fun StepsDestination(
     onNavigateUp: () -> Unit,
     viewModel: StepsViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val renderableStates = viewModel.renderableInfoStates
-    val isSelectionEnabled by viewModel.isSelectionEnabled.collectAsStateWithLifecycle()
-
     StepsScreen(
-        uiState = uiState,
-        renderableInfoStates = renderableStates,
-        isSelectionEnabled = isSelectionEnabled,
+        uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
         onEvent = viewModel::onEvent,
-        onExternalEvent = viewModel::onExternalEvent,
         onNavigateUp = onNavigateUp
     )
 }
@@ -116,85 +91,66 @@ fun StepsDestination(
 @Composable
 internal fun StepsScreen(
     uiState: StepsUiState,
-    renderableInfoStates: SnapshotStateMap<RenderableInfo, RenderableState>,
-    isSelectionEnabled: Boolean,
     onEvent: (StepsEvent) -> Unit,
-    onExternalEvent: (StepsExternalEvent) -> Unit,
     onNavigateUp: () -> Unit,
 ) {
     when (uiState) {
-        StepsUiState.EmptyModels -> {
+        StepsUiState.Loading -> LoadingWheelScreen()
+        StepsUiState.EmptyModels -> {}
 
-        }
-
-        StepsUiState.Loading -> LoadingWheel(Modifier.fillMaxSize())
         is StepsUiState.Success -> {
             StepsContent(
-                models = uiState.models,
-                steps = uiState.steps,
-                operationsTargets = uiState.operationTargets,
-                selectedStep = uiState.selectedStep,
-                selectedOperation = uiState.selectedOp,
-                renderableInfoStates = renderableInfoStates,
-                isSelectionEnabled = isSelectionEnabled,
+                data = uiState.data,
+                items = uiState.items,
+                edition = uiState.edition,
                 onNavigateUp = onNavigateUp,
                 onEvent = onEvent,
-                onExternalEvent = onExternalEvent
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun StepsContent(
-    models: List<Model>,
-    steps: List<Step>,
-    operationsTargets: List<OperationTargets>,
-    selectedStep: Step?,
-    selectedOperation: Operation?,
-    renderableInfoStates: SnapshotStateMap<RenderableInfo, RenderableState>,
-    isSelectionEnabled: Boolean,
+    data: StepsData,
+    items: StepsItems,
+    edition: StepsEdition,
     onEvent: (StepsEvent) -> Unit,
-    onExternalEvent: (StepsExternalEvent) -> Unit,
     onNavigateUp: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
+
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
-    val view = rememberView(engine).apply { isStencilBufferEnabled = true }
+    val view = rememberView(engine)
     val environmentLoader = rememberEnvironmentLoader(engine)
-    val environment = remember{ environmentLoader.createMainEnvironment() }
+    val environment = remember(environmentLoader::createMainEnvironment)
 
-    // Nodes
+    // The Scene Nodes
     val nodes = rememberNodes()
-    val containersMap by remember {
-        derivedStateOf { nodes.filterContainerNodes().associateBy { it.modelId } }
-    }
-    val cameraNode = rememberCameraNode(engine)
-    val mainLightNode = rememberNode { createMainLightNode(engine) }
+    val camera = rememberCameraNode(engine)
+    val light = rememberLightNode(engine)
+
+    // Renderables Edition
+    val pivotNodesMap: PivotNodesMap = remember { mutableStateMapOf() }
 
     // Components Visibility
     val drawerState = rememberDraggableDrawerState()
     var showSideSheet by remember { mutableStateOf(false) }
-    var isEditionEnabled by remember { mutableStateOf(false) } // To show bottom sheet
 
-    val updatedEditionState by rememberUpdatedState(isEditionEnabled)
-    val updatedSelectionState by rememberUpdatedState(isSelectionEnabled)
+    val updatedSelectionEnabled by rememberUpdatedState(edition.selectionEnabled)
 
     // On Touch
-    val cameraManipulator = rememberCustomCameraManipulator(cameraNode.worldPosition)
+    val cameraManipulator = rememberCustomCameraManipulator(camera.worldPosition)
     val gestureListener = rememberOnGestureListener(
         onSingleTapConfirmed = { _, node ->
-            if (updatedEditionState && updatedSelectionState) {
-                node?.findPivotFromRenderable { pivotNode ->
-                    val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
-                    onExternalEvent(StepsExternalEvent.OnSelectRenderable(info))
-                }
-            }
+            if (!updatedSelectionEnabled) return@rememberOnGestureListener
+            node?.findAncestorOrNull<PivotNode>()
+                ?.apply { onEvent(StepsEvent.OnSelectPivots(pivot)) }
         }
     )
 
@@ -203,366 +159,236 @@ fun StepsContent(
         CustomCameraGestureDetector({ view.viewport.height }, cameraManipulator)
     }
 
-    models.forEach { model ->
+    data.models.forEach { model ->
         key(model.id) {
-            val containerNode = remember(model.id) {
-                createContainerNode(
-                    engine = engine,
-                    modelLoader = modelLoader,
-                    materialLoader = materialLoader,
-                    model = model,
-                ).apply {
-                    position = model.offsetPosition
-                    quaternion = model.offsetRotation
-                    childNodes.filterModelNodes().forEach { modelNode ->
-                        modelNode.generatePivotNodes(materialLoader)
+            rememberContainerNode(model, engine) {
+                setModelNode(modelLoader, materialLoader)
+                generatePivotNodes()
+            }.also { container ->
+                DisposableEffect(container) {
+                    nodes.add(container)
+                    onDispose {
+                        nodes.remove(container)
+                        container.safeTerminate()
                     }
                 }
-            }
-
-            DisposableEffect(containerNode) {
-                nodes.add(containerNode)
-                onDispose { nodes.safeTerminate(containerNode) }
-            }
-
-            LaunchedEffect(containerNode) {
-                val infoStates = mutableMapOf<RenderableInfo, RenderableState>()
-                containerNode.pivotNodes.forEachIndexed { index, pivotNode ->
-                    val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
-                    infoStates[info] = RenderableState(
-                        name = pivotNode.name ?: "",
-                        index = index,
-                        initialPosition = pivotNode.position,
-                        initialQuaternion = pivotNode.quaternion
-                    )
-                }
-                onExternalEvent(StepsExternalEvent.OnLoadRenderables(infoStates))
-            }
-
-            val containerRenderableStates by remember(renderableInfoStates) {
-                derivedStateOf { renderableInfoStates.filter { it.key.modelId == model.id }.values }
-            }
-
-            LaunchedEffect(containerRenderableStates) {
-                containerNode.pivotNodes.forEach { pivotNode ->
-                    val info = RenderableInfo(pivotNode.modelId, pivotNode.hash)
-                    val state = renderableInfoStates[info] ?: return@forEach
-
-                    pivotNode.apply {
-                        if (state.isSelected && state.isVisible) {
-                            if (gizmoNode == null) {
-                                generateGizmoNode(materialLoader, selectedOperation?.isGlobal, true)
-                            }
-                        } else {
-                            removeGizmoNodes()
-                        }
-                    }
-                    pivotNode.boxNode?.apply { isVisible = state.isSelected }
-                    pivotNode.renderableNode?.apply {
-                        isVisible = state.isVisible
-                        isTouchable = state.isVisible && !state.isSelected
-                        childNodes.forEach { it.isVisible = state.isSelected }
-                        if (state.isSelected) {
-                            setSelectedMaterialInstance(materialLoader)
-                        } else {
-                            setUnselectedMaterialInstance(materialLoader)
-                        }
-                    }
+                LaunchedEffect(container) {
+                    container.pivotNodes.associateByTo(pivotNodesMap) { it.pivot }
                 }
             }
         }
     }
 
-    // Text field
-    val focusManager = LocalFocusManager.current
     val textFieldState = rememberTextFieldState()
     val searchQuery by remember { derivedStateOf { textFieldState.text.toString().trim() } }
-    val debouncedQuery by remember(textFieldState) { snapshotFlow { searchQuery }.debounce(200) }
-        .collectAsStateWithLifecycle(initialValue = "")
+    val debouncedQuery by remember(textFieldState) {
+        snapshotFlow { searchQuery }.debounce(200)
+    }.collectAsStateWithLifecycle(initialValue = "")
 
-    // Derived states of renderables
-    val renderablesInfoItems by remember { derivedStateOf { renderableInfoStates.keys.toList() } }
-    val selectedRenderableItems by remember(renderableInfoStates) {
-        derivedStateOf { renderableInfoStates.filter { it.value.isSelected } }
-    }
-
-    // Items in the list
-    val filteredRenderableItems by remember(renderablesInfoItems, debouncedQuery) {
+    val filteredPivots by remember(debouncedQuery, pivotNodesMap.size) {
         derivedStateOf {
+            val allPivots = pivotNodesMap.values.toList()
             if (debouncedQuery.isBlank()) {
-                renderablesInfoItems
+                allPivots.sortedBy { it.renderableNode?.name }
             } else {
-                renderablesInfoItems.filter {
-                    renderableInfoStates[it]?.name?.contains(debouncedQuery, true) == true
-                }
+                allPivots.filter {
+                    it.renderableNode?.name?.contains(debouncedQuery, ignoreCase = true) == true
+                }.sortedBy { it.renderableNode?.name }
             }
         }
     }
 
-    val operations = remember(operationsTargets) { operationsTargets.map { it.operation } }
+    val operations = remember(data.operationsTargets) {
+        data.operationsTargets.map { it.operation }
+    }
 
-    LaunchedEffect(selectedOperation, selectedRenderableItems, isEditionEnabled) {
-        applyOperationsOffsetsBeforeTo(
-            steps = steps,
-            operationsTargets = operationsTargets,
-            currentOperation = selectedOperation,
-            renderableInfoStates = renderableInfoStates,
-            containersMap = containersMap
-        )
-
-        if (selectedOperation == null) return@LaunchedEffect
-
-        val isGlobal = selectedOperation.isGlobal
-
-        if(updatedEditionState) {
-            selectedRenderableItems.forEach { (info, state) ->
-                val container = containersMap[info.modelId] ?: return@forEach
-                val pivot = container.pivotNodes[state.index]
-                pivot.gizmoNode?.apply {
-                    if(isGlobal) {
-                        worldQuaternion = Quaternion()
-                    } else {
-                        quaternion = Quaternion()
-                    }
-                }
+    var previousAddedPivots by remember { mutableStateOf(setOf<Pivot>()) }
+    var previousAnimatedPivots by remember { mutableStateOf(setOf<Pivot>()) }
+    LaunchedEffect(
+        edition.animatedPivots,
+        edition.editionEnabled,
+        items.currentOperation?.id,
+        items.currentOperation?.global
+    ) {
+        if (items.currentOperation?.id == 0 && edition.animatedPivots.isEmpty()) {
+            previousAnimatedPivots.forEach {
+                pivotNodesMap[it]?.setSelection(
+                    false,
+                    materialLoader
+                )
             }
         }
 
-        launchOperationAnimation(
-            currentOperation = selectedOperation,
-            operationsTargets = operationsTargets,
-            renderableInfoStates = renderableInfoStates,
-            selectedRenderableInfoStates = selectedRenderableItems,
-            containersMap = containersMap,
-            isEditionEnabled = isEditionEnabled,
-            currentSpeed = Speed.NORMAL,
-            isPlaying = true,
-            isLoopingEnabled = true,
-        )
+        previousAddedPivots = if (edition.editionEnabled) {
+            val animatedPivots = edition.animatedPivots
+
+            // Removed
+            (previousAddedPivots - animatedPivots).forEach {
+                pivotNodesMap[it]?.setSelection(false, materialLoader)
+            }
+
+            // Added
+            (animatedPivots - previousAddedPivots).forEach {
+                pivotNodesMap[it]?.setSelection(true, materialLoader)
+            }
+
+            val global = items.currentOperation?.global ?: false
+
+            animatedPivots.also {
+                it.forEach { pivot -> pivotNodesMap[pivot]?.updateGizmoQuaternion(global) }
+            }
+        } else {
+            edition.animatedPivots.forEach { pivotNodesMap[it]?.setPlaying(materialLoader) }
+            emptySet()
+        }
+        previousAnimatedPivots = edition.animatedPivots
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.screen_editor_activity_title)) },
-                navigationIcon = { NavigationUpIconButton(onNavigateUp) }
-            )
+    var previousTransformedPivots by remember { mutableStateOf(emptySet<Pivot>()) }
+    LaunchedEffect(edition.transformedTargets, edition.animatedPivots, items.currentOperation) {
+        val transformedPivots: Set<Pivot> = edition.transformedTargets
+            .flatMapTo(mutableSetOf(), OperationTargets::pivots)
+
+        val animatedPivots = edition.animatedPivots
+
+        previousTransformedPivots.forEach { pivotNodesMap[it]?.restoreTransform() }
+        previousTransformedPivots = transformedPivots + animatedPivots
+
+        // Calculate offset of transformed targets pivots
+        edition.transformedTargets.forEach { opTargets ->
+            val operation = opTargets.operation
+            opTargets.pivots.forEach { pivot ->
+                pivotNodesMap[pivot]?.applyOffset(operation.offsetTransform, operation.global)
+            }
         }
-    ) { paddingValues ->
-        Box(
+
+        val currentOperation = items.currentOperation ?: return@LaunchedEffect
+        val nodesToAnimate = animatedPivots.mapNotNull { pivotNodesMap[it] }
+        delay(200)
+        coroutineScope { nodesToAnimate.map { launch { it.animate(currentOperation) } }.joinAll() }
+    }
+
+    BoxedScaffold(
+        topBarTitle = stringResource(R.string.screen_editor_activity_title),
+        navigationIcon = { NavigationUpIconButton(onNavigateUp) }
+    ) {
+        Scene(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .background(Color.DarkGray),
+            engine = engine,
+            modelLoader = modelLoader,
+            materialLoader = materialLoader,
+            environmentLoader = environmentLoader,
+            view = view,
+            isOpaque = true,
+            environment = environment,
+            mainLightNode = light,
+            cameraNode = camera,
+            cameraManipulator = cameraManipulator,
+            childNodes = nodes,
+            onTouchEvent = { event, hitResult ->
+                gestureDetector.onTouchEvent(event, hitResult)
+                gestureCameraDetector.onTouchEvent(event)
+                true
+            }
+        )
+
+        InformationChips(
+            currentStepOrder = items.currentStep?.order ?: 0,
+            currentOperationOrder = items.currentOperation?.order ?: 0,
+            stepsCount = data.steps.size,
+            operationsCount = data.operationsTargets.size,
+            modifier = Modifier.align(Alignment.TopEnd),
+        )
+
+        // Renderables List
+        DraggableDrawer(
+            state = drawerState,
         ) {
-            Scene(
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.DarkGray),
-                engine = engine,
-                modelLoader = modelLoader,
-                materialLoader = materialLoader,
-                environmentLoader = environmentLoader,
-                view = view,
-                isOpaque = true,
-                environment = environment,
-                mainLightNode = mainLightNode,
-                cameraNode = cameraNode,
-                cameraManipulator = cameraManipulator,
-                childNodes = nodes,
-                onTouchEvent = { event, hitResult ->
-                    gestureDetector.onTouchEvent(event, hitResult)
-                    gestureCameraDetector.onTouchEvent(event)
-                    true
+                    .fillMaxHeight()
+                    .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } },
+                horizontalAlignment = Alignment.Start
+            ) {
+                SearchBar(state = textFieldState)
+                LazyColumn {
+                    items(
+                        items = filteredPivots,
+                        key = { "${it.pivot.modelId}_${it.pivot.xxh3}" }
+                    ) {
+                        RenderableItem(
+                            name = it.renderableNode?.name ?: "Unknown",
+                            isVisible = it.renderableVisible,
+                            isSelected = edition.animatedPivots.contains(it.pivot),
+                            onVisibilityChange = { it.toggleVisibility() }
+                        )
+                    }
                 }
-            )
+            }
+        }
 
-            // Information Chips
-            FlowRow(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.TopEnd),
-                horizontalArrangement = Arrangement.spacedBy(
-                    MaterialTheme.spacing.medium,
-                    Alignment.End
+        StepsSideSheet(
+            visible = showSideSheet && items.editingOperation == null,
+            steps = data.steps,
+            operations = operations,
+            editingStep = items.editingStep,
+            currentStep = items.currentStep,
+            currentOperation = items.currentOperation,
+            onDismiss = { showSideSheet = false },
+            onEditStep = { onEvent(StepsEvent.OnEditStep(it)) },
+            onCreateStep = { onEvent(StepsEvent.OnCreateStep) },
+            onSaveEditingStep = { onEvent(StepsEvent.OnSaveEditingStep) },
+            onChangeEditingStep = { onEvent(StepsEvent.OnChangeEditingStep(it)) },
+            onCreateOperation = { stepId ->
+                onEvent(StepsEvent.OnCreateOperation(stepId))
+                showSideSheet = false
+            },
+            onEditOperation = { operation ->
+                onEvent(StepsEvent.OnEditOperation(operation.id))
+                showSideSheet = false
+            },
+            onSelectOperation = { onEvent(StepsEvent.OnSelectOperation(it)) }
+        )
+
+        AnimatedToolBar(
+            isVisible = !showSideSheet,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
+            IconButton(
+                onClick = { scope.launch { drawerState.toggle() } },
+                content = { SearchIcon() }
+            )
+            IconButton(
+                onClick = {
+                    onEvent(StepsEvent.OnEditCurrentOperation)
+                    showSideSheet = false
+                },
+                content = { AnimationIcon() }
+            )
+            IconButton(
+                onClick = { showSideSheet = true },
+                content = { StepIcon() }
+            )
+        }
+
+        if (items.currentOperation != null) {
+            OperationBottomSheet(
+                visible = edition.editionEnabled,
+                selectedPivots = edition.animatedPivots.mapNotNullTo(
+                    mutableSetOf(),
+                    pivotNodesMap::get
                 ),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-                maxItemsInEachRow = 3
-            ) {
-                ButtonWithIcon(
-                    onClick = { showSideSheet = true },
-                    icon = { StepIcon() },
-                    content = {
-                        Text(
-                            text = pluralStringResource(
-                                R.plurals.button_editor_step_count_label,
-                                steps.size,
-                                selectedStep?.order ?: 0,
-                                steps.size
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                )
-
-                if (steps.isNotEmpty()) {
-                    FilledIconButton(
-                        onClick = { onEvent(StepsEvent.OnSelectPreviousStep) },
-                        modifier = Modifier.size(40.dp),
-                        enabled = selectedStep?.let { step ->
-                            step.order > steps.minOf { it.order }
-                        } ?: true,
-                        content = { ArrowBackIcon() }
-                    )
-
-                    FilledIconButton(
-                        onClick = { onEvent(StepsEvent.OnSelectNextStep) },
-                        modifier = Modifier.size(40.dp),
-                        enabled = selectedStep != null && selectedStep.order < steps.maxOf { it.order },
-                        content = { ArrowBackIcon(Modifier.rotate(180F)) }
-                    )
-                }
-
-                ButtonWithIcon(
-                    onClick = { showSideSheet = true },
-                    colors = ButtonDefaults.filledTonalButtonColors(),
-                    icon = { AnimationIcon() },
-                    content = {
-                        Text(
-                            text = pluralStringResource(
-                                R.plurals.button_editor_operation_count_label,
-                                operations.size,
-                                selectedOperation?.order ?: 0,
-                                operations.size
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                )
-            }
-
-            // Renderables List
-            DraggableDrawer(
-                state = drawerState,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } },
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    SearchBar(
-                        state = textFieldState,
-                        onKeyboardAction = KeyboardActionHandler { focusManager.clearFocus() }
-                    )
-                    LazyColumn {
-                        items(
-                            items = filteredRenderableItems,
-                            key = { "${it.modelId}_${it.xxh3}" }
-                        ) { renderable ->
-
-                            val renderableState by remember(renderable) {
-                                derivedStateOf {
-                                    renderableInfoStates[renderable] ?: RenderableState()
-                                }
-                            }
-
-                            RenderableItem(
-                                name = renderableState.name,
-                                isVisible = renderableState.isVisible,
-                                isSelected = false,
-                                onVisibilityChange = {
-                                    onExternalEvent(
-                                        StepsExternalEvent.OnToggleRenderableVisibility(
-                                            renderableInfo = renderable
-                                        )
-                                    )
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-
-            StepsSideSheet(
-                isVisible = showSideSheet,
-                onDismiss = { showSideSheet = false },
-                steps = steps,
-                selectedStep = selectedStep,
-                onNewStep = { onEvent(StepsEvent.OnNewStep) },
-                onSaveStep = { onEvent(StepsEvent.OnSaveStep(it)) },
-                onSelectStep = { onEvent(StepsEvent.OnSelectStep(it)) },
-                onUpdateStep = { onEvent(StepsEvent.OnUpdateStep(it)) },
-                operations = operations,
-                selectedOperation = selectedOperation,
-                onNewOperation = { stepId ->
-                    isEditionEnabled = true
-                    onEvent(StepsEvent.OnNewOperation(stepId))
-                    showSideSheet = false
-                },
-                onEditOperation = { operationToEdit ->
-                    isEditionEnabled = true
-                    onEvent(StepsEvent.OnSelectOperation(operationToEdit.id))
-                    val targets = operationsTargets
-                        .find { it.operation.id == operationToEdit.id }
-                        ?.targets
-                        ?: emptyList()
-
-                    onExternalEvent(StepsExternalEvent.OnSelectExistingRenderables(targets))
-                    showSideSheet = false
-                },
-                onSelectOperation = { onEvent(StepsEvent.OnSelectOperation(it)) }
+                onUnselectPivot = { onEvent(StepsEvent.OnUnselectPivot(it)) },
+                onSelectionChange = { onEvent(StepsEvent.OnSelectionChange(it)) },
+                editingOperation = items.currentOperation,
+                onChangeEditingOperation = { onEvent(StepsEvent.OnChangeEditingOperation(it)) },
+                onSaveEditingOperation = { onEvent(StepsEvent.OnSaveEditingOperation) },
+                onCancelEditingOperation = { onEvent(StepsEvent.OnCancelEditingOperation) },
+                onDeleteEditingOperation = {},
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
-
-            AnimatedToolBar(
-                isVisible = !showSideSheet,
-                modifier = Modifier.align(Alignment.BottomCenter),
-            ) {
-                IconButton(
-                    onClick = { scope.launch { drawerState.toggle() } },
-                    content = { SearchIcon() }
-                )
-
-                IconButton(
-                    onClick = {
-                        // Todo: dialog or bottomsheet to add operation
-                        // todo fix this behaviour
-                    },
-                    enabled = isEditionEnabled,
-                    content = { AnimationIcon() }
-                )
-
-                IconButton(
-                    onClick = { showSideSheet = true },
-                    enabled = !isEditionEnabled,
-                    content = { StepIcon() }
-                )
-            }
-
-            if (selectedStep != null && selectedOperation != null) {
-                OperationBottomSheet(
-                    isVisible = isEditionEnabled,
-                    selectedRenderablesStates = selectedRenderableItems,
-                    onUnselectItem = { onExternalEvent(StepsExternalEvent.OnUnselectRenderable(it)) },
-                    onSelectionChange = {
-                        onExternalEvent(StepsExternalEvent.OnChangeSelectionState(it))
-                    },
-                    onSaveClick = {
-                        onEvent(StepsEvent.OnSaveOperation(it))
-                        onExternalEvent(StepsExternalEvent.OnUnselectAllRenderables)
-                        isEditionEnabled = false
-                    },
-                    onCancelClick = {
-                        isEditionEnabled = false
-                        onExternalEvent(StepsExternalEvent.OnUnselectAllRenderables)
-                    },
-                    selectedOperation = selectedOperation,
-                    onOperationChange = { onEvent(StepsEvent.OnUpdateOperation(it)) },
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
-            }
         }
     }
 }

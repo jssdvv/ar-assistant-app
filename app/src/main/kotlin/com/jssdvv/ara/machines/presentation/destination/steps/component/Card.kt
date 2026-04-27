@@ -53,8 +53,8 @@ import com.jssdvv.ara.core.presentation.common.component.WarningIcon
 import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
+import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.model.Step
-import com.jssdvv.ara.machines.domain.utility.PivotInfo
 import kotlinx.coroutines.launch
 
 @Composable
@@ -197,9 +197,9 @@ fun StepCard(
 @Composable
 fun SelectableRenderablesCard(
     modifier: Modifier = Modifier,
-    items: List<PivotInfo>,
+    items: List<Pivot>,
     onActivateSelection: () -> Unit,
-    onDeleteItem : (PivotInfo) -> Unit
+    onDeleteItem : (Pivot) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val itemHeight = 56.dp

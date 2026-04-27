@@ -40,40 +40,43 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.presentation.common.CheckIcon
-import com.jssdvv.ara.core.presentation.common.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.CheckIcon
+import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
+import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.type.Axis
-import com.jssdvv.ara.machines.domain.type.Measurement
 import com.jssdvv.ara.machines.domain.type.OperationType
-import com.jssdvv.ara.machines.domain.utility.RenderableInfo
-import com.jssdvv.ara.machines.domain.utility.extractSingleAxisDegrees
-import com.jssdvv.ara.machines.domain.utility.rememberMultiRotationState
-import com.jssdvv.ara.machines.domain.utility.rememberMultiTranslationState
-import com.jssdvv.ara.machines.domain.utility.rememberSingleRotationState
-import com.jssdvv.ara.machines.domain.utility.rememberSingleTranslationState
-import com.jssdvv.ara.machines.domain.utility.rememberTimeState
-import com.jssdvv.ara.machines.domain.utility.unidirectionalRotation
-import com.jssdvv.ara.machines.domain.utility.unidirectionalTransformPair
-import com.jssdvv.ara.machines.domain.utility.unidirectionalTranslation
-import com.jssdvv.ara.machines.presentation.destination.steps.RenderableState
+import com.jssdvv.ara.machines.domain.type.measurement.Translation
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.extractSingleAxisDegrees
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiRotationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiTranslationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberSingleRotationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberSingleTranslationState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberTimeState
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalRotation
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTransformPair
+import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTranslation
+import com.jssdvv.ara.machines.presentation.sceneview.node.PivotNode
 import dev.romainguy.kotlin.math.max
+import io.github.sceneview.math.Transform
+import io.github.sceneview.math.quaternion
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 enum class BottomSheetScreen { MAIN, ENTITIES, OPERATIONS }
 
 @Composable
 fun OperationBottomSheet(
-    isVisible: Boolean,
-    selectedRenderablesStates: Map<RenderableInfo, RenderableState>,
-    onUnselectItem: (RenderableInfo) -> Unit,
+    visible: Boolean,
+    selectedPivots: Set<PivotNode>,
+    onUnselectPivot: (Pivot) -> Unit,
     onSelectionChange: (isActive: Boolean) -> Unit,
-    onSaveClick: (Operation) -> Unit,
-    onCancelClick: () -> Unit,
-    selectedOperation: Operation,
-    onOperationChange: (Operation) -> Unit,
+    editingOperation: Operation,
+    onChangeEditingOperation: (Operation) -> Unit,
+    onSaveEditingOperation: () -> Unit,
+    onCancelEditingOperation: () -> Unit,
+    onDeleteEditingOperation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var currentSheetScreen by remember { mutableStateOf(BottomSheetScreen.MAIN) }
@@ -96,7 +99,7 @@ fun OperationBottomSheet(
     }
 
     DraggableBottomSheet(
-        isVisible = isVisible,
+        isVisible = visible,
         modifier = modifier,
         header = {
             AnimatedContent(
@@ -113,22 +116,22 @@ fun OperationBottomSheet(
                     BottomSheetScreen.MAIN -> {
                         BottomSheetMainHeader(
                             title = "Edit Operation",
-                            onSaveClick = { onSaveClick(selectedOperation) },
-                            onCancelClick = onCancelClick
+                            onSaveClick = onSaveEditingOperation,
+                            onCancelClick = onCancelEditingOperation
                         )
                     }
 
                     BottomSheetScreen.OPERATIONS -> {
                         BottomSheetSubHeader(
                             title = "Selected operation",
-                            onNavigateUp = { currentSheetScreen = BottomSheetScreen.MAIN }
+                            onNavigateBack = { currentSheetScreen = BottomSheetScreen.MAIN }
                         )
                     }
 
                     BottomSheetScreen.ENTITIES -> {
                         BottomSheetSubHeader(
                             title = "Selected entities",
-                            onNavigateUp = { currentSheetScreen = BottomSheetScreen.MAIN }
+                            onNavigateBack = { currentSheetScreen = BottomSheetScreen.MAIN }
                         )
                     }
                 }
@@ -145,50 +148,42 @@ fun OperationBottomSheet(
                 }
             }
         ) { currentScreen ->
-
-            val settingsContent = when (selectedOperation.type) {
+            val settingsContent = when (editingOperation.type) {
                 OperationType.POINT_TO_POINT -> pointToPointSettings(
-                    selectedOperation,
-                    onOperationChange
+                    editingOperation,
+                    onChangeEditingOperation
                 )
 
-                OperationType.SCREW -> screwSettings(selectedOperation, onOperationChange)
+                OperationType.SCREW -> screwSettings(editingOperation, onChangeEditingOperation)
                 OperationType.CYLINDRICAL -> cylindricalSettings(
-                    selectedOperation,
-                    onOperationChange
+                    editingOperation,
+                    onChangeEditingOperation
                 )
 
-                else -> jointSettings(selectedOperation, onOperationChange)
+                else -> jointSettings(editingOperation, onChangeEditingOperation)
             }
 
             val lazyListContent = when (currentScreen) {
-                BottomSheetScreen.MAIN -> {
-                    stepsMainBottomScreen(
-                        operation = selectedOperation,
-                        onOperationChange = onOperationChange,
-                        onNavigateToBottomScreen = { currentSheetScreen = it },
-                        selectedItemsCount = selectedRenderablesStates.count(),
-                        entitiesInteractionSource = interactionSource,
-                        operationsInteractionSource = interactionSource2,
-                        settingsContent = settingsContent
-                    )
+                BottomSheetScreen.MAIN -> stepsMainBottomScreen(
+                    operation = editingOperation,
+                    onChangeEditingOperation = onChangeEditingOperation,
+                    onNavigateToBottomScreen = { currentSheetScreen = it },
+                    selectedEntitiesCount = selectedPivots.size,
+                    entitiesInteractionSource = interactionSource,
+                    operationsInteractionSource = interactionSource2,
+                    settingsContent = settingsContent
+                )
 
-                }
+                BottomSheetScreen.ENTITIES -> selectedPivotsBottomScreen(
+                    selectedPivots = selectedPivots,
+                    onUnselectItem = onUnselectPivot
+                )
 
-                BottomSheetScreen.ENTITIES -> {
-                    stepsOpSelectionBottomScreen(
-                        selectedRenderablesStates = selectedRenderablesStates,
-                        onUnselectItem = onUnselectItem
-                    )
-                }
-
-                BottomSheetScreen.OPERATIONS -> {
-                    stepsEntitiesBottomScreen(
-                        operation = selectedOperation,
-                        onOperationChange = onOperationChange,
-                        onNavigateToBottomScreen = { currentSheetScreen = it }
-                    )
-                }
+                BottomSheetScreen.OPERATIONS -> selectedOperationBottomScreen(
+                    operation = editingOperation,
+                    onOperationChange = onChangeEditingOperation,
+                    onNavigateBack = { currentSheetScreen = BottomSheetScreen.MAIN }
+                )
             }
 
             LazyColumn(
@@ -210,11 +205,11 @@ fun OperationBottomSheet(
 @Composable
 fun stepsMainBottomScreen(
     operation: Operation,
-    onOperationChange: (Operation) -> Unit,
-    onNavigateToBottomScreen: (BottomSheetScreen) -> Unit,
-    selectedItemsCount: Int,
+    selectedEntitiesCount: Int,
+    onChangeEditingOperation: (Operation) -> Unit,
     entitiesInteractionSource: MutableInteractionSource,
     operationsInteractionSource: MutableInteractionSource,
+    onNavigateToBottomScreen: (BottomSheetScreen) -> Unit,
     settingsContent: LazyListScope.() -> Unit
 ): LazyListScope.() -> Unit {
     val delayState = rememberTimeState(operation.delay)
@@ -225,7 +220,7 @@ fun stepsMainBottomScreen(
         snapshotFlow { delayState.seconds to durationState.seconds }
             .distinctUntilChanged()
             .collect { (delay, duration) ->
-                onOperationChange(
+                onChangeEditingOperation(
                     updatedCurrentOperation.value.copy(
                         delay = delay,
                         duration = duration
@@ -238,16 +233,14 @@ fun stepsMainBottomScreen(
         item {
             OutlinedTextField(
                 value = operation.title,
-                onValueChange = {
-                    onOperationChange(operation.copy(title = it))
-                },
+                onValueChange = { onChangeEditingOperation(operation.copy(title = it)) },
                 label = { Text("Operation name") },
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             EntitiesTextField(
-                selectedItemsCount = selectedItemsCount,
+                selectedItemsCount = selectedEntitiesCount,
                 onClick = { onNavigateToBottomScreen(BottomSheetScreen.ENTITIES) },
                 modifier = Modifier.fillMaxWidth(),
                 interactionSource = entitiesInteractionSource
@@ -281,13 +274,13 @@ fun stepsMainBottomScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                val (text, drawableId) = if (operation.isGlobal) {
+                val (text, drawableId) = if (operation.global) {
                     "Orientación global" to R.drawable.ic_orientation_global
                 } else {
                     "Orientación local" to R.drawable.ic_orientation_local
                 }
                 ButtonWithIcon(
-                    onClick = { onOperationChange(operation.copy(isGlobal = !operation.isGlobal)) },
+                    onClick = { onChangeEditingOperation(operation.copy(global = !operation.global)) },
                     icon = {
                         Icon(
                             painter = painterResource(drawableId),
@@ -302,44 +295,59 @@ fun stepsMainBottomScreen(
     }
 }
 
+
 @Composable
-fun stepsOpSelectionBottomScreen(
-    selectedRenderablesStates: Map<RenderableInfo, RenderableState>,
-    onUnselectItem: (RenderableInfo) -> Unit,
+fun selectedPivotsBottomScreen(
+    selectedPivots: Set<PivotNode>,
+    onUnselectItem: (Pivot) -> Unit
 ): LazyListScope.() -> Unit {
     return {
-        itemsIndexed(selectedRenderablesStates.entries.toList()) { index, (renderable, state) ->
-            if (index > 0) HorizontalDivider()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_renderable),
-                    contentDescription = null
-                )
+        if (selectedPivots.isEmpty()) {
+            item {
                 Text(
-                    text = state.name,
-                    modifier = Modifier.weight(1F)
+                    "No hay piezas seleccionadas",
+                    modifier = Modifier.padding(MaterialTheme.spacing.medium),
+                    style = MaterialTheme.typography.bodyMedium
                 )
-                IconButton(
-                    onClick = { onUnselectItem(renderable) },
-                    content = { CloseIcon() }
-                )
+            }
+        } else {
+            itemsIndexed(selectedPivots.toList()) { index, pivot ->
+                if (index > 0) HorizontalDivider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_renderable),
+                        contentDescription = null
+                    )
+                    Text(
+                        text = pivot.name ?: "",
+                        modifier = Modifier.weight(1F)
+                    )
+                    IconButton(
+                        onClick = {
+                            val info = Pivot(pivot.modelId, pivot.hash)
+                            onUnselectItem(info)
+                                  },
+                        content = { CloseIcon() }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun stepsEntitiesBottomScreen(
+fun selectedOperationBottomScreen(
     operation: Operation,
     onOperationChange: (Operation) -> Unit,
-    onNavigateToBottomScreen: (BottomSheetScreen) -> Unit
+    onNavigateBack: () -> Unit
 ): LazyListScope.() -> Unit {
+    val updatedOperation = rememberUpdatedState(operation)
     return {
         itemsIndexed(OperationType.entries) { index, operationType ->
             if (index > 0) HorizontalDivider()
@@ -348,8 +356,8 @@ fun stepsEntitiesBottomScreen(
                     .fillMaxWidth()
                     .height(56.dp)
                     .clickable {
-                        onOperationChange(operation.copy(type = operationType))
-                        onNavigateToBottomScreen(BottomSheetScreen.MAIN)
+                        onOperationChange(updatedOperation.value.copy(type = operationType))
+                        onNavigateBack()
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -374,12 +382,12 @@ fun pointToPointSettings(
     onOperationChange: (Operation) -> Unit,
 ): LazyListScope.() -> Unit {
     val multiTranslationState = rememberMultiTranslationState(
-        initialXMeters = currentOperation.offsetPosition.x,
-        initialYMeters = currentOperation.offsetPosition.y,
-        initialZMeters = currentOperation.offsetPosition.z
+        initialXMeters = currentOperation.offsetTransform.position.x,
+        initialYMeters = currentOperation.offsetTransform.position.y,
+        initialZMeters = currentOperation.offsetTransform.position.z
     )
     val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = currentOperation.offsetRotation.toEulerAngles()
+        initialEulerDegrees = currentOperation.offsetTransform.quaternion.toEulerAngles()
     )
     val updatedCurrentOperation = rememberUpdatedState(currentOperation)
 
@@ -389,8 +397,10 @@ fun pointToPointSettings(
             .collect { (position, rotation) ->
                 onOperationChange(
                     updatedCurrentOperation.value.copy(
-                        offsetPosition = position,
-                        offsetRotation = rotation
+                        offsetTransform = Transform(
+                            position = position,
+                            quaternion = rotation
+                        )
                     )
                 )
             }
@@ -438,13 +448,15 @@ fun screwSettings(
     var usePitch by remember { mutableStateOf(false) }
 
     val translationState =
-        rememberSingleTranslationState(initialMeters = max(operation.offsetPosition))
+        rememberSingleTranslationState(initialMeters = max(operation.offsetTransform.position))
     val pitchState = rememberSingleTranslationState(
-        initialMeters = if (operation.turns == 0F) 0F else max(operation.offsetPosition) / operation.turns
+        initialMeters = if (operation.turns == 0F) {
+            0F
+        } else max(operation.offsetTransform.position) / operation.turns
     )
     val turnsState = rememberSingleTranslationState(
         initialMeters = operation.turns,
-        initialMeasurement = Measurement.METERS
+        initialTranslation = Translation.METERS
     )
 
     fun updateFromDistance() {
@@ -511,8 +523,10 @@ fun screwSettings(
 
         onOperationChange(
             operation.copy(
-                offsetPosition = unidirectionalTranslation(selectedAxis, distance),
-                offsetRotation = unidirectionalRotation(selectedAxis, turns * 360F),
+                offsetTransform = Transform(
+                    position = unidirectionalTranslation(selectedAxis, distance),
+                    quaternion = unidirectionalRotation(selectedAxis, turns * 360F)
+                ),
                 turns = turns,
                 axis = selectedAxis
             )
@@ -585,10 +599,10 @@ fun cylindricalSettings(
 ): LazyListScope.() -> Unit {
     var selectedAxis by remember { mutableStateOf(operation.axis) }
     val translationState = rememberSingleTranslationState(
-        initialMeters = max(operation.offsetPosition)
+        initialMeters = max(operation.offsetTransform.position)
     )
     val rotationState = rememberSingleRotationState(
-        initialDegrees = operation.offsetRotation.extractSingleAxisDegrees(selectedAxis)
+        initialDegrees = operation.offsetTransform.quaternion.extractSingleAxisDegrees(selectedAxis)
     )
     val updatedCurrentOperation by rememberUpdatedState(operation)
 
@@ -598,8 +612,10 @@ fun cylindricalSettings(
             .collect { (meters, degrees) ->
                 onOperationChange(
                     updatedCurrentOperation.copy(
-                        offsetPosition = unidirectionalTranslation(selectedAxis, meters),
-                        offsetRotation = unidirectionalRotation(selectedAxis, degrees),
+                        offsetTransform = Transform(
+                            position = unidirectionalTranslation(selectedAxis, meters),
+                            quaternion =unidirectionalRotation(selectedAxis, degrees)
+                        ),
                         axis = selectedAxis
                     )
                 )
@@ -619,8 +635,7 @@ fun cylindricalSettings(
                     )
                     onOperationChange(
                         updatedCurrentOperation.copy(
-                            offsetPosition = newPosition,
-                            offsetRotation = newRotation,
+                            offsetTransform = Transform(newPosition, newRotation),
                             axis = axis
                         )
                     )
@@ -651,7 +666,7 @@ fun jointSettings(
     onOperationChange: (Operation) -> Unit,
 ): LazyListScope.() -> Unit {
     val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = operation.offsetRotation.toEulerAngles()
+        initialEulerDegrees = operation.offsetTransform.quaternion.toEulerAngles()
     )
     val updatedCurrentOperation by rememberUpdatedState(operation)
 
@@ -661,7 +676,7 @@ fun jointSettings(
             .collect { quaternion ->
                 onOperationChange(
                     updatedCurrentOperation.copy(
-                        offsetRotation = quaternion
+                        offsetTransform = Transform(quaternion = quaternion)
                     )
                 )
             }
