@@ -1,35 +1,34 @@
 package com.jssdvv.ara.machines.presentation.destination.machines
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
+import com.jssdvv.ara.core.presentation.foundation.component.OrderSection
+import com.jssdvv.ara.core.presentation.foundation.component.SearchBarSurface
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.machines.domain.type.MachineOrderKey
+import com.jssdvv.ara.machines.domain.type.OrderKey
 import com.jssdvv.ara.machines.presentation.destination.machines.component.MachineCard
-import com.jssdvv.ara.machines.presentation.destination.machines.component.MachinesOrderSection
-import com.jssdvv.ara.machines.presentation.destination.machines.component.MachinesSearchBar
 
 /**
  * Entry point for the Machines screen in the navigation graph.
@@ -42,9 +41,8 @@ fun MachinesDestination(
     onNavigateToSpecs: (Int) -> Unit,
     viewModel: MachineryViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     MachinesScreen(
-        uiState = uiState,
+        uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
         onEvent = viewModel::onEvent,
         onNavigateToSpecs = onNavigateToSpecs
     )
@@ -59,68 +57,48 @@ fun MachinesDestination(
  */
 @Composable
 internal fun MachinesScreen(
-    modifier: Modifier = Modifier,
     uiState: MachinesUiState,
     onEvent: (MachinesEvent) -> Unit,
     onNavigateToSpecs: (Int) -> Unit,
 ) {
-    val textFieldState = rememberTextFieldState()
-    val successUiState = uiState as? MachinesUiState.Success
+    when (uiState) {
+        MachinesUiState.Loading -> LoadingWheelScreen()
 
-    Scaffold(
-        modifier = modifier.windowInsetsPadding(WindowInsets.statusBars),
-        topBar = {
-            MachinesSearchBar(
-                orderKey = successUiState?.orderKey ?: MachineOrderKey.NAME,
-                orderType = successUiState?.orderType ?: OrderType.ASCENDING,
-                textFieldState = textFieldState,
-                onSearch = { onEvent(MachinesEvent.SearchMachines(it)) },
-                searchResults = successUiState?.searchedMachines ?: emptyList(),
-                onOrderMachines = { orderKey, orderType ->
-                    onEvent(MachinesEvent.OrderMachines(orderKey, orderType))
-                },
+        is MachinesUiState.Success -> {
+            MachinesContent(
+                orderKey = uiState.orderKey,
+                orderType = uiState.orderType,
+                machines = uiState.machines,
+                onEvent = onEvent,
                 onNavigateToMachineDetails = onNavigateToSpecs
             )
-        },
-        floatingActionButton = {}
-    ) { paddingValues ->
-        when (uiState) {
-            MachinesUiState.Loading -> LoadingWheelScreen()
-
-            is MachinesUiState.Success -> {
-                MachinesContent(
-                    modifier = Modifier.padding(paddingValues),
-                    machines = uiState.machines,
-                    orderType = uiState.orderType,
-                    orderKey = uiState.orderKey,
-                    onOrderMachines = { orderKey, orderType ->
-                        onEvent(MachinesEvent.OrderMachines(orderKey, orderType))
-                    },
-                    onNavigateToMachineDetails = onNavigateToSpecs
-                )
-            }
         }
     }
 }
 
 @Composable
 internal fun MachinesContent(
-    modifier: Modifier = Modifier,
-    machines: List<Machine>,
+    orderKey: OrderKey,
     orderType: OrderType,
-    orderKey: MachineOrderKey,
-    onOrderMachines: (MachineOrderKey, OrderType) -> Unit,
+    machines: List<Machine>,
+    onEvent: (MachinesEvent) -> Unit,
     onNavigateToMachineDetails: (Int) -> Unit,
 ) {
-    var selectedMachineId by remember { mutableStateOf<Int?>(null) }
-    Column(
-        modifier = modifier.fillMaxSize()
+    val textFieldState = rememberTextFieldState()
+    var currentMachineId by remember { mutableIntStateOf(0) }
+    SearchBarSurface(
+        value = textFieldState.text.toString(),
+        onValueChange = { textFieldState.setTextAndPlaceCursorAtEnd(it) },
+        placeholder = { Text(stringResource(R.string.search_bar_machines_supporting_text)) },
+        bottomRow = {
+            OrderSection(
+                orderType = orderType,
+                orderKey = orderKey,
+                orderKeys = OrderKey.entries,
+                onChangeSorting = { key, type -> onEvent(MachinesEvent.OrderMachines(key, type)) }
+            )
+        }
     ) {
-        MachinesOrderSection(
-            orderType = orderType,
-            orderKey = orderKey,
-            onOrderMachines = onOrderMachines
-        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -135,8 +113,8 @@ internal fun MachinesContent(
             ) { machine ->
                 MachineCard(
                     machine = machine,
-                    onClick = { selectedMachineId = machine.id },
-                    isSelected = selectedMachineId == machine.id,
+                    onClick = { currentMachineId = machine.id },
+                    isSelected = currentMachineId == machine.id,
                     onNavigateToDetails = { onNavigateToMachineDetails(it) },
                 )
             }

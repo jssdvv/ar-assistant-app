@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.machines.domain.type.MachineOrderKey
+import com.jssdvv.ara.machines.domain.type.OrderKey
 import com.jssdvv.ara.machines.domain.usecase.SearchMachines
 import com.jssdvv.ara.machines.domain.usecase.SelectMachines
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +24,7 @@ class MachineryViewModel @Inject constructor(
     private val searchMachinesUseCase: SearchMachines
 ) : ViewModel() {
 
-    private val orderKey = MutableStateFlow(MachineOrderKey.NAME)
+    private val orderKey = MutableStateFlow(OrderKey.NAME)
     private val orderType = MutableStateFlow(OrderType.ASCENDING)
     private val machines = MutableStateFlow(emptyList<Machine>())
     private val searchedMachines = MutableStateFlow(emptyList<Machine>())
@@ -48,7 +48,7 @@ class MachineryViewModel @Inject constructor(
         initialValue = MachinesUiState.Loading
     )
 
-    private fun getMachines(orderType: OrderType, orderKey: MachineOrderKey) {
+    private fun getMachines(orderType: OrderType, orderKey: OrderKey) {
         getMachinesJob?.cancel()
         getMachinesJob = selectMachinesUseCase(orderKey, orderType).onEach { machines ->
             this.machines.value = machines
@@ -62,7 +62,7 @@ class MachineryViewModel @Inject constructor(
         }
     }
 
-    private fun onOrderMachines(orderKey: MachineOrderKey, orderType: OrderType) {
+    private fun onOrderMachines(orderKey: OrderKey, orderType: OrderType) {
         this.orderType.value = orderType
         this.orderKey.value = orderKey
         getMachines(orderType, orderKey)
@@ -82,7 +82,7 @@ class MachineryViewModel @Inject constructor(
 
 sealed class MachinesEvent {
     data class OrderMachines(
-        val orderKey: MachineOrderKey,
+        val orderKey: OrderKey,
         val orderType: OrderType,
     ) : MachinesEvent()
 
@@ -93,7 +93,7 @@ sealed interface MachinesUiState {
     data object Loading : MachinesUiState
     data class Success(
         val orderType: OrderType,
-        val orderKey: MachineOrderKey,
+        val orderKey: OrderKey,
         val machines: List<Machine>,
         val searchedMachines: List<Machine>,
     ) : MachinesUiState

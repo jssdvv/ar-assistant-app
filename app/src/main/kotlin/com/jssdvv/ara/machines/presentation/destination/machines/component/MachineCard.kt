@@ -41,7 +41,7 @@ fun MachineCard(
         isFocused = isSelected,
         imageUri = machine.imageUri,
         modifier = modifier,
-        imageContentDescription = stringResource(R.string.machine_image_content_desc)
+        imageContentDescription = stringResource(R.string.card_machine_image_content_desc)
     ) {
         // Content Padding
         Column(

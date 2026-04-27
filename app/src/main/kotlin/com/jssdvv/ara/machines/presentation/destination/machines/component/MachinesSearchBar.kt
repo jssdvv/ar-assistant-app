@@ -29,17 +29,17 @@ import com.jssdvv.ara.core.presentation.common.component.ArrowBackIcon
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.common.component.SearchIcon
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.machines.domain.type.MachineOrderKey
+import com.jssdvv.ara.machines.domain.type.OrderKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MachinesSearchBar(
-    orderKey: MachineOrderKey,
+    orderKey: OrderKey,
     orderType: OrderType,
     textFieldState: TextFieldState,
     onSearch: (String) -> Unit,
     searchResults: List<Machine>,
-    onOrderMachines: (MachineOrderKey, OrderType) -> Unit,
+    onOrderMachines: (OrderKey, OrderType) -> Unit,
     onNavigateToMachineDetails: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -91,11 +91,6 @@ fun MachinesSearchBar(
             expanded = expanded,
             onExpandedChange = { expanded = it },
         ) {
-            MachinesOrderSection(
-                orderType = orderType,
-                orderKey = orderKey,
-                onOrderMachines = onOrderMachines
-            )
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
