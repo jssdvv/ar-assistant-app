@@ -1,0 +1,21 @@
+material {
+    name : gizmo_color,
+    parameters : [
+        {
+            type : float4,
+            name : baseColor
+        }
+    ],
+    shadingModel : unlit,
+    culling : none,
+    blending : transparent,
+    depthWrite : false,
+    depthCulling : false,
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        material.baseColor = vec4(materialParams.baseColor.rgb, 1.0);
+    }
+}

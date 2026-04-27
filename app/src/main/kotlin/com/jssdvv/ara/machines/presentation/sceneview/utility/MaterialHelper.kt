@@ -5,6 +5,7 @@ import io.github.sceneview.loaders.MaterialLoader
 
 const val MODEL_FILAMAT = "material/toon.filamat"
 const val COLOR_FILAMAT = "material/color.filamat"
+const val GIZMO_FILAMAT = "material/gizmo.filamat"
 
 val MODEL_SELECTED_COLOR = floatArrayOf(1.00F, 0.60F, 0.40F)
 val MODEL_PLAYING_COLOR = floatArrayOf(0.80F, 0.20F, 0.20F)
@@ -23,7 +24,7 @@ val PLANE_LAST_POSITION_COLOR = floatArrayOf(1.00F, 0.80F, 0.00F)
 /**
  * Material instance for complex shapes like models, renderables.
  */
-fun MaterialLoader.createModelColorMaterialInstance(
+fun MaterialLoader.createModelMaterial(
     color: FloatArray = DISABLED_COLOR,
     alpha: Float = 1F
 ) = createInstance(createMaterial(MODEL_FILAMAT)).apply {
@@ -33,8 +34,8 @@ fun MaterialLoader.createModelColorMaterialInstance(
 /**
  * Material instance for visual guides geometry like gizmos or axis.
  */
-fun MaterialLoader.createGizmoColorMaterialInstance(color: FloatArray = DISABLED_COLOR) =
-    createInstance(createMaterial(COLOR_FILAMAT)).apply {
+fun MaterialLoader.createGizmoMaterial(color: FloatArray = DISABLED_COLOR) =
+    createInstance(createMaterial(GIZMO_FILAMAT)).apply {
         setParameter("baseColor", color[0], color[1], color[2])
         setDepthCulling(false)
         setDepthWrite(false)
@@ -43,12 +44,12 @@ fun MaterialLoader.createGizmoColorMaterialInstance(color: FloatArray = DISABLED
 /**
  * Material instance for visual markers.
  */
-fun MaterialLoader.createMarkerColorMaterialInstance(color: FloatArray = DISABLED_COLOR) =
+fun MaterialLoader.createMarkerMaterial(color: FloatArray = DISABLED_COLOR) =
     createInstance(createMaterial(COLOR_FILAMAT)).apply {
         setParameter("baseColor", color[0], color[1], color[2])
     }
 
-fun MaterialLoader.createBoxMaterialInstance() = this.createColorInstance(
+fun MaterialLoader.createBoxMaterial() = this.createColorInstance(
     color = Color(1F, 1F, 1F, 0.2F),
     metallic = 0F,
     roughness = 0F,
