@@ -29,9 +29,8 @@ import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import com.jssdvv.ara.machines.presentation.sceneview.node.ContainerNode
 import com.jssdvv.ara.machines.presentation.sceneview.node.MarkerNode
 import com.jssdvv.ara.machines.presentation.sceneview.node.OriginNode
-import com.jssdvv.ara.machines.presentation.sceneview.utility.applyObjectPositionOffset
-import com.jssdvv.ara.machines.presentation.sceneview.utility.applyObjectQuaternionOffset
-import com.jssdvv.ara.machines.presentation.sceneview.utility.setUnselectedMaterialInstance
+import com.jssdvv.ara.machines.presentation.sceneview.utility.applyOffset
+import com.jssdvv.ara.machines.presentation.sceneview.utility.setUnselectedMaterial
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.math.Transform
@@ -284,7 +283,7 @@ class ModelsCalibrationViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             containerNode?.apply {
-                modelNode?.setUnselectedMaterialInstance(materialLoader)
+                modelNode?.setUnselectedMaterial(materialLoader)
                 setGizmoVisibility(false, materialLoader)
 
                 val modelToUpdate = models.value.find { it.id == this.modelId }?.copy(
@@ -312,7 +311,7 @@ class ModelsCalibrationViewModel @Inject constructor(
         viewModelScope.launch {
             containerNode?.apply {
                 transform = previousModelTransform.value
-                modelNode?.setUnselectedMaterialInstance(materialLoader)
+                modelNode?.setUnselectedMaterial(materialLoader)
                 setGizmoVisibility(false, materialLoader)
             }
             selectedContainerId.value = null
@@ -367,9 +366,9 @@ class ModelsCalibrationViewModel @Inject constructor(
 
     private fun restoreContainerDefaults(container: ContainerNode?) {
         if (selectedMeasurement.value == Measurement.TRANSLATION) {
-            container?.restorePositionDefaults()
+            container?.restorePosition()
         } else {
-            container?.restoreQuaternionDefaults()
+            container?.restoreQuaternion()
         }
     }
 
@@ -377,11 +376,11 @@ class ModelsCalibrationViewModel @Inject constructor(
         if (selectedMeasurement.value == Measurement.TRANSLATION) {
             val millis = selectedMode.value.translation.millisPerUnit * tick / 1000F
             val offset = unidirectionalTranslation(axis, millis)
-            container?.applyObjectPositionOffset(offset)
+            container?.applyOffset(offset)
         } else {
             val degrees = selectedMode.value.rotation.halfDegreesPerUnit * tick / 2F
             val offset = unidirectionalRotation(axis, degrees)
-            container?.applyObjectQuaternionOffset(offset)
+            container?.applyOffset(offset)
         }
     }
 

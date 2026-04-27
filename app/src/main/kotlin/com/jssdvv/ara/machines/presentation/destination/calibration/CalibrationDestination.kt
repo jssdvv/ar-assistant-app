@@ -39,8 +39,8 @@ import com.jssdvv.ara.core.presentation.common.state.anyDenied
 import com.jssdvv.ara.core.presentation.common.state.anyPermanentlyDenied
 import com.jssdvv.ara.core.presentation.common.state.deniedPermissions
 import com.jssdvv.ara.core.presentation.common.state.permanentlyDeniedRationales
+import com.jssdvv.ara.core.presentation.foundation.component.ARSceneSurface
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
-import com.jssdvv.ara.core.presentation.foundation.component.SceneSurface
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.presentation.component.NotificationChip
@@ -57,6 +57,7 @@ import com.jssdvv.ara.machines.presentation.destination.calibration.component.Un
 import com.jssdvv.ara.machines.presentation.destination.steps.component.BottomSheetMainHeader
 import com.jssdvv.ara.machines.presentation.destination.steps.component.DraggableBottomSheet
 import com.jssdvv.ara.machines.presentation.sceneview.node.ContainerNode
+import com.jssdvv.ara.machines.presentation.sceneview.utility.ContainerNodesMap
 import com.jssdvv.ara.machines.presentation.sceneview.utility.configureARSession
 import com.jssdvv.ara.machines.presentation.sceneview.utility.detectMarkerNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.findAncestorOrNull
@@ -197,8 +198,8 @@ fun SuccessModelsCalibrationScreen(
     val marker = remember(nodes.size) { nodes.markerNode }
 
     // Model Edition
-    val containersMap = remember { mutableMapOf<Int, ContainerNode>() }
-    val selectedContainer = remember(items.selectedModelId) { containersMap[items.selectedModelId] }
+    val containerNodesMap: ContainerNodesMap = remember { mutableMapOf() }
+    val selectedContainer = remember(items.selectedModelId) { containerNodesMap[items.selectedModelId] }
     var pressedAxis by remember { mutableStateOf<Axis?>(null) }
 
     // Components Visibility
@@ -223,11 +224,11 @@ fun SuccessModelsCalibrationScreen(
                     setModelNode(modelLoader, materialLoader)
                 }.also { container ->
                     DisposableEffect(container) {
-                        containersMap[container.modelId] = container
+                        containerNodesMap[container.modelId] = container
                         origin.addChildNode(container)
                         onEvent(ModelsEvent.OnRepositionOrigin(origin, marker))
                         onDispose {
-                            containersMap.remove(container.modelId)
+                            containerNodesMap.remove(container.modelId)
                             container.safeTerminate()
                         }
                     }
@@ -254,7 +255,7 @@ fun SuccessModelsCalibrationScreen(
         }
     }
 
-    SceneSurface(
+    ARSceneSurface(
         modifier = modifier,
         onNavigationUp = {
             if (data.models.any { !it.calibrated }) showWarningDialog = true
@@ -431,7 +432,7 @@ fun SuccessModelsCalibrationScreen(
             ModelsDialog(
                 models = data.models,
                 onSelectModel = { modelId ->
-                    val container = containersMap[modelId] ?: return@ModelsDialog
+                    val container = containerNodesMap[modelId] ?: return@ModelsDialog
                     onEvent(ModelsEvent.OnSelectContainer(container, materialLoader))
                     showModelsDialog = false
                 },
