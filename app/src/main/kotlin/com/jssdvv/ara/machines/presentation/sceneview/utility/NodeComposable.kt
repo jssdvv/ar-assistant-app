@@ -17,15 +17,6 @@ import io.github.sceneview.managers.color
 import io.github.sceneview.node.CameraNode
 import io.github.sceneview.node.LightNode
 import io.github.sceneview.node.Node
-import io.github.sceneview.safeDestroyEntity
-import io.github.sceneview.safeDestroyTransformable
-
-fun Node.safeTerminate() {
-    childNodes.forEach(Node::safeTerminate)
-    runCatching { parent = null }
-    engine.safeDestroyTransformable(entity)
-    engine.safeDestroyEntity(entity)
-}
 
 @Composable
 fun rememberNodes(
@@ -34,10 +25,7 @@ fun rememberNodes(
     buildList(creator).toMutableStateList()
 }.also { nodes ->
     DisposableEffect(nodes) {
-        onDispose {
-            nodes.forEach { it.safeTerminate() }
-            nodes.clear()
-        }
+        onDispose { nodes.safeTerminate() }
     }
 }
 
