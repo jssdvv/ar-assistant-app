@@ -1,18 +1,15 @@
 package com.jssdvv.ara.machines.data.local.mapper.operation
 
-import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
-import com.jssdvv.ara.machines.domain.model.RenderableTarget
+import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
+import com.jssdvv.ara.machines.domain.model.Pivot
 
-fun RenderableTargetComposite.toDomain() = RenderableTarget(
-    operationId = operationId,
+fun PivotComposite.toDomain() = Pivot(
     modelId = modelId,
-    xxh3 = xxh3,
-    name = name
+    xxh3 = hash
 )
 
-fun RenderableTarget.toComposite() = RenderableTargetComposite(
+fun Pivot.toComposite(operationId: Int) = PivotComposite(
     operationId = operationId,
     modelId = modelId,
-    xxh3 = xxh3,
-    name = name
+    hash = xxh3
 )

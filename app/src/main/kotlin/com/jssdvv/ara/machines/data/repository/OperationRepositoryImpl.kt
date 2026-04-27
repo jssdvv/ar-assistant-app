@@ -40,15 +40,15 @@ class OperationRepositoryImpl(
             val result = dao.upsertOperation(entity)[0].toInt()
             val generatedOperationId = if (result == -1) entity.id else result
 
-            val newTargets = operationTargets.targets.map {
-                it.toComposite().copy(operationId = generatedOperationId)
+            val newTargets = operationTargets.pivots.map {
+                it.toComposite(generatedOperationId)
             }
 
             val existingTargets = dao.selectTargetsByOperationId(generatedOperationId)
             val targetsToDelete = existingTargets.filter { existingTarget ->
                 newTargets.none { newTarget ->
                     newTarget.modelId == existingTarget.modelId &&
-                            newTarget.xxh3 == existingTarget.xxh3
+                            newTarget.hash == existingTarget.hash
                 }
             }
 

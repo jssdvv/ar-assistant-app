@@ -3,7 +3,7 @@ material {
     shadingModel : lit,
     parameters : [
         {
-            type : float3,
+            type : float4,
             name : baseColor
         }
     ],
@@ -13,7 +13,7 @@ material {
 fragment {
     void material(inout MaterialInputs material) {
         prepareMaterial(material);
-        material.baseColor.rgb = materialParams.baseColor;
+        material.baseColor = materialParams.baseColor;
     }
 
     vec3 surfaceShading(
@@ -21,21 +21,48 @@ fragment {
             const ShadingData shadingData,
             const LightData lightData
     ) {
-        // Number of visible shade transitions
-        const float shades = 5.0;
-        // Ambient intensity
-        const float ambient = 0.1;
+        vec3 normal = getWorldNormalVector();
 
-        float toon = max(ceil(lightData.NdotL * shades) / shades, ambient);
+        float up    = max(dot(normal, vec3( 0.0,  1.0,  0.0)), 0.0);
+        float down  = max(dot(normal, vec3( 0.0, -1.0,  0.0)), 0.0);
+        float north = max(dot(normal, vec3( 0.0,  0.0, -1.0)), 0.0);
+        float south = max(dot(normal, vec3( 0.0,  0.0,  1.0)), 0.0);
+        float east  = max(dot(normal, vec3( 1.0,  0.0,  0.0)), 0.0);
+        float west  = max(dot(normal, vec3(-1.0,  0.0,  0.0)), 0.0);
 
-        // Shadowing and attenuation
+        vec3 color = shadingData.diffuseColor;
+
+        color = mix(color, shadingData.diffuseColor * 1.00, up);
+        color = mix(color, shadingData.diffuseColor * 1.00, down);
+        color = mix(color, shadingData.diffuseColor * 0.70, north);
+        color = mix(color, shadingData.diffuseColor * 0.50, south);
+        color = mix(color, shadingData.diffuseColor * 0.85, east);
+        color = mix(color, shadingData.diffuseColor * 0.60, west);
+
+        const float shades   = 4.0;
+        const float ambient  = 0.20;
+        const float minLight = 0.20;
+        const float maxLight = 0.60;
+
+        float NdotLCompressed = mix(minLight, maxLight, lightData.NdotL);
+
+        float toon = max(ceil(NdotLCompressed * shades) / shades, ambient);
         toon *= lightData.visibility * lightData.attenuation;
 
-        // Color and intensity
-        vec3 light = lightData.colorIntensity.rgb * lightData.colorIntensity.w;
+        float intensity = min(lightData.colorIntensity.w, 1.0);
 
-        return shadingData.diffuseColor * light * toon;
+        vec3 light = lightData.colorIntensity.rgb * intensity;
+
+        float shade = 0.50;
+
+        shade = mix(shade, 1.00, up);
+        shade = mix(shade, 0.15, down);
+        shade = mix(shade, 0.70, north);
+        shade = mix(shade, 0.45, south);
+        shade = mix(shade, 0.85, east);
+        shade = mix(shade, 0.60, west);
+
+        //return color * light * toon;
+        return color * shade;
     }
 }
-
-// I lost the original file of toon3.filamat and I don't know if it's the same

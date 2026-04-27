@@ -4,5 +4,48 @@
     <!--DOCUMENTS SCREEN-->
 
     <string name="top_bar_documents_title">Documents</string>
+    <string name="screen_documents_empty_message">No documents</string>
+
+    <!--TEXT FIELD [specific for documents]-->
+
+    <string name="text_field_document_name_label">Document name</string>
+    <string name="text_field_category_label">Category</string>
+
+    <!--DOCUMENT TYPE [ENUM]-->
+
+    <string name="document_type_unknown_label">Unknown</string>
+    <string name="document_type_technical_sheet_label">Technical Sheet</string>
+    <string name="document_type_magazine_label">Magazine</string>
+    <string name="document_type_catalog_label">Catalog</string>
+    <string name="document_type_invoice_label">Invoice</string>
+    <string name="document_type_contract_label">Contract</string>
+    <string name="document_type_manual_label">Manual</string>
+
+    <!--DIALOG-->
+
+    <string name="dialog_delete_document_title">Delete document</string>
+    <string name="dialog_delete_document_message">Are you sure you want to delete this document?</string>
+    <string name="dialog_create_document_title">New document</string>
+
+    <!--FAB-->
+
+    <string name="fab_upload_document_label">Upload document</string>
+
+    <!--MINI CARD-->
+
+    <string name="document_preview_content_desc">Document preview</string>
+    <string name="document_delete_content_desc">Delete document</string>
+
+    <!--SEARCH-->
+
+    <string name="search_bar_documents_supporting_text">Search documents</string>
+
+    <!--FILTER [reuse from core-common.xml: order_type_*_alphabet_label and order_type_*_date_label]-->
+
+    <!--DATE FORMAT-->
+
+    <string name="date_format">dd/MM/yyyy</string>
+
+    <!--BUTTON [reuse button_save_action from core-common.xml]-->
 
 </resources>

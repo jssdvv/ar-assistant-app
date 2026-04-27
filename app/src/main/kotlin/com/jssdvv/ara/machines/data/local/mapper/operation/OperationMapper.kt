@@ -1,13 +1,14 @@
 package com.jssdvv.ara.machines.data.local.mapper.operation
 
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
-import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
+import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
 import com.jssdvv.ara.machines.data.local.relation.OperationWithTargets
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
-import com.jssdvv.ara.machines.domain.model.RenderableTarget
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.math.Position
+import io.github.sceneview.math.Transform
+import io.github.sceneview.math.quaternion
 
 fun OperationEntity.toDomain() = Operation(
     id = id,
@@ -19,9 +20,11 @@ fun OperationEntity.toDomain() = Operation(
     duration = duration,
     axis = axis,
     turns = turns,
-    isGlobal = isGlobal,
-    containerOffsetPosition = Position(offsetVx, offsetVy, offsetVz),
-    containerOffsetQuaternion = Quaternion(offsetQx, offsetQy, offsetQz, offsetQw)
+    global = global,
+    offsetTransform = Transform(
+        position = Position(offsetVx, offsetVy, offsetVz),
+        quaternion = Quaternion(offsetQx, offsetQy, offsetQz, offsetQw)
+    ),
 )
 
 fun Operation.toEntity() = OperationEntity(
@@ -34,22 +37,22 @@ fun Operation.toEntity() = OperationEntity(
     duration = duration,
     axis = axis,
     turns = turns,
-    isGlobal = isGlobal,
-    offsetVy = containerOffsetPosition.y,
-    offsetVx = containerOffsetPosition.x,
-    offsetVz = containerOffsetPosition.z,
-    offsetQx = containerOffsetQuaternion.x,
-    offsetQy = containerOffsetQuaternion.y,
-    offsetQz = containerOffsetQuaternion.z,
-    offsetQw = containerOffsetQuaternion.w,
+    global = global,
+    offsetVy = offsetTransform.position.y,
+    offsetVx = offsetTransform.position.x,
+    offsetVz = offsetTransform.position.z,
+    offsetQx = offsetTransform.quaternion.x,
+    offsetQy = offsetTransform.quaternion.y,
+    offsetQz = offsetTransform.quaternion.z,
+    offsetQw = offsetTransform.quaternion.w,
 )
 
 fun OperationWithTargets.toDomain() = OperationTargets(
     operation = operation.toDomain(),
-    targets = targets.map(RenderableTargetComposite::toDomain)
+    pivots = pivotTargets.mapTo(mutableSetOf(), PivotComposite::toDomain)
 )
 
 fun OperationTargets.toComposite() = OperationWithTargets(
     operation = operation.toEntity(),
-    targets = targets.map(RenderableTarget::toComposite)
+    pivotTargets = pivots.map { it.toComposite(operation.id) }
 )

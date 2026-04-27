@@ -26,7 +26,7 @@ import com.jssdvv.ara.machines.data.local.entity.machine.MachineSpecsEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MotorIdentityEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MotorSpecsEntity
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
-import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
+import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
 
 
 @Database(
@@ -43,7 +43,7 @@ import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetCompo
         ActivityEntity::class,
         StepEntity::class,
         OperationEntity::class,
-        RenderableTargetComposite::class,
+        PivotComposite::class,
 
         // Augmented Entities
         ModelEntity::class,

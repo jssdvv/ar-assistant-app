@@ -3,6 +3,16 @@
 
     <!--EVENTS SCREEN-->
 
+    <string name="top_bar_events_title">Events</string>
+
+    <!--CALENDAR TOP BAR [COMPONENT]-->
+
+    <string name="icon_previous_month_content_desc">Go to previous month</string>
+    <string name="icon_next_month_content_desc">Go to next month</string>
+    <string name="button_select_month_label">Select month</string>
+
+    <!--CALENDAR DAYS [COMPONENT]-->
+
     <string-array name="calendar_days_symbol_designation">
         <item>S</item>
         <item>M</item>

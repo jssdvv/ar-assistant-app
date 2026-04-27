@@ -9,8 +9,8 @@ import com.jssdvv.ara.core.presentation.navigation.MarkerIcon
 
 @Composable
 fun SceneMarkerIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     IconButton(
         onClick = onClick,

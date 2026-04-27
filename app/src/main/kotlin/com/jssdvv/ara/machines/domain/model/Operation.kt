@@ -2,39 +2,35 @@ package com.jssdvv.ara.machines.domain.model
 
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.OperationType
-import dev.romainguy.kotlin.math.Quaternion
-import io.github.sceneview.math.Position
+import io.github.sceneview.math.Transform
 
 data class Operation(
     val id: Int = 0,
     val stepId: Int,
     val order: Int = 0,
-    val title: String,
+    val title: String = "",
 
     // Animation
-    val type: OperationType,
+    val type: OperationType = OperationType.CYLINDRICAL,
     val delay: Float = 0F, // Seconds
-    val duration: Float = 8F, // Seconds
+    val duration: Float = 5F, // Seconds
 
     // Renderables
     val axis: Axis = Axis.Y,
     val turns: Float = 2F,
-    val isGlobal: Boolean = false,
+    val global: Boolean = false,
 
     // Relative to container coordinate system
-    val containerOffsetPosition: Position = Position(),
-    val containerOffsetQuaternion: Quaternion = Quaternion()
+    val offsetTransform: Transform = Transform()
 )
 
 // Cross-Ref table 1-N
-data class RenderableTarget(
-    val operationId: Int,
+data class Pivot(
     val modelId: Int,
-    val xxh3: Long,
-    val name: String
+    val xxh3: Long, // xxh3 hash from renderable's name
 )
 
 data class OperationTargets(
     val operation: Operation,
-    val targets: List<RenderableTarget>
+    val pivots: Set<Pivot>
 )

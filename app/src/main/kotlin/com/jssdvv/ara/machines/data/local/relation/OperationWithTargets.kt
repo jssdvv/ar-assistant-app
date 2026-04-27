@@ -3,7 +3,7 @@ package com.jssdvv.ara.machines.data.local.relation
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
-import com.jssdvv.ara.machines.data.local.entity.operation.RenderableTargetComposite
+import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
 
 // 1 to N
 data class OperationWithTargets(
@@ -12,7 +12,7 @@ data class OperationWithTargets(
 
     @Relation(
         parentColumn = OperationEntity.COLUMN_ID,
-        entityColumn = RenderableTargetComposite.COLUMN_OPERATION_ID
+        entityColumn = PivotComposite.COLUMN_OPERATION_ID
     )
-    val targets: List<RenderableTargetComposite>
+    val pivotTargets: List<PivotComposite>
 )

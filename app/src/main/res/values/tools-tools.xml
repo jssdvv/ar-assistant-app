@@ -5,6 +5,10 @@
 
     <string name="top_bar_tools_title">Tools</string>
 
+    <!--TOOLS SEARCH BAR [COMPONENT]-->
+
+    <string name="search_bar_tools_supporting_text">Search tools</string>
+
     <!--TOOL TYPE [ENUM]-->
 
     <string name="tool_type_wrenches_label">Wrench</string>

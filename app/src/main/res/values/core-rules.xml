@@ -43,7 +43,7 @@
             - [hint] A short input guide that suggests expected user input.
             - [instruction] Text that explains how to use a component or complete a task.
             - [message] A general-purpose prompt or notice shown to the user.
-            - [step] Used in wizards or onboarding (e.g., "Step 1: Choose an option").
+            - [step] Used in wizards or onboarding (e.g., "Step 1: Choose an orderKey").
 
         Explanatory: Texts that clarify system behavior, intentions, or requirements.
 

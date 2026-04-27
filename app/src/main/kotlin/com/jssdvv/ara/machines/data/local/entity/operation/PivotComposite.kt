@@ -7,49 +7,45 @@ import androidx.room.Index
 import com.jssdvv.ara.machines.data.local.entity.ModelEntity
 
 @Entity(
-    tableName = RenderableTargetComposite.TABLE_NAME,
+    tableName = PivotComposite.TABLE_NAME,
     primaryKeys = [
-        RenderableTargetComposite.COLUMN_OPERATION_ID,
-        RenderableTargetComposite.COLUMN_MODEL_ID,
-        RenderableTargetComposite.COLUMN_XXH3
+        PivotComposite.COLUMN_OPERATION_ID,
+        PivotComposite.COLUMN_MODEL_ID,
+        PivotComposite.COLUMN_HASH
     ],
     foreignKeys = [
         ForeignKey(
             entity = OperationEntity::class,
             parentColumns = [OperationEntity.COLUMN_ID],
-            childColumns = [RenderableTargetComposite.COLUMN_OPERATION_ID],
+            childColumns = [PivotComposite.COLUMN_OPERATION_ID],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = ModelEntity::class,
             parentColumns = [ModelEntity.COLUMN_ID],
-            childColumns = [RenderableTargetComposite.COLUMN_MODEL_ID],
+            childColumns = [PivotComposite.COLUMN_MODEL_ID],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = [RenderableTargetComposite.COLUMN_OPERATION_ID]),
-        Index(value = [RenderableTargetComposite.COLUMN_MODEL_ID])
+        Index(value = [PivotComposite.COLUMN_OPERATION_ID]),
+        Index(value = [PivotComposite.COLUMN_MODEL_ID])
     ]
 )
-data class RenderableTargetComposite(
+data class PivotComposite(
     @ColumnInfo(name = COLUMN_OPERATION_ID)
     val operationId: Int,
 
     @ColumnInfo(name = COLUMN_MODEL_ID)
     val modelId: Int,
 
-    @ColumnInfo(name = COLUMN_XXH3)
-    val xxh3: Long,
-
-    @ColumnInfo(name = COLUMN_NAME)
-    val name: String
+    @ColumnInfo(name = COLUMN_HASH)
+    val hash: Long,
 ) {
     companion object {
-        const val TABLE_NAME = "renderable_target_composite"
+        const val TABLE_NAME = "pivot_composite"
         const val COLUMN_OPERATION_ID = "operation_id"
         const val COLUMN_MODEL_ID = "model_id"
-        const val COLUMN_XXH3 = "xxh3"
-        const val COLUMN_NAME = "name"
+        const val COLUMN_HASH = "hash"
     }
 }

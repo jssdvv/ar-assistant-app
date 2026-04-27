@@ -5,12 +5,14 @@
 
     <string name="graph_scanner_label">Scanner</string>
     <string name="graph_machines_label">Machines</string>
+    <string name="graph_schedule_label">Schedule</string>
     <string name="graph_tools_label">Tools</string>
 
     <!--NAVIGATION GRAPH ICON [COMPONENT]-->
 
     <string name="icon_scanner_content_desc">Open the Barcode Scanner</string>
     <string name="icon_machines_content_desc">Open the Machines List</string>
+    <string name="icon_schedule_content_desc">Open the Schedule</string>
     <string name="icon_tools_content_desc">Open Tool List</string>
 
     <!--COUNTER NAVIGATION BUTTON [COMPONENT]-->
@@ -32,6 +34,10 @@
     <!--NAVIGATION WITH ICON BUTTON [COMPONENT]-->
 
     <string name="button_navigate_to_specs_from_machines_label">Specifications</string>
+
+    <!--BACK NAVIGATION [COMPONENT]-->
+
+    <string name="icon_back_content_desc">Go back</string>
     <string name="button_navigate_to_animations_from_activities_label">Edit animations</string>
     <string name="button_navigate_to_ar_session_from_activities_label">Start</string>
 

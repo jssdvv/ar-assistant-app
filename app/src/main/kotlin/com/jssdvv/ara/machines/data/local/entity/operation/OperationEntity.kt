@@ -56,8 +56,8 @@ data class OperationEntity(
     @ColumnInfo(name = COLUMN_TURNS)
     val turns: Float,
 
-    @ColumnInfo(name = COLUMN_IS_GLOBAL)
-    val isGlobal: Boolean,
+    @ColumnInfo(name = COLUMN_GLOBAL)
+    val global: Boolean,
 
     @ColumnInfo(name = COLUMN_OFFSET_VX)
     val offsetVx: Float,
@@ -95,7 +95,7 @@ data class OperationEntity(
         // Renderables
         const val COLUMN_AXIS = "axis"
         const val COLUMN_TURNS = "turns"
-        const val COLUMN_IS_GLOBAL = "is_global"
+        const val COLUMN_GLOBAL = "global"
         const val COLUMN_OFFSET_VX = "offset_vx"
         const val COLUMN_OFFSET_VY = "offset_vy"
         const val COLUMN_OFFSET_VZ = "offset_vz"
