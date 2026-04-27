@@ -17,6 +17,9 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.Base64
 import android.widget.Toast
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
+import androidx.core.graphics.withTranslation
 import com.jssdvv.ara.core.domain.repository.DirectoriesManager
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.type.UriType
@@ -50,6 +53,10 @@ class FilesManagerImpl(
             "heif",
             "tiff"
         )
+
+        private const val PDF_EXTENSION = "pdf"
+        private const val PDF_PREVIEW_DPI = 300
+        private const val PDF_PREVIEW_MAX_WIDTH = 2000
     }
 
     override fun getUriType(uri: Uri): UriType =
@@ -218,6 +225,37 @@ class FilesManagerImpl(
         }
     }
 
+    override fun copyPdfToInternalStorage(
+        contentUri: Uri,
+        machineId: Int,
+    ): File? {
+        try {
+            val inputStream = getInputStreamFromUri(contentUri) ?: return null
+            val fileName = getFileNameFromUri(contentUri) ?: "document"
+            val fileExtension = fileName.substringAfterLast('.', "")
+
+            if (fileExtension != PDF_EXTENSION)
+                throw IllegalArgumentException("File extension must be $PDF_EXTENSION")
+
+            val storageFileName = "${UUID.randomUUID()}.$PDF_EXTENSION"
+
+            val documentsDir = directoriesManager.getDocumentsDir(machineId)
+            val outputFile = File(documentsDir, storageFileName)
+
+            inputStream.use { input ->
+                FileOutputStream(outputFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            return outputFile
+        } catch (e: IllegalArgumentException) {
+            val toast = Toast.makeText(context, e.message, Toast.LENGTH_SHORT)
+            toast.show()
+            return null
+        }
+    }
+
     override suspend fun generateLabelBitmap(
         name: String,
         description: String,
@@ -309,11 +347,7 @@ class FilesManagerImpl(
                 val contentHeight = titleHeight + descriptionHeight + 3 * padding
                 val totalHeightPx = imageHeightPx + contentHeight
 
-                bitmap = Bitmap.createBitmap(
-                    imageWidthPx,
-                    totalHeightPx.toInt(),
-                    Bitmap.Config.ARGB_8888
-                )
+                bitmap = createBitmap(imageWidthPx, totalHeightPx.toInt())
 
                 canvas = Canvas(bitmap)
 
@@ -336,12 +370,7 @@ class FilesManagerImpl(
                 )
 
                 imageBitmap?.let{
-                    val scaledImage = Bitmap.createScaledBitmap(
-                        it,
-                        imageWidthPx,
-                        imageHeightPx.toInt(),
-                        true
-                    )
+                    val scaledImage = it.scale(imageWidthPx, imageHeightPx.toInt())
 
                     canvas.drawBitmap(
                         scaledImage,
@@ -351,15 +380,13 @@ class FilesManagerImpl(
                     )
                 }
 
-                canvas.save()
-                canvas.translate(0F, imageHeightPx)
-                titleLayout.draw(canvas)
-                canvas.restore()
+                canvas.withTranslation(0F, imageHeightPx) {
+                    titleLayout.draw(this)
+                }
 
-                canvas.save()
-                canvas.translate(0F, imageHeightPx + titleHeight + padding)
-                descriptionLayout.draw(canvas)
-                canvas.restore()
+                canvas.withTranslation(0F, imageHeightPx + titleHeight + padding) {
+                    descriptionLayout.draw(this)
+                }
 
 
             } catch (e: Exception) {
@@ -389,7 +416,7 @@ class FilesManagerImpl(
 }
 
 fun Bitmap.toRoundedBitmap(cornerRadius: Float): Bitmap {
-    val output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val output = createBitmap(width, height)
     val canvas = Canvas(output)
 
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {

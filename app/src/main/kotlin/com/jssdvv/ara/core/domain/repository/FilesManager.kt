@@ -23,6 +23,11 @@ interface FilesManager {
         machineId: Int
     ): File?
 
+    fun copyPdfToInternalStorage(
+        contentUri: Uri,
+        machineId: Int
+    ): File?
+
     suspend fun generateLabelBitmap(
         name: String,
         description: String,

@@ -190,11 +190,13 @@ fun MenuIcon(
 fun DeleteIcon(
     modifier: Modifier = Modifier,
     painter: Painter = painterResource(R.drawable.ic_delete),
-    contentDescription: String = stringResource(R.string.icon_delete_content_desc)
+    contentDescription: String = stringResource(R.string.icon_delete_content_desc),
+    tint: Color = LocalContentColor.current
 ) = Icon(
     modifier = modifier,
     painter = painter,
-    contentDescription = contentDescription
+    contentDescription = contentDescription,
+    tint = tint
 )
 
 @Composable
