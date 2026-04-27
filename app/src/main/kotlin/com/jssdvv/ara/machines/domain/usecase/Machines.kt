@@ -5,7 +5,7 @@ import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
-import com.jssdvv.ara.machines.domain.type.MachineOrderKey
+import com.jssdvv.ara.machines.domain.type.OrderKey
 import kotlinx.coroutines.flow.Flow
 
 data class MachinesDataManager(
@@ -19,7 +19,7 @@ class SearchMachines(
 ) {
     operator fun invoke(
         search: String,
-        orderKey: MachineOrderKey,
+        orderKey: OrderKey,
         orderType: OrderType,
     ): Flow<List<Machine>> = repository.searchModelsOrdered(search, orderKey, orderType)
 }
@@ -30,7 +30,7 @@ class SelectMachineAndDetails(private val repository: MachineRepository) {
 }
 
 class SelectMachines(private val repository: MachineRepository) {
-    operator fun invoke(orderKey: MachineOrderKey, orderType: OrderType): Flow<List<Machine>> =
+    operator fun invoke(orderKey: OrderKey, orderType: OrderType): Flow<List<Machine>> =
         repository.selectModelsOrdered(orderKey, orderType)
 }
 

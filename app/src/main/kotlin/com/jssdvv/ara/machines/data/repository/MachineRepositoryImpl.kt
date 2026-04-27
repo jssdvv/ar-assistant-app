@@ -11,7 +11,7 @@ import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
-import com.jssdvv.ara.machines.domain.type.MachineOrderKey
+import com.jssdvv.ara.machines.domain.type.OrderKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -20,13 +20,13 @@ class MachineRepositoryImpl(
 ) : MachineRepository {
 
     private fun getOrderKey(
-        orderKey: MachineOrderKey = MachineOrderKey.NAME,
+        orderKey: OrderKey = OrderKey.NAME,
     ): String = when (orderKey) {
-        MachineOrderKey.CODE -> MachineEntity.COLUMN_CODE
-        MachineOrderKey.NAME -> MachineEntity.COLUMN_NAME
-        MachineOrderKey.TYPE -> MachineEntity.COLUMN_TYPE
-        MachineOrderKey.CREATION_DATE -> MachineEntity.COLUMN_CREATED_AT
-        MachineOrderKey.MODIFICATION_DATE -> MachineEntity.COLUMN_MODIFIED_AT
+        OrderKey.CODE -> MachineEntity.COLUMN_CODE
+        OrderKey.NAME -> MachineEntity.COLUMN_NAME
+        OrderKey.TYPE -> MachineEntity.COLUMN_TYPE
+        OrderKey.CREATION_DATE -> MachineEntity.COLUMN_CREATED_AT
+        OrderKey.MODIFICATION_DATE -> MachineEntity.COLUMN_MODIFIED_AT
     }
 
     private fun getOrderType(
@@ -38,7 +38,7 @@ class MachineRepositoryImpl(
 
     private fun buildSearchQuery(
         search: String,
-        orderKey: MachineOrderKey = MachineOrderKey.NAME,
+        orderKey: OrderKey = OrderKey.NAME,
         orderType: OrderType = OrderType.ASCENDING,
     ): SupportSQLiteQuery {
         val query =
@@ -55,7 +55,7 @@ class MachineRepositoryImpl(
     }
 
     private fun buildSelectQuery(
-        orderKey: MachineOrderKey = MachineOrderKey.NAME,
+        orderKey: OrderKey = OrderKey.NAME,
         orderType: OrderType = OrderType.ASCENDING,
     ): SupportSQLiteQuery {
         val query =
@@ -72,14 +72,14 @@ class MachineRepositoryImpl(
 
     override fun searchModelsOrdered(
         search: String,
-        orderKey: MachineOrderKey,
+        orderKey: OrderKey,
         orderType: OrderType,
     ): Flow<List<Machine>> =
         dao.selectEntitiesOrdered(buildSearchQuery(search, orderKey, orderType))
             .map { it.map(MachineEntity::toDomain) }
 
     override fun selectModelsOrdered(
-        orderKey: MachineOrderKey,
+        orderKey: OrderKey,
         orderType: OrderType,
     ): Flow<List<Machine>> =
         dao.selectEntitiesOrdered(buildSelectQuery(orderKey, orderType))

@@ -4,7 +4,7 @@ import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
-import com.jssdvv.ara.machines.domain.type.MachineOrderKey
+import com.jssdvv.ara.machines.domain.type.OrderKey
 import kotlinx.coroutines.flow.Flow
 
 interface MachineRepository {
@@ -12,12 +12,12 @@ interface MachineRepository {
 
     fun searchModelsOrdered(
         search: String,
-        orderKey: MachineOrderKey,
+        orderKey: OrderKey,
         orderType: OrderType,
     ): Flow<List<Machine>>
 
     fun selectModelsOrdered(
-        orderKey: MachineOrderKey,
+        orderKey: OrderKey,
         orderType: OrderType
     ): Flow<List<Machine>>
 
