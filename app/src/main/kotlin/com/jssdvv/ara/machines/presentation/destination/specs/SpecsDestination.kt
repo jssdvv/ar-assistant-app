@@ -12,11 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -34,8 +31,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.domain.utility.AspectRatio
+import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
+import com.jssdvv.ara.core.presentation.foundation.component.LazyColumnScaffold
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.navigation.ActivitiesIcon
 import com.jssdvv.ara.core.presentation.navigation.DocumentsIcon
@@ -48,81 +46,57 @@ import com.jssdvv.ara.machines.presentation.destination.specs.component.MachineI
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MachineSpecsCard
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MotorIdentityCard
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MotorSpecsCard
-import com.jssdvv.ara.machines.presentation.destination.specs.component.SpecsTopBar
 import java.text.SimpleDateFormat
 
 @Composable
-fun MachineDetailsDestination(
-    onNavigateBack: () -> Unit,
+fun SpecsDestination(
+    onNavigateUp: () -> Unit,
     onNavigateToActivities: (Int) -> Unit,
     onNavigateToDocuments: (Int) -> Unit,
-    viewModel: MachineDetailsViewModel = hiltViewModel(),
+    viewModel: SpecsViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val cardUiState by viewModel.cardsUiState.collectAsStateWithLifecycle()
-    MachineDetailsScreen(
-        uiState = uiState,
-        cardUiState = cardUiState,
-        uiEvent = viewModel::uiEvent,
-        onNavigateBack = onNavigateBack,
+    SpecsScreen(
+        uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
+        cardUiState = viewModel.cardsUiState.collectAsStateWithLifecycle().value,
+        onEvent = viewModel::uiEvent,
+        onNavigateUp = onNavigateUp,
         onNavigateToActivities = onNavigateToActivities,
         onNavigateToDocuments = onNavigateToDocuments,
     )
 }
 
 @Composable
-internal fun MachineDetailsScreen(
-    modifier: Modifier = Modifier,
-    uiState: MachineDetailsUiState,
-    cardUiState: MachineDetailsCardsUiState,
-    uiEvent: (MachineDetailsUiEvent) -> Unit,
-    onNavigateBack: () -> Unit,
+internal fun SpecsScreen(
+    uiState: SpecsUiState,
+    cardUiState: SpecsCardsUiState,
+    onEvent: (SpecsEvent) -> Unit,
+    onNavigateUp: () -> Unit,
     onNavigateToActivities: (Int) -> Unit,
     onNavigateToDocuments: (Int) -> Unit,
-    lazyListState: LazyListState = rememberLazyListState(),
 ) {
-    val onShowTitle by remember {
-        derivedStateOf { lazyListState.firstVisibleItemIndex >= 2 }
-    }
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            SpecsTopBar(
-                onNavigateBack = onNavigateBack,
-                isTitleShown = onShowTitle,
-                title = if (cardUiState is MachineDetailsCardsUiState.Success) {
-                    cardUiState.machine?.name ?: ""
-                } else ""
+    when (cardUiState) {
+        SpecsCardsUiState.Loading -> LoadingWheelScreen()
+        is SpecsCardsUiState.Success -> {
+            SpecsContent(
+                machine = cardUiState.machine,
+                machineSpecs = cardUiState.machineSpecs,
+                motorIdentity = cardUiState.motorIdentity,
+                motorSpecs = cardUiState.motorSpecs,
+                counters = uiState.counters,
+                card = uiState.card,
+                isEditing = uiState.isEditing,
+                onEvent = onEvent,
+                onNavigateUp = onNavigateUp,
+                onNavigateToActivities = onNavigateToActivities,
+                onNavigateToDocuments = onNavigateToDocuments,
             )
-        }
-    ) { paddingValues ->
-        when (cardUiState) {
-            MachineDetailsCardsUiState.Loading -> LoadingWheelScreen()
-
-            is MachineDetailsCardsUiState.Success -> {
-                MachineDetailsSuccessScreen(
-                    modifier = Modifier.padding(paddingValues),
-                    machine = cardUiState.machine,
-                    machineSpecs = cardUiState.machineSpecs,
-                    motorIdentity = cardUiState.motorIdentity,
-                    motorSpecs = cardUiState.motorSpecs,
-                    counters = uiState.counters,
-                    card = uiState.card,
-                    isEditing = uiState.isEditing,
-                    uiEvent = uiEvent,
-                    onNavigateToActivities = onNavigateToActivities,
-                    onNavigateToDocuments = onNavigateToDocuments,
-                    lazyListState = lazyListState
-                )
-            }
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MachineDetailsSuccessScreen(
-    modifier: Modifier = Modifier,
+fun SpecsContent(
     machine: Machine?,
     machineSpecs: MachineSpecs?,
     motorIdentity: MotorIdentity?,
@@ -130,24 +104,24 @@ fun MachineDetailsSuccessScreen(
     counters: MachineDetailsCounters,
     card: MachineDetailsCard,
     isEditing: Boolean,
-    uiEvent: (MachineDetailsUiEvent) -> Unit,
+    onEvent: (SpecsEvent) -> Unit,
+    onNavigateUp: () -> Unit,
     onNavigateToActivities: (Int) -> Unit,
     onNavigateToDocuments: (Int) -> Unit,
-    lazyListState: LazyListState,
-    aspectRatio: AspectRatio = AspectRatio(16F, 9F)
 ) {
+    val lazyListState = rememberLazyListState()
+    val titleVisible by remember { derivedStateOf { lazyListState.firstVisibleItemIndex >= 2 } }
     // TODO: Add editing of machine title and image, also add a delete button at the end of the screen
-    LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        state = lazyListState,
+    LazyColumnScaffold(
+        topBarTitle = if (titleVisible) machine?.name.orEmpty() else "",
+        navigationIcon = { NavigationUpIconButton(onNavigateUp) },
+        lazyListState = lazyListState
     ) {
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(aspectRatio.aspectRatio),
+                    .aspectRatio(16/9F),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 AsyncImage(
@@ -173,7 +147,7 @@ fun MachineDetailsSuccessScreen(
                         .data(machine?.imageUri)
                         .build(),
                     contentScale = ContentScale.FillWidth,
-                    contentDescription = stringResource(R.string.machine_image_content_desc)
+                    contentDescription = stringResource(R.string.card_machine_image_content_desc)
                 )
             }
         }
@@ -233,9 +207,9 @@ fun MachineDetailsSuccessScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 machine = machine,
                 editingCard = card,
-                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickEditCard = { onEvent(SpecsEvent.OnEditCard(it)) },
                 onClickSaveCard = { machine ->
-                    uiEvent(MachineDetailsUiEvent.OnSaveMachineIdentificationCard(machine))
+                    onEvent(SpecsEvent.OnSaveMachineIdentificationCard(machine))
                 }
             )
             Spacer(Modifier.height(MaterialTheme.spacing.medium))
@@ -245,9 +219,9 @@ fun MachineDetailsSuccessScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 machineSpecs = machineSpecs,
                 editingCard = card,
-                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickEditCard = { onEvent(SpecsEvent.OnEditCard(it)) },
                 onClickSaveCard = { machineSpecs ->
-                    uiEvent(MachineDetailsUiEvent.OnSaveMachineSpecificationsCard(machineSpecs))
+                    onEvent(SpecsEvent.OnSaveMachineSpecificationsCard(machineSpecs))
                 }
             )
             Spacer(Modifier.height(MaterialTheme.spacing.medium))
@@ -257,9 +231,9 @@ fun MachineDetailsSuccessScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 motorIdentity = motorIdentity,
                 editingCard = card,
-                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickEditCard = { onEvent(SpecsEvent.OnEditCard(it)) },
                 onClickSaveCard = { motor ->
-                    uiEvent(MachineDetailsUiEvent.OnSaveMotorIdentificationCard(motor))
+                    onEvent(SpecsEvent.OnSaveMotorIdentificationCard(motor))
                 }
             )
             Spacer(Modifier.height(MaterialTheme.spacing.medium))
@@ -269,9 +243,9 @@ fun MachineDetailsSuccessScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 motorSpecs = motorSpecs,
                 editingCard = card,
-                onClickEditCard = { uiEvent(MachineDetailsUiEvent.OnEditCard(it)) },
+                onClickEditCard = { onEvent(SpecsEvent.OnEditCard(it)) },
                 onClickSaveCard = { motorSpecs ->
-                    uiEvent(MachineDetailsUiEvent.OnSaveMotorSpecificationsCard(motorSpecs))
+                    onEvent(SpecsEvent.OnSaveMotorSpecificationsCard(motorSpecs))
                 }
             )
         }

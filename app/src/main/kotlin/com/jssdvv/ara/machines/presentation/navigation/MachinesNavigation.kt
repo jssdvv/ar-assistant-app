@@ -12,7 +12,7 @@ import com.jssdvv.ara.machines.presentation.destination.calibration.CalibrationD
 import com.jssdvv.ara.machines.presentation.destination.documents.DocumentsDestination
 import com.jssdvv.ara.machines.presentation.destination.machines.MachinesDestination
 import com.jssdvv.ara.machines.presentation.destination.markers.MarkersDestination
-import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsDestination
+import com.jssdvv.ara.machines.presentation.destination.specs.SpecsDestination
 import com.jssdvv.ara.machines.presentation.destination.steps.StepsDestination
 import kotlinx.serialization.Serializable
 
@@ -79,8 +79,8 @@ fun NavGraphBuilder.machinesNavGraph(
         composable<MachinesGraph.SpecsRoute>(
             deepLinks = listOf(navDeepLink<MachinesGraph.SpecsRoute>(basePath = "${baseUri}/machine"))
         ) {
-            MachineDetailsDestination(
-                onNavigateBack = { navHostController.navigateUp() },
+            SpecsDestination(
+                onNavigateUp =  { navHostController.navigateUp() },
                 onNavigateToActivities = navHostController::navigateToActivities,
                 onNavigateToDocuments = navHostController::navigateToDocuments
             )

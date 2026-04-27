@@ -37,7 +37,7 @@ import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
-class MachineDetailsViewModel @Inject constructor(
+class SpecsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val selectMachineAndDetailsUseCase: SelectMachineAndDetails,
     private val upsertMachinesUseCase: UpsertMachines,
@@ -71,36 +71,36 @@ class MachineDetailsViewModel @Inject constructor(
         }
     }
 
-    val uiState: StateFlow<MachineDetailsUiState> = combine(
+    val uiState: StateFlow<SpecsUiState> = combine(
         currentCard,
         isEditingCard,
         counters,
-        ::MachineDetailsUiState
+        ::SpecsUiState
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = MachineDetailsUiState()
+        initialValue = SpecsUiState()
     )
 
-    val cardsUiState: StateFlow<MachineDetailsCardsUiState> = combine(
+    val cardsUiState: StateFlow<SpecsCardsUiState> = combine(
         machineState,
         machineSpecsState,
         motorIdentityState,
         motorSpecsState,
-        MachineDetailsCardsUiState::Success
+        SpecsCardsUiState::Success
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MachineDetailsCardsUiState.Loading
+        initialValue = SpecsCardsUiState.Loading
     )
 
-    fun uiEvent(event: MachineDetailsUiEvent) {
+    fun uiEvent(event: SpecsEvent) {
         when (event) {
-            is MachineDetailsUiEvent.OnEditCard -> {
+            is SpecsEvent.OnEditCard -> {
                 currentCard.value = event.card
             }
 
-            is MachineDetailsUiEvent.OnSaveMachineIdentificationCard -> {
+            is SpecsEvent.OnSaveMachineIdentificationCard -> {
                 machineState.value = machineState.value?.copy(
                     // Note: createdAt should never be updated
                     code = event.machine.code,
@@ -127,7 +127,7 @@ class MachineDetailsViewModel @Inject constructor(
                 currentCard.value = NONE
             }
 
-            is MachineDetailsUiEvent.OnSaveMachineSpecificationsCard -> {
+            is SpecsEvent.OnSaveMachineSpecificationsCard -> {
                 machineSpecsState.value = machineSpecsState.value?.copy(
                     // Note: createdAt should never be updated
                     serviceCapacity = event.machineSpecs.serviceCapacity,
@@ -156,7 +156,7 @@ class MachineDetailsViewModel @Inject constructor(
                 currentCard.value = NONE
             }
 
-            is MachineDetailsUiEvent.OnSaveMotorIdentificationCard -> {
+            is SpecsEvent.OnSaveMotorIdentificationCard -> {
                 motorIdentityState.value = motorIdentityState.value?.copy(
                     // Note: createdAt should never be updated
                     brand = event.motorIdentity.brand,
@@ -183,7 +183,7 @@ class MachineDetailsViewModel @Inject constructor(
                 currentCard.value = NONE
             }
 
-            is MachineDetailsUiEvent.OnSaveMotorSpecificationsCard -> {
+            is SpecsEvent.OnSaveMotorSpecificationsCard -> {
                 motorSpecsState.value = motorSpecsState.value?.copy(
                     // Note: createdAt should never be updated
                     effClass = event.motorSpecs.effClass,
@@ -223,8 +223,8 @@ class MachineDetailsViewModel @Inject constructor(
                 currentCard.value = NONE
             }
 
-            is MachineDetailsUiEvent.OnSaveMachineName -> {}
-            is MachineDetailsUiEvent.OnSaveMachineImageUri -> {}
+            is SpecsEvent.OnSaveMachineName -> {}
+            is SpecsEvent.OnSaveMachineImageUri -> {}
         }
     }
 
@@ -250,22 +250,22 @@ class MachineDetailsViewModel @Inject constructor(
     }
 }
 
-sealed class MachineDetailsUiEvent {
-    data class OnEditCard(val card: MachineDetailsCard) : MachineDetailsUiEvent()
-    data class OnSaveMachineIdentificationCard(val machine: Machine) : MachineDetailsUiEvent()
+sealed class SpecsEvent {
+    data class OnEditCard(val card: MachineDetailsCard) : SpecsEvent()
+    data class OnSaveMachineIdentificationCard(val machine: Machine) : SpecsEvent()
     data class OnSaveMachineSpecificationsCard(val machineSpecs: MachineSpecs) :
-        MachineDetailsUiEvent()
+        SpecsEvent()
 
-    data class OnSaveMotorIdentificationCard(val motorIdentity: MotorIdentity) : MachineDetailsUiEvent()
-    data class OnSaveMotorSpecificationsCard(val motorSpecs: MotorSpecs) : MachineDetailsUiEvent()
+    data class OnSaveMotorIdentificationCard(val motorIdentity: MotorIdentity) : SpecsEvent()
+    data class OnSaveMotorSpecificationsCard(val motorSpecs: MotorSpecs) : SpecsEvent()
 
-    data class OnSaveMachineName(val name: String) : MachineDetailsUiEvent()
-    data class OnSaveMachineImageUri(val imageUri: Uri?) : MachineDetailsUiEvent()
+    data class OnSaveMachineName(val name: String) : SpecsEvent()
+    data class OnSaveMachineImageUri(val imageUri: Uri?) : SpecsEvent()
 }
 
-sealed interface MachineDetailsCardsUiState {
+sealed interface SpecsCardsUiState {
 
-    data object Loading : MachineDetailsCardsUiState
+    data object Loading : SpecsCardsUiState
 
     /**
      * Data class containing the successfully loaded data of the machine details screen cards from
@@ -281,7 +281,7 @@ sealed interface MachineDetailsCardsUiState {
         val machineSpecs: MachineSpecs?,
         val motorIdentity: MotorIdentity?,
         val motorSpecs: MotorSpecs?,
-    ) : MachineDetailsCardsUiState
+    ) : SpecsCardsUiState
 }
 
 data class MachineDetailsCounters(
@@ -296,7 +296,7 @@ data class MachineDetailsCounters(
  * @property card Indicates which card is currently being edited.
  * @property isEditing A boolean flag indicating whether the screen is in editing mode.
  */
-data class MachineDetailsUiState(
+data class SpecsUiState(
     val card: MachineDetailsCard = NONE,
     val isEditing: Boolean = false,
     val counters: MachineDetailsCounters = MachineDetailsCounters(),
