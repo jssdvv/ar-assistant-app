@@ -2,7 +2,7 @@ package com.jssdvv.ara.machines.presentation.sceneview.node
 
 import com.google.android.filament.Engine
 import com.jssdvv.ara.machines.domain.type.Axis
-import com.jssdvv.ara.machines.presentation.sceneview.utility.createGizmoColorMaterialInstance
+import com.jssdvv.ara.machines.presentation.sceneview.utility.createGizmoMaterial
 import com.jssdvv.ara.machines.presentation.sceneview.utility.setPriorityIterable
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.math.Scale
@@ -25,7 +25,7 @@ class AxisNode(
     radius = radius,
     height = height,
     sideCount = sideCount,
-    materialInstance = materialLoader.createGizmoColorMaterialInstance(axis.color)
+    materialInstance = materialLoader.createGizmoMaterial(axis.color)
 ) {
     companion object {
         const val DEFAULT_RADIUS = 0.001F

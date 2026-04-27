@@ -3,7 +3,7 @@ package com.jssdvv.ara.machines.presentation.sceneview.node
 import com.google.android.filament.Engine
 import com.google.ar.core.AugmentedImage
 import com.jssdvv.ara.machines.presentation.sceneview.utility.PLANE_FULL_TRACKING_COLOR
-import com.jssdvv.ara.machines.presentation.sceneview.utility.createMarkerColorMaterialInstance
+import com.jssdvv.ara.machines.presentation.sceneview.utility.createMarkerMaterial
 import io.github.sceneview.ar.arcore.yDirection
 import io.github.sceneview.ar.node.AugmentedImageNode
 import io.github.sceneview.loaders.MaterialLoader
@@ -32,7 +32,7 @@ class MarkerNode(
                 z = augmentedImage.extentZ
             ),
             normal = pose.yDirection,
-            materialInstance = materialLoader.createMarkerColorMaterialInstance(
+            materialInstance = materialLoader.createMarkerMaterial(
                 PLANE_FULL_TRACKING_COLOR
             )
         ).also { addChildNode(it) }

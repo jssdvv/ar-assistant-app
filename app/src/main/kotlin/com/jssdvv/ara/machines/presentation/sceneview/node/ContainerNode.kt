@@ -5,13 +5,14 @@ import com.google.android.filament.Engine
 import com.jssdvv.ara.core.domain.utility.forEachApply
 import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.type.Axis
+import com.jssdvv.ara.machines.presentation.sceneview.utility.AxisNodesMap
 import com.jssdvv.ara.machines.presentation.sceneview.utility.MODEL_UNSELECTED_COLOR
-import com.jssdvv.ara.machines.presentation.sceneview.utility.createModelColorMaterialInstance
-import com.jssdvv.ara.machines.presentation.sceneview.utility.safeTerminate
+import com.jssdvv.ara.machines.presentation.sceneview.utility.createModelMaterial
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
+import io.github.sceneview.math.Transform
 import io.github.sceneview.math.centerPosition
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.node.Node
@@ -27,7 +28,7 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
     var gizmoNode: GizmoNode? = null
     var pivotNodes: List<PivotNode> = emptyList()
 
-    private var axisNodes: MutableMap<Axis, AxisNode> = mutableMapOf()
+    private var axisNodes: AxisNodesMap = mutableMapOf()
 
     fun setModelNode(modelLoader: ModelLoader, materialLoader: MaterialLoader) {
         val rawUri = model.glbUri.toString()
@@ -47,7 +48,7 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
             this.isTouchable = false
             this.position = -(this.quaternion * this.boundingBox.centerPosition)
             this.parent = this@ContainerNode
-            this.setMaterialInstance(materialLoader.createModelColorMaterialInstance(
+            this.setMaterialInstance(materialLoader.createModelMaterial(
                 MODEL_UNSELECTED_COLOR
             ))
             this.renderableNodes.forEach { renderable ->
@@ -71,10 +72,8 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
                 this.hash = LongHashFunction.xx3().hashChars(renderableNode.name ?: "")
                 this.renderableNode = renderableNode
                 this.parent = this@ContainerNode
-                this.position = position
-                this.quaternion = quaternion
-                this.initialPosition = position
-                this.initialQuaternion = quaternion
+                this.transform = Transform(position, quaternion)
+                this.initialTransform = Transform(position, quaternion)
             }
 
             renderableNode.apply {
@@ -88,23 +87,9 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
         }
     }
 
-    fun restorePivotsTransform() {
-        pivotNodes.forEachApply {
-            position = initialPosition
-            quaternion = initialQuaternion
-        }
-    }
-
     private fun generateGizmoNode(materialLoader: MaterialLoader) {
         if (gizmoNode != null) return
         gizmoNode = GizmoNode(engine, materialLoader).also { addChildNode(it) }
-    }
-
-    fun generateAxesNodes(materialLoader: MaterialLoader) {
-        Axis.entries.forEach { axis ->
-            if (axisNodes.containsKey(axis)) return@forEach
-            axisNodes[axis] = AxisNode(engine, materialLoader, axis).also { addChildNode(it) }
-        }
     }
 
     fun setGizmoVisibility(visible: Boolean, materialLoader: MaterialLoader) {
@@ -126,20 +111,8 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
         }
     }
 
-    fun restorePositionDefaults() { position = Position() }
-    fun restoreQuaternionDefaults() { quaternion = Quaternion() }
-
-    fun terminate() {
-        modelNode?.safeTerminate()
-        gizmoNode?.safeTerminate()
-        pivotNodes.forEach(Node::safeTerminate)
-        axisNodes.values.forEach(Node::safeTerminate)
-        modelNode = null
-        gizmoNode = null
-        pivotNodes = emptyList()
-        axisNodes.clear()
-        safeTerminate()
-    }
+    fun restorePosition() { position = Position() }
+    fun restoreQuaternion() { quaternion = Quaternion() }
 
     init {
         modelId = model.id

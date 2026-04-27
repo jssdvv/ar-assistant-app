@@ -1,7 +1,7 @@
 package com.jssdvv.ara.machines.presentation.sceneview.node
 
 import com.google.android.filament.Engine
-import com.jssdvv.ara.machines.presentation.sceneview.utility.createBoxMaterialInstance
+import com.jssdvv.ara.machines.presentation.sceneview.utility.createBoxMaterial
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Size
@@ -16,11 +16,10 @@ class BoxNode(
     engine = engine,
     size = size + Size(0.005F),
     center = center,
-    materialInstance = materialLoader.createBoxMaterialInstance()
+    materialInstance = materialLoader.createBoxMaterial()
 ) {
     init {
         isHittable = false
         isTouchable = false
-        setPriority(6)
     }
 }

@@ -7,7 +7,7 @@ import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_C_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_X_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_Y_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_Z_COLOR
-import com.jssdvv.ara.machines.presentation.sceneview.utility.createGizmoColorMaterialInstance
+import com.jssdvv.ara.machines.presentation.sceneview.utility.createGizmoMaterial
 import com.jssdvv.ara.machines.presentation.sceneview.utility.setPriorityIterable
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.node.SphereNode
@@ -27,7 +27,7 @@ class GizmoNode(
     engine = engine,
     center = io.github.sceneview.math.Position(),
     radius = DEFAULT_SPHERE_RADIUS,
-    materialInstance = materialLoader.createGizmoColorMaterialInstance(cColor)
+    materialInstance = materialLoader.createGizmoMaterial(cColor)
 ) {
     companion object {
         const val DEFAULT_SPHERE_RADIUS = Arrow.Companion.DEFAULT_SHAFT_RADIUS * 2.5F
@@ -35,7 +35,7 @@ class GizmoNode(
 
     val xArrowNode = ArrowNode(
         engine = engine,
-        materialInstance = materialLoader.createGizmoColorMaterialInstance(xColor)
+        materialInstance = materialLoader.createGizmoMaterial(xColor)
     ).apply {
         this.parent = this@GizmoNode
         this.quaternion = Axis.X.quaternion
@@ -44,7 +44,7 @@ class GizmoNode(
 
     val yArrowNode = ArrowNode(
         engine = engine,
-        materialInstance = materialLoader.createGizmoColorMaterialInstance(yColor)
+        materialInstance = materialLoader.createGizmoMaterial(yColor)
     ).apply {
         this.parent = this@GizmoNode
         this.quaternion = Axis.Y.quaternion
@@ -53,7 +53,7 @@ class GizmoNode(
 
     val zArrowNode = ArrowNode(
         engine = engine,
-        materialInstance = materialLoader.createGizmoColorMaterialInstance(zColor)
+        materialInstance = materialLoader.createGizmoMaterial(zColor)
     ).apply {
         this.parent = this@GizmoNode
         this.quaternion = Axis.Z.quaternion
