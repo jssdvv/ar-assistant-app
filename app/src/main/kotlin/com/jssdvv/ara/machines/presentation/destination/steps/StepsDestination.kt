@@ -371,7 +371,7 @@ fun StepsContent(
             )
         }
 
-        if (items.editingOperation != null) {
+        if (items.currentOperation != null) {
             OperationBottomSheet(
                 visible = items.editionEnabled,
                 selectedPivots = animation.animatedPivots.mapNotNullTo(
@@ -380,7 +380,7 @@ fun StepsContent(
                 ),
                 onUnselectPivot = { onEvent(StepsEvent.OnUnselectPivot(it)) },
                 onSelectionChange = { onEvent(StepsEvent.OnSelectionChange(it)) },
-                editingOperation = items.editingOperation,
+                editingOperation = items.currentOperation,
                 onChangeEditingOperation = { onEvent(StepsEvent.OnChangeEditingOperation(it)) },
                 onSaveEditingOperation = { onEvent(StepsEvent.OnSaveEditingOperation) },
                 onCancelEditingOperation = { onEvent(StepsEvent.OnCancelEditingOperation) },

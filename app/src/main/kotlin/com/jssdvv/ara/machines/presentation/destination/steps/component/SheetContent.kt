@@ -62,6 +62,7 @@ import com.jssdvv.ara.machines.presentation.sceneview.node.PivotNode
 import dev.romainguy.kotlin.math.max
 import io.github.sceneview.math.Transform
 import io.github.sceneview.math.quaternion
+import io.github.sceneview.math.Position
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 enum class BottomSheetScreen { MAIN, ENTITIES, OPERATIONS }
@@ -332,7 +333,7 @@ fun selectedPivotsBottomScreen(
                         onClick = {
                             val info = Pivot(pivot.modelId, pivot.hash)
                             onUnselectItem(info)
-                                  },
+                        },
                         content = { CloseIcon() }
                     )
                 }
@@ -356,7 +357,18 @@ fun selectedOperationBottomScreen(
                     .fillMaxWidth()
                     .height(56.dp)
                     .clickable {
-                        onOperationChange(updatedOperation.value.copy(type = operationType))
+                        if (operationType == OperationType.JOINT) {
+                            onOperationChange(
+                                updatedOperation.value.copy(
+                                    type = operationType,
+                                    offsetTransform = Transform(
+                                        quaternion = updatedOperation.value.offsetTransform.quaternion
+                                    )
+                                )
+                            )
+                        } else {
+                            onOperationChange(updatedOperation.value.copy(type = operationType))
+                        }
                         onNavigateBack()
                     },
                 verticalAlignment = Alignment.CenterVertically,
@@ -517,7 +529,7 @@ fun screwSettings(
         val pitch = pitchState.meters
         val distance = translationState.meters
         val turns = when {
-            usePitch -> if(pitch != 0F) distance / pitch else 0F
+            usePitch -> if (pitch != 0F) distance / pitch else 0F
             else -> turnsState.numeric
         }
 
@@ -614,7 +626,7 @@ fun cylindricalSettings(
                     updatedCurrentOperation.copy(
                         offsetTransform = Transform(
                             position = unidirectionalTranslation(selectedAxis, meters),
-                            quaternion =unidirectionalRotation(selectedAxis, degrees)
+                            quaternion = unidirectionalRotation(selectedAxis, degrees)
                         ),
                         axis = selectedAxis
                     )
