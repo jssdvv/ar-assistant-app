@@ -365,57 +365,47 @@ class ModelsCalibrationViewModel @Inject constructor(
     }
 
     private fun restoreContainerDefaults(container: ContainerNode?) {
-        if (selectedMeasurement.value == Measurement.TRANSLATION) {
-            container?.restorePosition()
-        } else {
-            container?.restoreQuaternion()
+        container?.apply {
+            if (selectedMeasurement.value == Measurement.TRANSLATION) {
+                restorePosition()
+            } else {
+                restoreQuaternion()
+            }
         }
     }
 
     private fun tickDragged(container: ContainerNode?, axis: Axis, tick: Int) {
-        if (selectedMeasurement.value == Measurement.TRANSLATION) {
-            val millis = selectedMode.value.translation.millisPerUnit * tick / 1000F
-            val offset = unidirectionalTranslation(axis, millis)
-            container?.applyOffset(offset)
-        } else {
-            val degrees = selectedMode.value.rotation.halfDegreesPerUnit * tick / 2F
-            val offset = unidirectionalRotation(axis, degrees)
-            container?.applyOffset(offset)
+        container?.apply {
+            if (selectedMeasurement.value == Measurement.TRANSLATION) {
+                val millis = selectedMode.value.translation.millisPerUnit * tick / 1000F
+                val offset = unidirectionalTranslation(axis, millis)
+                applyOffset(offset)
+            } else {
+                val degrees = selectedMode.value.rotation.halfDegreesPerUnit * tick / 2F
+                val offset = unidirectionalRotation(axis, degrees)
+                applyOffset(offset)
+            }
         }
     }
 
     private fun toggleTorch() {
-        options.update { it.copy(isTorchEnabled = !it.isTorchEnabled) }
-        emitNotification(
-            if (options.value.isTorchEnabled) {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_torch_enabled,
-                    iconRes = R.drawable.ic_torch_filled
-                )
-            } else {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_torch_disabled,
-                    iconRes = R.drawable.ic_torch_outlined
-                )
-            }
-        )
+        options.update { it.copy(torchEnabled = !it.torchEnabled) }
+        val (message, iconRes) = if (options.value.torchEnabled) {
+            R.string.notification_chip_message_torch_enabled to R.drawable.ic_torch_filled
+        } else {
+            R.string.notification_chip_message_torch_disabled to R.drawable.ic_torch_outlined
+        }
+        emitNotification(NotificationEvent(message = message, iconRes = iconRes))
     }
 
     private fun togglePlane() {
-        options.update { it.copy(isPlaneEnabled = !it.isPlaneEnabled) }
-        emitNotification(
-            if (options.value.isPlaneEnabled) {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_plane_enabled,
-                    iconRes = R.drawable.ic_plane_renderer_on
-                )
-            } else {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_plane_disabled,
-                    iconRes = R.drawable.ic_plane_renderer_off
-                )
-            }
-        )
+        options.update { it.copy(planeEnabled = !it.planeEnabled) }
+        val (message, iconRes) = if (options.value.planeEnabled) {
+            R.string.notification_chip_message_plane_enabled to R.drawable.ic_plane_renderer_on
+        } else {
+            R.string.notification_chip_message_plane_disabled to R.drawable.ic_plane_renderer_off
+        }
+        emitNotification(NotificationEvent(message = message, iconRes = iconRes))
     }
 
     private fun emitNotification(event: NotificationEvent) {
@@ -429,8 +419,10 @@ sealed interface ModelsEvent {
 
     data class OnSelectMarker(val marker: Marker) : ModelsEvent
 
-    data class OnRepositionOrigin(val originNode: OriginNode?, val markerNode: MarkerNode?) :
-        ModelsEvent
+    data class OnRepositionOrigin(
+        val originNode: OriginNode?,
+        val markerNode: MarkerNode?
+    ) : ModelsEvent
 
     data class OnCalibrateOriginToMarker(
         val originNode: OriginNode?,
@@ -502,6 +494,6 @@ data class BitmapInfo(
 
 @Immutable
 data class CalibrationOptions(
-    val isTorchEnabled: Boolean = false,
-    val isPlaneEnabled: Boolean = false
+    val torchEnabled: Boolean = false,
+    val planeEnabled: Boolean = true
 )

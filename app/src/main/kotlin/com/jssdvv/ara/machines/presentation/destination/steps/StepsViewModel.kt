@@ -35,7 +35,6 @@ import java.io.File
 import javax.inject.Inject
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class StepsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -48,9 +47,6 @@ class StepsViewModel @Inject constructor(
     private val route = savedStateHandle.toRoute<MachinesGraph.StepsRoute>()
     private val machineId = route.machineId
     private val activityId = route.activityId
-
-
-    private val selectionEnabled = MutableStateFlow(false)
 
     private val models: StateFlow<List<Model>> = modelsDataManager
         .select(machineId)
@@ -68,6 +64,7 @@ class StepsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val operationsTargets: StateFlow<List<OperationTargets>> = steps
         .map { it.map { step -> step.id } }
         .distinctUntilChanged()
@@ -91,6 +88,7 @@ class StepsViewModel @Inject constructor(
         )
 
     private val selectedOperationId = MutableStateFlow<Int?>(null)
+    private val selectionEnabled = MutableStateFlow(false)
     private val editingOperation = MutableStateFlow<Operation?>(null)
     private val currentOperation: StateFlow<Operation?> = combine(
         editingOperation,
@@ -103,7 +101,6 @@ class StepsViewModel @Inject constructor(
                 ?.apply { animatedPivots.value = pivots }
                 ?.operation
     }
-        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
@@ -126,9 +123,11 @@ class StepsViewModel @Inject constructor(
     private val editingStep = MutableStateFlow<Step?>(null)
     private val currentStep: StateFlow<Step?> = combine(
         steps,
+        editingStep,
         currentOperation
-    ) { steps, currentOperation ->
-        steps.firstOrNull { it.id == currentOperation?.stepId }
+    ) { steps, editingStep, currentOperation ->
+        editingStep ?: steps
+            .firstOrNull { it.id == currentOperation?.stepId }
     }
         .distinctUntilChanged()
         .stateIn(
@@ -149,34 +148,33 @@ class StepsViewModel @Inject constructor(
     )
 
     val items: StateFlow<StepsItems> = combine(
+        selectionEnabled,
         currentStep,
         currentOperation,
-        editingStep,
-        editingOperation,
-        ::StepsItems
-    ).stateIn(
+        editingOperation
+    ){ selectionEnabled, currentStep,currentOperation, editingOperation ->
+        val editionEnabled = editingOperation != null
+        StepsItems(
+            selectionEnabled = selectionEnabled && editionEnabled,
+            editionEnabled = editionEnabled,
+            currentStep = currentStep,
+            currentOperation = currentOperation,
+            editingOperation = editingOperation
+        )
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
         initialValue = StepsItems()
     )
 
-    val edition: StateFlow<StepsEdition> = combine(
-        selectionEnabled,
-        editingOperation,
+    val edition: StateFlow<StepsAnimation> = combine(
         transformedTargets,
         animatedPivots,
-    ) { selectionEnabled, editingOperation, transformedTargets, animatedPivots ->
-        val editionEnabled = editingOperation != null
-        StepsEdition(
-            editionEnabled = editionEnabled,
-            selectionEnabled = selectionEnabled && editionEnabled,
-            transformedTargets = transformedTargets,
-            animatedPivots = animatedPivots,
-        )
-    }.stateIn(
+        ::StepsAnimation
+    ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = StepsEdition()
+        initialValue = StepsAnimation()
     )
 
     val uiState: StateFlow<StepsUiState> = combine(
@@ -272,9 +270,9 @@ class StepsViewModel @Inject constructor(
             // No changes = return
             if (existingStep == step) return@launch
 
-            val imageUri = when {
-                step.imageUri == existingStep?.imageUri -> existingStep?.imageUri
-                step.imageUri == null -> existingStep?.imageUri
+            val imageUri = when (step.imageUri) {
+                existingStep?.imageUri -> existingStep?.imageUri
+                null -> existingStep?.imageUri
                 else -> replaceImage(existingStep?.imageUri, step.imageUri)?.toUri()
                     ?: existingStep?.imageUri
             }
@@ -427,7 +425,7 @@ sealed interface StepsUiState {
     data class Success(
         val data: StepsData = StepsData(),
         val items: StepsItems = StepsItems(),
-        val edition: StepsEdition = StepsEdition()
+        val animation: StepsAnimation = StepsAnimation()
     ) : StepsUiState
 }
 
@@ -440,16 +438,15 @@ data class StepsData(
 
 @Immutable
 data class StepsItems(
+    val selectionEnabled: Boolean = false,
+    val editionEnabled: Boolean = false,
     val currentStep: Step? = null,
     val currentOperation: Operation? = null,
-    val editingStep: Step? = null,
-    val editingOperation: Operation? = null,
+    val editingOperation: Operation? = null
 )
 
 @Immutable
-data class StepsEdition(
-    val editionEnabled: Boolean = false,
-    val selectionEnabled: Boolean = false,
+data class StepsAnimation(
     val transformedTargets: List<OperationTargets> = emptyList(),
     val animatedPivots: Set<Pivot> = emptySet()
 )

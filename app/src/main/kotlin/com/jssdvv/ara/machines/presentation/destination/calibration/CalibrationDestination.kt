@@ -84,17 +84,15 @@ fun CalibrationDestination(
     onNavigateBack: () -> Unit,
     onNavigateToMarkers: (machineId: Int) -> Unit,
     viewModel: ModelsCalibrationViewModel = hiltViewModel(),
-) {
-    ModelsCalibrationScreen(
-        notification = viewModel.notification,
-        permissions = viewModel.permissions.collectAsStateWithLifecycle().value,
-        uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
-        onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack,
-        onNavigateToMarkers = { onNavigateToMarkers(viewModel.machineId) },
-        modifier = modifier
-    )
-}
+) = ModelsCalibrationScreen(
+    notification = viewModel.notification,
+    permissions = viewModel.permissions.collectAsStateWithLifecycle().value,
+    uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
+    onEvent = viewModel::onEvent,
+    onNavigateBack = onNavigateBack,
+    onNavigateToMarkers = { onNavigateToMarkers(viewModel.machineId) },
+    modifier = modifier
+)
 
 @Composable
 internal fun ModelsCalibrationScreen(
@@ -146,7 +144,7 @@ internal fun ModelsCalibrationScreen(
                 }
 
                 is ModelsCalibrationUiState.Success -> {
-                    SuccessModelsCalibrationScreen(
+                    CalibrationContent(
                         notification = notification,
                         modifier = modifier,
                         data = uiState.data,
@@ -174,7 +172,7 @@ internal fun ModelsCalibrationScreen(
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
-fun SuccessModelsCalibrationScreen(
+fun CalibrationContent(
     notification: SharedFlow<NotificationEvent>,
     data: CalibrationData,
     items: CalibrationItems,
@@ -186,7 +184,7 @@ fun SuccessModelsCalibrationScreen(
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
-    val view = rememberView(engine).apply { isStencilBufferEnabled = true }
+    val view = rememberView(engine)
 
     var session by remember { mutableStateOf<Session?>(null) }
     var trackingMethod by remember { mutableStateOf(AugmentedImage.TrackingMethod.NOT_TRACKING) }
@@ -244,9 +242,7 @@ fun SuccessModelsCalibrationScreen(
         session?.setImageDatabase(info.markerId.toString(), info.bitmap)
     }
 
-    LaunchedEffect(options.isTorchEnabled) {
-        session?.setTorch(options.isTorchEnabled)
-    }
+    LaunchedEffect(options.torchEnabled) { session?.setTorch(options.torchEnabled) }
 
     LaunchedEffect(pressedAxis, selectedContainer) {
         selectedContainer?.apply {
@@ -265,8 +261,8 @@ fun SuccessModelsCalibrationScreen(
         optionsRow = {
             OptionsRow(
                 rowHeight = it,
-                isPlaneEnabled = options.isPlaneEnabled,
-                isTorchEnabled = options.isTorchEnabled,
+                isPlaneEnabled = options.planeEnabled,
+                isTorchEnabled = options.torchEnabled,
                 onToggleTorch = { onEvent(ModelsEvent.OnToggleTorch) },
                 onTogglePlane = { onEvent(ModelsEvent.OnTogglePlane) }
             )
@@ -326,7 +322,7 @@ fun SuccessModelsCalibrationScreen(
             modelLoader = modelLoader,
             materialLoader = materialLoader,
             childNodes = nodes,
-            planeRenderer = options.isPlaneEnabled, // Dots on detected flat surfaces
+            planeRenderer = options.planeEnabled, // Dots on detected flat surfaces
             sessionConfiguration = ::configureARSession,
             onSessionCreated = { session = it },
             onSessionUpdated = { _, frame ->

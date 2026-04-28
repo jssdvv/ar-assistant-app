@@ -71,7 +71,6 @@ import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberView
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -80,13 +79,11 @@ import kotlinx.coroutines.launch
 fun StepsDestination(
     onNavigateUp: () -> Unit,
     viewModel: StepsViewModel = hiltViewModel(),
-) {
-    StepsScreen(
-        uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
-        onEvent = viewModel::onEvent,
-        onNavigateUp = onNavigateUp
-    )
-}
+) = StepsScreen(
+    uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
+    onEvent = viewModel::onEvent,
+    onNavigateUp = onNavigateUp
+)
 
 @Composable
 internal fun StepsScreen(
@@ -102,7 +99,7 @@ internal fun StepsScreen(
             StepsContent(
                 data = uiState.data,
                 items = uiState.items,
-                edition = uiState.edition,
+                animation = uiState.animation,
                 onNavigateUp = onNavigateUp,
                 onEvent = onEvent,
             )
@@ -115,7 +112,7 @@ internal fun StepsScreen(
 fun StepsContent(
     data: StepsData,
     items: StepsItems,
-    edition: StepsEdition,
+    animation: StepsAnimation,
     onEvent: (StepsEvent) -> Unit,
     onNavigateUp: () -> Unit,
 ) {
@@ -135,14 +132,14 @@ fun StepsContent(
     val camera = rememberCameraNode(engine)
     val light = rememberLightNode(engine)
 
-    // Renderables Edition
+    // Renderables Lookup
     val pivotNodesMap: PivotNodesMap = remember { mutableStateMapOf() }
 
     // Components Visibility
     val drawerState = rememberDraggableDrawerState()
     var showSideSheet by remember { mutableStateOf(false) }
 
-    val updatedSelectionEnabled by rememberUpdatedState(edition.selectionEnabled)
+    val updatedSelectionEnabled by rememberUpdatedState(items.selectionEnabled)
 
     // On Touch
     val cameraManipulator = rememberCustomCameraManipulator(camera.worldPosition)
@@ -205,12 +202,12 @@ fun StepsContent(
     var previousAddedPivots by remember { mutableStateOf(setOf<Pivot>()) }
     var previousAnimatedPivots by remember { mutableStateOf(setOf<Pivot>()) }
     LaunchedEffect(
-        edition.animatedPivots,
-        edition.editionEnabled,
+        animation.animatedPivots,
+        items.editionEnabled,
         items.currentOperation?.id,
         items.currentOperation?.global
     ) {
-        if (items.currentOperation?.id == 0 && edition.animatedPivots.isEmpty()) {
+        if (items.currentOperation?.id == 0 && animation.animatedPivots.isEmpty()) {
             previousAnimatedPivots.forEach {
                 pivotNodesMap[it]?.setSelection(
                     false,
@@ -219,8 +216,8 @@ fun StepsContent(
             }
         }
 
-        previousAddedPivots = if (edition.editionEnabled) {
-            val animatedPivots = edition.animatedPivots
+        previousAddedPivots = if (items.editionEnabled) {
+            val animatedPivots = animation.animatedPivots
 
             // Removed
             (previousAddedPivots - animatedPivots).forEach {
@@ -232,30 +229,26 @@ fun StepsContent(
                 pivotNodesMap[it]?.setSelection(true, materialLoader)
             }
 
-            val global = items.currentOperation?.global ?: false
-
-            animatedPivots.also {
-                it.forEach { pivot -> pivotNodesMap[pivot]?.updateGizmoQuaternion(global) }
-            }
+            animatedPivots
         } else {
-            edition.animatedPivots.forEach { pivotNodesMap[it]?.setPlaying(materialLoader) }
+            animation.animatedPivots.forEach { pivotNodesMap[it]?.setPlaying(materialLoader) }
             emptySet()
         }
-        previousAnimatedPivots = edition.animatedPivots
+        previousAnimatedPivots = animation.animatedPivots
     }
 
     var previousTransformedPivots by remember { mutableStateOf(emptySet<Pivot>()) }
-    LaunchedEffect(edition.transformedTargets, edition.animatedPivots, items.currentOperation) {
-        val transformedPivots: Set<Pivot> = edition.transformedTargets
+    LaunchedEffect(animation, items.currentOperation) {
+        val transformedPivots: Set<Pivot> = animation.transformedTargets
             .flatMapTo(mutableSetOf(), OperationTargets::pivots)
 
-        val animatedPivots = edition.animatedPivots
+        val animatedPivots = animation.animatedPivots
 
         previousTransformedPivots.forEach { pivotNodesMap[it]?.restoreTransform() }
         previousTransformedPivots = transformedPivots + animatedPivots
 
         // Calculate offset of transformed targets pivots
-        edition.transformedTargets.forEach { opTargets ->
+        animation.transformedTargets.forEach { opTargets ->
             val operation = opTargets.operation
             opTargets.pivots.forEach { pivot ->
                 pivotNodesMap[pivot]?.applyOffset(operation.offsetTransform, operation.global)
@@ -263,9 +256,14 @@ fun StepsContent(
         }
 
         val currentOperation = items.currentOperation ?: return@LaunchedEffect
-        val nodesToAnimate = animatedPivots.mapNotNull { pivotNodesMap[it] }
-        delay(200)
-        coroutineScope { nodesToAnimate.map { launch { it.animate(currentOperation) } }.joinAll() }
+        val nodesToAnimate = animatedPivots.mapNotNull(pivotNodesMap::get)
+        val global = currentOperation.global
+
+        coroutineScope {
+            nodesToAnimate
+                .onEach { it.updateGizmoOrientation(global) }
+                .map { launch { it.animate(currentOperation) } }.joinAll()
+        }
     }
 
     BoxedScaffold(
@@ -321,7 +319,7 @@ fun StepsContent(
                         RenderableItem(
                             name = it.renderableNode?.name ?: "Unknown",
                             isVisible = it.renderableVisible,
-                            isSelected = edition.animatedPivots.contains(it.pivot),
+                            isSelected = animation.animatedPivots.contains(it.pivot),
                             onVisibilityChange = { it.toggleVisibility() }
                         )
                     }
@@ -330,10 +328,10 @@ fun StepsContent(
         }
 
         StepsSideSheet(
-            visible = showSideSheet && items.editingOperation == null,
+            visible = showSideSheet && items.currentOperation?.id != 0,
             steps = data.steps,
             operations = operations,
-            editingStep = items.editingStep,
+            editingStep = items.currentStep,
             currentStep = items.currentStep,
             currentOperation = items.currentOperation,
             onDismiss = { showSideSheet = false },
@@ -373,20 +371,20 @@ fun StepsContent(
             )
         }
 
-        if (items.currentOperation != null) {
+        if (items.editingOperation != null) {
             OperationBottomSheet(
-                visible = edition.editionEnabled,
-                selectedPivots = edition.animatedPivots.mapNotNullTo(
+                visible = items.editionEnabled,
+                selectedPivots = animation.animatedPivots.mapNotNullTo(
                     mutableSetOf(),
                     pivotNodesMap::get
                 ),
                 onUnselectPivot = { onEvent(StepsEvent.OnUnselectPivot(it)) },
                 onSelectionChange = { onEvent(StepsEvent.OnSelectionChange(it)) },
-                editingOperation = items.currentOperation,
+                editingOperation = items.editingOperation,
                 onChangeEditingOperation = { onEvent(StepsEvent.OnChangeEditingOperation(it)) },
                 onSaveEditingOperation = { onEvent(StepsEvent.OnSaveEditingOperation) },
                 onCancelEditingOperation = { onEvent(StepsEvent.OnCancelEditingOperation) },
-                onDeleteEditingOperation = {},
+                onDeleteEditingOperation = {}, // TODO add this
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
