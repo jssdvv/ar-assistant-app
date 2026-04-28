@@ -1,9 +1,10 @@
 package com.jssdvv.ara.machines.presentation.destination.ar_session
 
+
+import android.Manifest
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,23 +13,25 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
 import com.jssdvv.ara.core.domain.type.OrderType
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.presentation.common.state.ManifestString
+import com.jssdvv.ara.core.presentation.common.state.Permission
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
+import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
+import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.model.Step
 import com.jssdvv.ara.machines.domain.usecase.MarkersDataManager
 import com.jssdvv.ara.machines.domain.usecase.ModelsDataManager
 import com.jssdvv.ara.machines.domain.usecase.OperationDataManager
 import com.jssdvv.ara.machines.domain.usecase.StepsDataManager
-import com.jssdvv.ara.machines.domain.utility.RenderableInfo
-import com.jssdvv.ara.machines.domain.utility.RestorableState
 import com.jssdvv.ara.machines.presentation.destination.ar_session.component.Speed
 import com.jssdvv.ara.machines.presentation.destination.calibration.BitmapInfo
+import com.jssdvv.ara.machines.presentation.destination.calibration.ModelsCalibrationViewModel.Companion.permissionsManifestStrings
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
+import com.jssdvv.ara.machines.presentation.sceneview.node.MarkerNode
+import com.jssdvv.ara.machines.presentation.sceneview.node.OriginNode
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.romainguy.kotlin.math.Quaternion
-import io.github.sceneview.math.Position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,14 +52,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.forEach
-import kotlin.collections.set
 
 @HiltViewModel
 class ARSessionViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val permissionHandler: PermissionHandler,
     private val filesManager: FilesManager,
     private val markersDataManager: MarkersDataManager,
@@ -66,21 +65,23 @@ class ARSessionViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        val permissions = listOf(android.Manifest.permission.CAMERA)
+        const val CAMERA_PERMISSION = Manifest.permission.CAMERA
     }
 
     val route = savedStateHandle.toRoute<MachinesGraph.ARSessionRoute>()
     val machineId = route.machineId
     val activityId = route.activityId
 
-    // Permissions Pair<Permission string, Permission state>
-    private val _notification = MutableSharedFlow<NotificationEvent>(extraBufferCapacity = 1)
-    private val _permissionsStates = MutableStateFlow(emptyList<Pair<String, PermissionState>>())
-    private val options = MutableStateFlow(ARSessionOptions())
-    private val _renderableInfoStates = mutableStateMapOf<RenderableInfo, RenderableAnimationState>()
+    private val _permissions = MutableStateFlow<Set<Permission>>(
+        setOf(
+            Permission(
+                manifestString = CAMERA_PERMISSION,
+                state = permissionHandler.getPermissionState(CAMERA_PERMISSION, true)
+            )
+        )
+    )
 
-    private val currentStep = MutableStateFlow<Step?>(null)
-    private val currentOperationTargets = MutableStateFlow<OperationTargets?>(null)
+    private val _notification = MutableSharedFlow<NotificationEvent>(extraBufferCapacity = 1)
 
     private val markers: StateFlow<List<Marker>> = markersDataManager
         .select(machineId)
@@ -136,101 +137,142 @@ class ARSessionViewModel @Inject constructor(
         .mapNotNull { it?.let { marker -> marker.id to marker.imageUri } }
         .distinctUntilChanged()
         .mapLatest { (id, imageUri) ->
-            val bitmap =
-                filesManager.getBitmapFromInputStream(filesManager.getInputStreamFromUri(imageUri))
-            bitmap?.let { BitmapInfo(id, it) }
+            filesManager.getBitmapFromInputStream(filesManager.getInputStreamFromUri(imageUri))
+                ?.let { BitmapInfo(id, it) }
         }
         .flowOn(Dispatchers.IO)
         .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            null
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = null
         )
 
-    private val selectedOperationTargets: StateFlow<OperationTargets?> = combine(
+    private val selectedOperationId = MutableStateFlow<Int?>(null)
+    private val currentOperation: StateFlow<Operation?> = combine(
         operationsTargets,
-        currentOperationTargets,
-    ) { opTargets, currentOpTargets ->
-        val current = currentOpTargets?: opTargets.minByOrNull { it.operation.order }
-        unselectAllRenderables()
-        current?.targets?.forEach { target ->
-            val info = RenderableInfo(target.modelId, target.xxh3)
-            val currentState = _renderableInfoStates[info] ?: RenderableAnimationState()
-            _renderableInfoStates[info] = currentState.copy(isSelectedToPlay = true)
-        }
-        current
+        selectedOperationId
+    ) { operationsTargets, selectedOperationId ->
+        operationsTargets
+            .firstOrNull { it.operation.id == selectedOperationId }
+            .let { it ?: operationsTargets.firstOrNull() }
+            .also { animatedPivots.value = it?.pivots ?: emptySet() }
+            ?.operation
+    }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = null
+        )
+
+    private val animatedPivots = MutableStateFlow(emptySet<Pivot>())
+    private val transformedTargets: StateFlow<List<OperationTargets>> = combine(
+        operationsTargets,
+        currentOperation
+    ) { opsTargets, current ->
+        if (current == null) return@combine emptyList()
+        opsTargets.takeWhile { it.operation.id != current.id }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = null
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
     )
 
-    private val selectedStep: StateFlow<Step?> = combine(
+    private val selectedStepId = MutableStateFlow<Int?>(null)
+    private val currentStep: StateFlow<Step?> = combine(
         steps,
-        selectedOperationTargets
-    ) { steps, selectedOperationTargets ->
-        val stepId =  selectedOperationTargets?.operation?.stepId
-        val currentStep = steps.find { it.id == stepId }
+        selectedStepId
+    ) { steps, selectedStepId ->
+        steps.firstOrNull { it.id == selectedStepId } ?: steps.firstOrNull()
+    }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = null
+        )
+
+    private val currentStepOperations: StateFlow<List<OperationTargets>> = combine(
+        operationsTargets,
         currentStep
+    ) { operationsTargets, currentStep ->
+        operationsTargets
+            .filter { it.operation.stepId == currentStep?.id }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = null
+        initialValue = emptyList()
     )
 
-    private val editorData: StateFlow<EditorData> = combine(
+    private val data: StateFlow<ARSessionData> = combine(
         markers,
         models,
         steps,
         operationsTargets,
-        ::EditorData
+        ::ARSessionData
     ).stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = EditorData()
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = ARSessionData()
     )
 
-    init { onCheckPermissionsStates(permissions.map { it to true }) }
-
-    val notification = _notification.asSharedFlow()
-    val permissionsStates = _permissionsStates.asStateFlow()
-    val renderableInfoStates: SnapshotStateMap<RenderableInfo, RenderableAnimationState>
-        get() = _renderableInfoStates
-
-    val uiState: StateFlow<ARSessionUiState> = combine(
-        editorData,
+    private val items: StateFlow<ARSessionItems> = combine(
         selectedMarker,
         selectedMarkerBitmap,
-        selectedStep,
-        selectedOperationTargets,
-        options
-    ) { args ->
-        val data = args[0] as EditorData
-        ARSessionUiState.Success(
-            editorData = data,
-            selectedMarker = args[1] as Marker?,
-            selectedMarkerBitmap = args[2] as BitmapInfo?,
-            selectedStep = args[3] as Step?,
-            selectedOperationTargets = args[4] as OperationTargets?,
-            options = args[5] as ARSessionOptions
-        )
-    }.stateIn(
+        currentStep,
+        currentOperation,
+        ::ARSessionItems
+    ).stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = ARSessionItems()
+    )
+
+    private val animation: StateFlow<ARSessionAnimation> = combine(
+        transformedTargets,
+        animatedPivots,
+        ::ARSessionAnimation
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = ARSessionAnimation()
+    )
+
+    private val options = MutableStateFlow(ARSessionOptions())
+
+    val notification = _notification.asSharedFlow()
+    val permissions = _permissions.asStateFlow()
+    val uiState: StateFlow<ARSessionUiState> = combine(
+        data,
+        items,
+        animation,
+        options,
+        ARSessionUiState::Success
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
         initialValue = ARSessionUiState.Loading
     )
 
     fun onEvent(event: ARSessionEvent) {
         when (event) {
-            is ARSessionEvent.OnCheckPermissionsStates -> onCheckPermissionsStates(event.permissions)
+            ARSessionEvent.OnCheckPermissionsStates -> onCheckPermissionsStates()
             is ARSessionEvent.OnPermissionInteraction -> onPermissionInteraction(event.permission)
+
             is ARSessionEvent.OnSelectMarker -> selectedMarker.update { event.marker }
+            is ARSessionEvent.OnRepositionOrigin -> repositionOrigin(
+                event.originNode,
+                event.markerNode
+            )
+
             is ARSessionEvent.OnSelectStep -> selectStep(event.stepId)
             ARSessionEvent.OnSelectNextStep -> selectNextStep()
             ARSessionEvent.OnSelectPreviousStep -> selectPreviousStep()
+
             is ARSessionEvent.OnSelectOperation -> selectOperation(event.operationId)
             ARSessionEvent.OnSelectNextOperation -> selectNextOperation()
             ARSessionEvent.OnSelectPreviousOperation -> selectPreviousOperation()
+
             ARSessionEvent.OnTogglePlay -> onTogglePlay()
             ARSessionEvent.OnToggleTorch -> onToggleTorch()
             ARSessionEvent.OnToggleLoop -> onToggleLooping()
@@ -238,297 +280,248 @@ class ARSessionViewModel @Inject constructor(
         }
     }
 
-    fun onExternalEvent(event: ARSessionExternalEvent) {
-        when (event) {
-            is ARSessionExternalEvent.OnLoadRenderables -> loadRenderables(event.infoStates)
-            is ARSessionExternalEvent.OnPlayRenderable -> selectRenderable(event.renderableInfo)
-            ARSessionExternalEvent.OnStopAllRenderables -> unselectAllRenderables()
-            is ARSessionExternalEvent.OnToggleRenderableVisibility -> toggleRenderableVisibility(event.renderableInfo)
-            ARSessionExternalEvent.OnHideAllRenderables -> hideAllRenderables()
-            ARSessionExternalEvent.OnShowAllRenderables -> showAllRenderables()
+    private fun onCheckPermissionsStates() {
+        this._permissions.update {
+            permissionsManifestStrings.mapTo(mutableSetOf()) { string ->
+                Permission(
+                    manifestString = string,
+                    state = permissionHandler.getPermissionState(string, true)
+                )
+            }
         }
     }
 
-    /**
-     * This method checks the permissions states and updates the [_permissionsStates] value.
-     *
-     * @param [permissions] List of pairs of <Permission string, Permission state>
-     */
-    private fun onCheckPermissionsStates(
-        permissions: List<Pair<String, Boolean>>,
-    ) {
-        _permissionsStates.value = permissions.map {
-            it.first to permissionHandler.getPermissionState(it.first, it.second)
-        }
-    }
-
-    private fun onPermissionInteraction(permission: String) =
+    private fun onPermissionInteraction(permission: ManifestString) {
         permissionHandler.onPermissionDialogInteraction(permission)
+    }
+
+    private fun repositionOrigin(originNode: OriginNode?, markerNode: MarkerNode?) {
+        originNode?.repositionToMarker(markerNode, selectedMarker.value?.originOffsetTransform)
+        val positionNumber = selectedMarker.value?.index ?: return
+        emitNotification(
+            NotificationEvent(
+                message = R.string.notification_chip_message_origin_repositioned,
+                args = listOf("M${machineId}P${positionNumber}")
+            )
+        )
+    }
 
     private fun selectStep(stepId: Int?) {
-        currentOperationTargets.value = operationsTargets.value
-            .filter{ it.operation.stepId == stepId }
-            .minByOrNull { it.operation.order }
+        selectedStepId.value = stepId
     }
 
     private fun selectNextStep() {
-        val currentStep = selectedStep.value
-        val nextStep = steps.value.navigate(
-            current = currentStep ?: return,
-            selector = { it.order },
-            offset = 1
-        )
+        val currentStepId = currentStep.value?.id ?: return
+        val nextStep = steps.value.next { it.id == currentStepId }
 
-        val nextStepId = nextStep?.id
-        val operationsTargets = operationsTargets.value
-            .filter { it.operation.stepId == nextStepId }
-            .sortedBy { it.operation.order }
+        if (nextStep?.id != currentStepId) {
+            val firstOpInNext = operationsTargets.value
+                .filter { it.operation.stepId == nextStep?.id }
+                .minByOrNull { it.operation.order }
 
-        currentOperationTargets.value = operationsTargets
-            .minByOrNull { it.operation.order }
+            selectStep(nextStep?.id)
+            selectOperation(firstOpInNext?.operation?.id)
+        }
     }
 
     private fun selectPreviousStep() {
-        val currentStep = selectedStep
-        val nextStep = steps.value.navigate(
-            current = currentStep.value ?: return,
-            selector = { it.order },
-            offset = -1
-        )
+        val currentStepId = currentStep.value?.id ?: return
+        val previousStep = steps.value.previous { it.id == currentStepId }
 
-        val nextStepId = nextStep?.id
-        val operationsTargets = operationsTargets.value
-            .filter { it.operation.stepId == nextStepId }
-            .sortedBy { it.operation.order }
+        if (previousStep?.id != currentStepId) {
+            val firstOpInPrev = operationsTargets.value
+                .filter { it.operation.stepId == previousStep?.id }
+                .minByOrNull { it.operation.order }
 
-        currentOperationTargets.value = operationsTargets
-            .minByOrNull { it.operation.order }
+            selectStep(previousStep?.id)
+            selectOperation(firstOpInPrev?.operation?.id)
+        }
     }
 
     private fun selectOperation(operationId: Int?) {
-        currentOperationTargets.value = operationsTargets.value.find { it.operation.id == operationId }
+        selectedOperationId.value = operationId
     }
 
     private fun selectNextOperation() {
-        currentOperationTargets.value = operationsTargets.value.navigate(
-            current = selectedOperationTargets.value ?: return,
-            selector = { it.operation.order },
-            offset = 1
-        )
+        val currentOp = currentOperation.value
+        val currentStep = currentStep.value ?: return
+        val stepsList = steps.value
+        val operationsTargets = this@ARSessionViewModel.operationsTargets.value
+
+        val isLastOp = currentOp == null || currentStepOperations.value
+                    .maxByOrNull { it.operation.order }?.operation?.id == currentOp.id
+
+        if (isLastOp) {
+            val nextStep = stepsList.next { it.id == currentStep.id }
+
+            if (nextStep?.id != currentStep.id) {
+                val firstOpInNext = operationsTargets
+                    .filter { it.operation.stepId == nextStep?.id }
+                    .minByOrNull { it.operation.order }
+
+                selectStep(nextStep?.id)
+                selectOperation(firstOpInNext?.operation?.id)
+            } else {
+                selectOperation(currentOp?.id)
+            }
+        } else {
+            val next = operationsTargets.next { it.operation.id == currentOp.id }
+            selectOperation(next?.operation?.id)
+        }
     }
 
     private fun selectPreviousOperation() {
-        currentOperationTargets.value = operationsTargets.value.navigate(
-            current = selectedOperationTargets.value ?: return,
-            selector = { it.operation.order },
-            offset = -1
-        )
+        val currentOp = currentOperation.value
+        val currentStep = currentStep.value ?: return
+        val stepsList = steps.value
+        val operationsTargets = this@ARSessionViewModel.operationsTargets.value
+
+        val isFirstOp = currentOp == null || currentStepOperations.value
+                    .minByOrNull { it.operation.order }?.operation?.id == currentOp.id
+
+        if (isFirstOp) {
+            val previousStep = stepsList.previous { it.id == currentStep.id }
+
+            if (previousStep?.id != currentStep.id) {
+                val lastOpInPrev = operationsTargets
+                    .filter { it.operation.stepId == previousStep?.id }
+                    .maxByOrNull { it.operation.order }
+
+                selectStep(previousStep?.id)
+                selectOperation(lastOpInPrev?.operation?.id)
+            } else {
+                selectOperation(currentOp?.id)
+            }
+        } else {
+            val previousOp = operationsTargets.previous { it.operation.id == currentOp.id }
+            selectOperation(previousOp?.operation?.id)
+        }
     }
 
     private fun onTogglePlay() {
-        options.update { it.copy(isPlaying = !it.isPlaying) }
-        emitNotification(
-            if (options.value.isPlaying) {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_play,
-                    iconRes = R.drawable.ic_play
-                )
-            } else {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_pause,
-                    iconRes = R.drawable.ic_pause
-                )
-            }
-        )
+        options.update { it.copy(playing = !it.playing) }
+        val (message, iconRes) = if (options.value.playing) {
+            R.string.notification_chip_message_play to R.drawable.ic_play
+        } else {
+            R.string.notification_chip_message_pause to R.drawable.ic_pause
+        }
+        emitNotification(NotificationEvent(message = message, iconRes = iconRes))
     }
 
     private fun onToggleTorch() {
-        options.update{ it.copy(isTorchEnabled = !it.isTorchEnabled) }
-        emitNotification(
-            if (options.value.isTorchEnabled) {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_torch_enabled,
-                    iconRes = R.drawable.ic_torch_filled
-                )
-            } else {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_torch_disabled,
-                    iconRes = R.drawable.ic_torch_outlined
-                )
-            }
-        )
+        options.update { it.copy(torchEnabled = !it.torchEnabled) }
+        val (message, iconRes) = if (options.value.torchEnabled) {
+            R.string.notification_chip_message_torch_enabled to R.drawable.ic_torch_filled
+        } else {
+            R.string.notification_chip_message_torch_disabled to R.drawable.ic_torch_outlined
+        }
+        emitNotification(NotificationEvent(message = message, iconRes = iconRes))
     }
 
     private fun onToggleLooping() {
-        options.update { it.copy(isLoopingEnabled = !it.isLoopingEnabled) }
-        emitNotification(
-            if (options.value.isLoopingEnabled) {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_loop_enabled,
-                    iconRes = R.drawable.ic_loop
-                )
-            } else {
-                NotificationEvent(
-                    message = R.string.notification_chip_message_loop_disabled,
-                    iconRes = R.drawable.ic_linear_start
-                )
-            }
-        )
+        options.update { it.copy(looping = !it.looping) }
+        val (message, iconRes) = if (options.value.looping) {
+            R.string.notification_chip_message_loop_enabled to R.drawable.ic_loop
+        } else {
+            R.string.notification_chip_message_loop_disabled to R.drawable.ic_linear_start
+        }
+        emitNotification(NotificationEvent(message = message, iconRes = iconRes))
     }
 
     private fun onToggleSpeed() {
-        val nextIndex = (options.value.currentSpeed.ordinal + 1) % Speed.entries.size
-        options.update { it.copy(currentSpeed = Speed.entries[nextIndex]) }
-        emitNotification(
-            when (options.value.currentSpeed) {
-                Speed.HALF -> NotificationEvent(
-                    message = R.string.notification_chip_message_speed_half,
-                    iconRes = R.drawable.ic_slow_motion
-                )
-
-                Speed.NORMAL -> NotificationEvent(
-                    message = R.string.notification_chip_message_speed_normal,
-                    iconRes = R.drawable.ic_play
-                )
-
-                Speed.DOUBLE -> NotificationEvent(
-                    message = R.string.notification_chip_message_speed_double,
-                    iconRes = R.drawable.ic_fast_forward
-                )
-            }
-        )
+        val nextIndex = (options.value.speed.ordinal + 1) % Speed.entries.size
+        options.update { it.copy(speed = Speed.entries[nextIndex]) }
+        val (message, iconRes) = options.value.speed.notificationStringId to
+                options.value.speed.notificationIconResId
+        emitNotification(NotificationEvent(message = message, iconRes = iconRes))
     }
 
     private fun emitNotification(event: NotificationEvent) {
-        viewModelScope.launch {
-            _notification.emit(event)
-        }
-    }
-
-    private fun loadRenderables(renderables: Map<RenderableInfo, RenderableAnimationState>) {
-        renderables.forEach { (info, state) ->
-            val currentState = _renderableInfoStates[info] ?: RenderableAnimationState()
-            _renderableInfoStates[info] = currentState.copy(
-                name = state.name,
-                index = state.index,
-                initialPosition = state.initialPosition,
-                initialQuaternion = state.initialQuaternion
-            )
-        }
-    }
-
-    private fun selectRenderable(vararg renderableInfo: RenderableInfo) {
-        renderableInfo.forEach {
-            val currentState = _renderableInfoStates[it] ?: RenderableAnimationState()
-            _renderableInfoStates[it] = currentState.copy(isSelectedToPlay = true)
-        }
-    }
-
-    private fun toggleRenderableVisibility(renderableInfo: RenderableInfo) {
-        val currentState = _renderableInfoStates[renderableInfo] ?: RenderableAnimationState()
-        _renderableInfoStates[renderableInfo] = currentState.copy(isVisible = !currentState.isVisible)
-    }
-
-    private fun unselectAllRenderables() {
-        _renderableInfoStates.putAll(_renderableInfoStates.mapValues { it.value.copy(isSelectedToPlay = false) })
-    }
-
-    private fun showAllRenderables() {
-        _renderableInfoStates.putAll(_renderableInfoStates.mapValues { it.value.copy(isVisible = true) })
-    }
-
-    private fun hideAllRenderables() {
-        _renderableInfoStates.putAll(_renderableInfoStates.mapValues { it.value.copy(isVisible = false) })
+        viewModelScope.launch { _notification.emit(event) }
     }
 }
 
-sealed class ARSessionEvent {
-    data class OnCheckPermissionsStates(val permissions: List<Pair<String, Boolean>>) :
-        ARSessionEvent()
+sealed interface ARSessionEvent {
+    data object OnCheckPermissionsStates : ARSessionEvent
+    data class OnPermissionInteraction(val permission: String) : ARSessionEvent
 
-    data class OnPermissionInteraction(val permission: String) : ARSessionEvent()
-    data class OnSelectMarker(val marker: Marker) : ARSessionEvent()
-    data class OnSelectStep(val stepId: Int) : ARSessionEvent()
-    data object OnSelectNextStep : ARSessionEvent()
-    data object OnSelectPreviousStep : ARSessionEvent()
-    data class OnSelectOperation(val operationId: Int) : ARSessionEvent()
-    data object OnSelectNextOperation : ARSessionEvent()
-    data object OnSelectPreviousOperation : ARSessionEvent()
-    data object OnTogglePlay : ARSessionEvent()
-    data object OnToggleTorch : ARSessionEvent()
-    data object OnToggleLoop : ARSessionEvent()
-    data object OnToggleSpeed : ARSessionEvent()
-}
+    data class OnSelectMarker(val marker: Marker) : ARSessionEvent
 
-sealed interface ARSessionExternalEvent {
-    data class OnLoadRenderables(
-        val infoStates: Map<RenderableInfo, RenderableAnimationState>
-    ) : ARSessionExternalEvent
+    data class OnRepositionOrigin(
+        val originNode: OriginNode?,
+        val markerNode: MarkerNode?
+    ) : ARSessionEvent
 
-    data class OnPlayRenderable(
-        val renderableInfo: RenderableInfo
-    ) : ARSessionExternalEvent
+    data class OnSelectStep(val stepId: Int) : ARSessionEvent
+    data object OnSelectNextStep : ARSessionEvent
+    data object OnSelectPreviousStep : ARSessionEvent
 
-    data object OnStopAllRenderables : ARSessionExternalEvent
-    data class OnToggleRenderableVisibility(
-        val renderableInfo: RenderableInfo
-    ): ARSessionExternalEvent
+    data class OnSelectOperation(val operationId: Int) : ARSessionEvent
+    data object OnSelectNextOperation : ARSessionEvent
+    data object OnSelectPreviousOperation : ARSessionEvent
 
-    data object OnHideAllRenderables : ARSessionExternalEvent
-    data object OnShowAllRenderables : ARSessionExternalEvent
+    data object OnTogglePlay : ARSessionEvent
+    data object OnToggleTorch : ARSessionEvent
+    data object OnToggleLoop : ARSessionEvent
+    data object OnToggleSpeed : ARSessionEvent
 }
 
 sealed interface ARSessionUiState {
-
     data object Loading : ARSessionUiState
 
+    @Immutable
     data class Success(
-        val editorData: EditorData = EditorData(),
-        val selectedMarker: Marker? = null,
-        val selectedMarkerBitmap: BitmapInfo? = null,
-        val selectedStep: Step? = null,
-        val selectedOperationTargets: OperationTargets? = null,
+        val data: ARSessionData = ARSessionData(),
+        val items: ARSessionItems = ARSessionItems(),
+        val animation: ARSessionAnimation = ARSessionAnimation(),
         val options: ARSessionOptions = ARSessionOptions()
     ) : ARSessionUiState
 }
 
-data class EditorData(
+@Immutable
+data class ARSessionData(
     val markers: List<Marker> = emptyList(),
     val models: List<Model> = emptyList(),
     val steps: List<Step> = emptyList(),
     val operationsTargets: List<OperationTargets> = emptyList(),
 )
 
-data class ARSessionOptions(
-    val isPlaying: Boolean = false,
-    val isTorchEnabled: Boolean = false,
-    val currentSpeed: Speed = Speed.NORMAL,
-    val isLoopingEnabled: Boolean = true,
+@Immutable
+data class ARSessionItems(
+    val selectedMarker: Marker? = null,
+    val currentBitmap: BitmapInfo? = null,
+    val currentStep: Step? = null,
+    val currentOperation: Operation? = null
 )
 
+@Immutable
+data class ARSessionAnimation(
+    val transformedTargets: List<OperationTargets> = emptyList(),
+    val animatedPivots: Set<Pivot> = emptySet()
+)
+
+@Immutable
+data class ARSessionOptions(
+    val speed: Speed = Speed.NORMAL,
+    val playing: Boolean = false,
+    val looping: Boolean = true,
+    val torchEnabled: Boolean = false,
+)
+
+@Immutable
 data class NotificationEvent(
     val id: Long = System.currentTimeMillis(),
     @param:StringRes val message: Int? = null,
-    @param:DrawableRes val iconRes: Int? = null
+    @param:DrawableRes val iconRes: Int? = null,
+    val args: List<Any> = emptyList()
 )
 
-data class RenderableAnimationState(
-    val name: String = "",
-    val isVisible: Boolean = true,
-    val isSelectedToPlay: Boolean = false,
-    override val index: Int = 0,
-    override val initialPosition: Position = Position(),
-    override val initialQuaternion: Quaternion = Quaternion()
-) : RestorableState
+private fun <T> List<T>.next(predicate: (T) -> Boolean): T? {
+    val index = indexOfFirst(predicate)
+    return if (index == -1) null else getOrNull((index + 1).coerceAtMost(lastIndex.coerceAtLeast(0)))
+}
 
-private fun <T> List<T>.navigate(
-    current: T,
-    selector: (T) -> Int,
-    offset: Int
-): T? {
-    val sorted = sortedBy(selector)
-    val index = sorted.indexOf(current)
-    if (index == -1) return null
-    val clampedIndex = (index + offset).coerceIn(0, sorted.lastIndex)
-    return sorted[clampedIndex]
+private fun <T> List<T>.previous(predicate: (T) -> Boolean): T? {
+    val index = indexOfFirst(predicate)
+    return if (index == -1) null else getOrNull((index - 1).coerceAtLeast(0))
 }
