@@ -191,7 +191,7 @@ class PivotNode(engine: Engine) : Node(engine) {
         renderableNode?.materialInstance = materialLoader.createModelMaterial(materialColor)
     }
 
-    fun updateGizmoQuaternion(global: Boolean) {
+    fun updateGizmoOrientation(global: Boolean) {
         gizmoNode?.worldQuaternion = if (global) Quaternion() else this@PivotNode.worldQuaternion
     }
 

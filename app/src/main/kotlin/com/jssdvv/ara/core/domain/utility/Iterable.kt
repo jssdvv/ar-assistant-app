@@ -1,7 +1,6 @@
 package com.jssdvv.ara.core.domain.utility
 
-inline fun <T> Iterable<T>.forEachApply(block: T.() -> Unit) {
-    for (element in this) {
-        element.apply(block)
-    }
+inline fun <T, R : Iterable<T>> R.forEachApply(block: T.() -> Unit): R {
+    for (element in this) { element.block() }
+    return this
 }

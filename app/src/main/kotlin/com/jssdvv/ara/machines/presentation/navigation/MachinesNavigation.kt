@@ -117,7 +117,7 @@ fun NavGraphBuilder.machinesNavGraph(
         }
         composable<MachinesGraph.ARSessionRoute> {
             ARSessionDestination(
-                onNavigateBack = { navHostController.navigateUp() }
+                onNavigateUp = { navHostController.navigateUp() }
             )
         }
     }
