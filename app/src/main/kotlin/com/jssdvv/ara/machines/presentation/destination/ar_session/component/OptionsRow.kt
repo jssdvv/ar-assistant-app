@@ -1,5 +1,7 @@
 package com.jssdvv.ara.machines.presentation.destination.ar_session.component
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -18,11 +20,28 @@ import com.jssdvv.ara.core.presentation.foundation.component.TextIcon
 
 enum class Speed(
     val denominator: Float,
-    val displayText: String
+    val displayText: String,
+    @param:StringRes val notificationStringId: Int,
+    @param:DrawableRes val notificationIconResId: Int
 ) {
-    HALF(0.5F, ".5×"),
-    NORMAL(1F, "1×"),
-    DOUBLE(2F, "2×")
+    HALF(
+        denominator = 0.5F,
+        displayText = ".5×",
+        notificationStringId = R.string.notification_chip_message_speed_half,
+        notificationIconResId = R.drawable.ic_slow_motion
+    ),
+    NORMAL(
+        denominator = 1F,
+        displayText = "1×",
+        notificationStringId = R.string.notification_chip_message_speed_normal,
+        notificationIconResId = R.drawable.ic_play
+    ),
+    DOUBLE(
+        denominator = 2F,
+        displayText = "2×",
+        notificationStringId = R.string.notification_chip_message_speed_double,
+        notificationIconResId = R.drawable.ic_fast_forward
+    )
 }
 
 @Composable
