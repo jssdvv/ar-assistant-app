@@ -1,71 +1,54 @@
 package com.jssdvv.ara.core.domain.type
 
+import android.content.Intent
+import android.content.res.AssetManager
+import android.media.MediaPlayer
+import androidx.core.content.FileProvider
+
 enum class UriType(
-    val schemes: Set<String>,
+    val scheme: String,
+    val prefix: String? = null,
 ) {
     /**
-     * Used for accessing data from a ContentProvider.
-     *
-     * Format: ```content://[authority]/[path]/[file]```
-     */
-    CONTENT(
-        schemes = setOf("content")
-    ),
-
-    /**
      * Used for accessing app resources (drawable, raw, etc).
+     * Commonly used for playing sounds via [MediaPlayer].
      *
      * Format: ```android.resource://[package]/[id]```
      */
     RESOURCE(
-        schemes = setOf("android.resource")
+        scheme = "android.resource"
+    ),
+
+    /**
+     * Used for accessing files bundled in the assets folder of the APK.
+     * Resolved via [AssetManager], not the file system.
+     * Typically used for pre-populating internal storage on first launch.
+     *
+     * Format: ```file:///android_asset/[path]/[file]```
+     */
+    ASSET(
+        scheme = "file",
+        prefix = "android_asset"
     ),
 
     /**
      * Used for accessing data from the local file system.
-     * Also, used for accessing data from the assets folder.
+     * Note: restricted on Android 7+ without [FileProvider].
      *
      * Format: ```file:///[path]/[file]```
-     *
-     * Assets Format With Prefix: ```file:///android_asset/[path]/[file]```
      */
     FILE(
-        schemes = setOf("file")
+        scheme = "file"
     ),
 
     /**
-     * Used for embedding data in the UriType.
+     * Used for accessing data from a ContentProvider.
+     * This is the standard scheme received from [Intent.ACTION_OPEN_DOCUMENT]
+     * and [Intent.ACTION_GET_CONTENT] file pickers.
      *
-     * Format: ```data:[<media_type>][;base64],<data>```
+     * Format: ```content://[authority]/[path]/[file]```
      */
-    DATA(
-        schemes = setOf("data")
-    ),
-
-    /**
-     * Used for accessing data over the network.
-     *
-     * Format: ```http(s)://[authority]/[path]/[file]```
-     */
-    NETWORK(
-        schemes = setOf("http", "https")
-    ),
-
-    /**
-     * Used for link to play store listings.
-     *
-     * Format: ```market://details?id=[package_name]```
-     */
-    MARKET(
-        schemes = setOf("market")
-    ),
-
-    /**
-     * Used for referencing an installed package.
-     *
-     * Format: ```package:[package_name]```
-     */
-    PACKAGE(
-        schemes = setOf("package")
+    CONTENT(
+        scheme = "content"
     )
 }
