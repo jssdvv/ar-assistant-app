@@ -11,43 +11,36 @@ class DirectoriesManagerImpl(
     private val context: Context,
 ) : DirectoriesManager {
     companion object {
-        private const val MACHINE_DIRECTORY_NAME = "machine"
-        private const val MEDIA_DIRECTORY_NAME = "media"
-        private const val MARKER_DIRECTORY_NAME = "marker"
-        private const val DOCUMENT_DIRECTORY_NAME = "document"
-        private const val MODEL_DIRECTORY_NAME = "model"
-        private const val VECTOR_DIRECTORY_NAME = "vector"
+        private const val MACHINE_DIR = "machine"
+        private const val MEDIA_DIR = "media"
+        private const val MARKER_DIR = "marker"
+        private const val DOC_DIR = "document"
+        private const val MODEL_DIR = "model"
+        private const val VECTOR_DIR = "vector"
     }
 
     private val internalStorageDir by lazy { context.filesDir }
 
-    override fun getMachineDir(machineId: Int): File =
-        File(internalStorageDir, "$MACHINE_DIRECTORY_NAME/$machineId").apply {
-            if (!exists()) mkdirs()
-        }
+    private fun checkDir(file: File) { if (!file.exists()) file.mkdirs() }
 
-    override fun getMarkersDir(machineId: Int): File =
-        File(getMachineDir(machineId), MARKER_DIRECTORY_NAME).apply {
-            if (!exists()) mkdirs()
-        }
+    override fun getRootMachineDir() = File(internalStorageDir, MACHINE_DIR)
+        .also(::checkDir)
 
-    override fun getMediaFilesDir(machineId: Int): File =
-        File(getMachineDir(machineId), MEDIA_DIRECTORY_NAME).apply {
-            if (!exists()) mkdirs()
-        }
+    override fun getMachineDir(machineId: Int) = File(getRootMachineDir(), machineId.toString())
+        .also(::checkDir)
 
-    override fun getDocumentsDir(machineId: Int): File =
-        File(getMachineDir(machineId), DOCUMENT_DIRECTORY_NAME).apply {
-            if (!exists()) mkdirs()
-        }
+    override fun getMarkersDir(machineId: Int) = File(getMachineDir(machineId), MARKER_DIR)
+        .also(::checkDir)
 
-    override fun getModelsDir(machineId: Int): File =
-        File(getMachineDir(machineId), MODEL_DIRECTORY_NAME).apply {
-            if (!exists()) mkdirs()
-        }
+    override fun getMediaFilesDir(machineId: Int) = File(getMachineDir(machineId), MEDIA_DIR)
+        .also(::checkDir)
 
-    override fun getVectorDir(machineId: Int) : File =
-        File(internalStorageDir, "$MACHINE_DIRECTORY_NAME/$VECTOR_DIRECTORY_NAME").apply {
-            if (!exists()) mkdirs()
-        }
+    override fun getDocumentsDir(machineId: Int) = File(getMachineDir(machineId), DOC_DIR)
+        .also(::checkDir)
+
+    override fun getModelsDir(machineId: Int) = File(getMachineDir(machineId), MODEL_DIR)
+        .also(::checkDir)
+
+    override fun getVectorDir(machineId: Int) = File(getRootMachineDir(), VECTOR_DIR)
+        .also(::checkDir)
 }

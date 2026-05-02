@@ -5,6 +5,11 @@ import java.io.File
 interface DirectoriesManager {
 
     /**
+     * Directory path: ```com.jssdvv.ara.files/machine```
+     */
+    fun getRootMachineDir(): File
+
+    /**
      * Base directory for each machine's files.This directory
      * is mainly used for store the other directories of the machine.
      *
@@ -39,10 +44,6 @@ interface DirectoriesManager {
     /**
      * Exclusive directory for storing models of each machine. This files are shared
      * between the calibration and activities procedures of the machine:
-     *
-     * **List of nodes:**
-     * - ModelNode: Used as 3D models parts of the machines.
-     * - PlaneNode: Used as 3D planes, for displaying images or videos.
      *
      * Directory path: ```com.jssdvv.ara.files/machine/[machine_id]/model```
      */
