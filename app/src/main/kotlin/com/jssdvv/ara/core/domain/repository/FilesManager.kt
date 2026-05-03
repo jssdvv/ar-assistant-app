@@ -2,6 +2,7 @@ package com.jssdvv.ara.core.domain.repository
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import com.jssdvv.ara.core.domain.type.UriType
 import java.io.File
 import java.io.InputStream
@@ -17,6 +18,8 @@ interface FilesManager {
     fun copyImageToInternalStorage(uri: Uri, machineId: Int): File?
     fun copyDocToInternalStorage(uri: Uri, machineId: Int): File?
 
+    fun getFileDescriptor(uri: Uri?): ParcelFileDescriptor?
+
     suspend fun generateLabelBitmap(
         name: String,
         description: String,
@@ -25,5 +28,7 @@ interface FilesManager {
         machineId: Int
     ): Uri?
 
+    fun getShareableUri(uri: Uri?): Uri?
+    fun shareFile(uri: Uri?)
     fun deleteFile(file: File)
 }

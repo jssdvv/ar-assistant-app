@@ -1,6 +1,8 @@
 package com.jssdvv.ara.core.data.repository
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapShader
@@ -11,10 +13,12 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.withTranslation
@@ -263,6 +267,72 @@ class FilesManagerImpl(
         }
 
         Uri.fromFile(outputFile)
+    }
+
+    override fun getFileDescriptor(uri: Uri?): ParcelFileDescriptor? {
+        if(uri == null) return null
+        val uriType = getUriType(uri) ?: return null
+        return when (uriType) {
+            UriType.CONTENT -> context.contentResolver.openFileDescriptor(uri, "r")
+            UriType.FILE -> uri.path?.let { ParcelFileDescriptor.open(File(it), ParcelFileDescriptor.MODE_READ_ONLY) }
+            UriType.ASSET,
+            UriType.RESOURCE -> {
+                File(context.cacheDir, "tmp_${uri.lastPathSegment}").let { tempFile ->
+                    getInputStream(uri)?.use { input ->
+                        tempFile.outputStream().use { input.copyTo(it) }
+                    }
+                    ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY).also {
+                        tempFile.delete()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun getShareableUri(uri: Uri?): Uri? {
+        if(uri == null) return null
+        val uriType = getUriType(uri) ?: return null
+        return when (uriType) {
+            UriType.CONTENT -> uri
+            UriType.FILE -> runCatching {
+                FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    File(uri.path ?: return null)
+                )
+            }.getOrNull()
+
+            UriType.ASSET,
+            UriType.RESOURCE -> runCatching {
+                val tempFile = File(context.cacheDir, "tmp_${uri.lastPathSegment}")
+                getInputStream(uri)?.use { input ->
+                    tempFile.outputStream().use { input.copyTo(it) }
+                }
+                FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    tempFile
+                ).also { tempFile.delete() }
+            }.getOrNull()
+        }
+    }
+
+    override fun shareFile(uri: Uri?) {
+        if (uri == null) return
+        val extension = getFileName(uri)?.fileExtension() ?: return
+        val fileType = FileType.fromExtension(extension) ?: return
+        val shareableUri = getShareableUri(uri) ?: return
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = fileType.mimeType
+            putExtra(Intent.EXTRA_STREAM, shareableUri)
+//            putExtra(Intent.EXTRA_SUBJECT, context.getString(fileType.shareSubject))
+//            putExtra(Intent.EXTRA_TEXT, context.getString(fileType.shareText))
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        val chooser = Intent.createChooser(intent, null).apply {
+            if (context !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
     }
 
     override fun deleteFile(file: File) {

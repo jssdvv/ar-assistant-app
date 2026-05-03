@@ -1,18 +1,16 @@
 package com.jssdvv.ara.core.data.repository
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfDocument.PageInfo
+import android.graphics.pdf.PdfRenderer
+import android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.widget.Toast
-import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 import com.jssdvv.ara.core.domain.repository.DirectoriesManager
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.repository.PDFGeneratorHelper
@@ -47,6 +45,26 @@ class PDFGeneratorHelperImpl(
     private val usableWidth by lazy { SHEET_WIDTH_PTS - 2 * SHEET_MARGIN_PTS.toFloat() }
     private val usableHeight by lazy { SHEET_HEIGHT_PTS - 2 * SHEET_MARGIN_PTS.toFloat() }
 
+    override suspend fun renderPDF(uri: Uri?, onRenderer: (PdfRenderer) -> Unit): List<Bitmap> {
+        return withContext(Dispatchers.IO) {
+            val descriptor = filesManager.getFileDescriptor(uri) ?: return@withContext emptyList()
+
+            descriptor.use {
+                PdfRenderer(it).use { renderer ->
+                    onRenderer(renderer)
+                    (0 until renderer.pageCount).map { index ->
+                        renderer.openPage(index).use { page ->
+                            createBitmap(page.width, page.height).also { bitmap ->
+                                Canvas(bitmap).drawColor(Color.WHITE)
+                                page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override fun generateTechnicalSheetPDF() {
         TODO("Generate it from machine details")
     }
@@ -74,8 +92,8 @@ class PDFGeneratorHelperImpl(
 
             for (marker in markers) {
                 try {
-                    val markerInputStream = filesManager.getInputStreamFromUri(marker.imageUri)
-                    val markerOriginalBitmap = filesManager.getBitmapFromInputStream(markerInputStream)
+                    val markerInputStream = filesManager.getInputStream(marker.imageUri)
+                    val markerOriginalBitmap = filesManager.getBitmap(markerInputStream)
                         ?: throw IllegalStateException("Failed to load bitmap from uri: ${marker.imageUri}")
 
                     var markerWidthPts =
@@ -124,11 +142,9 @@ class PDFGeneratorHelperImpl(
 
                     canvas?.let {
 
-                        val scaledBitmap = Bitmap.createScaledBitmap(
-                            markerOriginalBitmap,
+                        val scaledBitmap = markerOriginalBitmap.scale(
                             markerWidthPts.toInt(),
-                            markerHeightPts.toInt(),
-                            true
+                            markerHeightPts.toInt()
                         )
 
                         it.drawBitmap(scaledBitmap, currentX, currentY, null)
@@ -157,42 +173,9 @@ class PDFGeneratorHelperImpl(
         }
 
         withContext(Dispatchers.Main) {
-            sharePdf(context, pdfUri, fileName)
+            filesManager.shareFile(pdfUri)
         }
 
         return pdfUri
-    }
-
-    private fun sharePdf(context: Context, fileUri: Uri, fileName: String) {
-        try {
-            // Convert the file:// UriType to a content:// UriType via FileProvider
-            val contentUri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                File(fileUri.path!!)
-            )
-
-            val sendIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type = "application/pdf"
-                putExtra(Intent.EXTRA_STREAM, contentUri)
-                putExtra(Intent.EXTRA_SUBJECT, "Markers PDF")
-                putExtra(Intent.EXTRA_TEXT, "Sharing markers PDF file: $fileName")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-
-            val shareIntent = Intent.createChooser(sendIntent, "Share Markers PDF")
-
-            if (context !is Activity) shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            context.startActivity(shareIntent)
-        } catch (e: Exception) {
-            // Handle any errors
-            Handler(Looper.getMainLooper()).post {
-                Log.e("PDFGeneratorHelperImpl", "Error sharing PDF: ${e.message}", e)
-                Toast.makeText(context, "Error sharing file: ${e.message}", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
     }
 }
