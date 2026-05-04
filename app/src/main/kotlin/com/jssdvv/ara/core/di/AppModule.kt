@@ -6,14 +6,14 @@ import com.jssdvv.ara.core.data.local.AppDatabase
 import com.jssdvv.ara.core.data.repository.BarcodeWriterImpl
 import com.jssdvv.ara.core.data.repository.DirectoriesManagerImpl
 import com.jssdvv.ara.core.data.repository.FilesManagerImpl
-import com.jssdvv.ara.core.data.repository.PDFGeneratorHelperImpl
+import com.jssdvv.ara.core.data.repository.PDFHelperImpl
 import com.jssdvv.ara.core.data.repository.PermissionHandlerImpl
 import com.jssdvv.ara.core.data.repository.RationaleProviderImpl
 import com.jssdvv.ara.core.data.repository.VibratorHelperImpl
 import com.jssdvv.ara.core.domain.repository.BarcodeWriter
 import com.jssdvv.ara.core.domain.repository.DirectoriesManager
 import com.jssdvv.ara.core.domain.repository.FilesManager
-import com.jssdvv.ara.core.domain.repository.PDFGeneratorHelper
+import com.jssdvv.ara.core.domain.repository.PDFHelper
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
 import com.jssdvv.ara.core.domain.repository.RationaleProvider
 import com.jssdvv.ara.core.domain.repository.VibratorHelper
@@ -79,8 +79,7 @@ object AppModule {
     fun providePermissionHandler(
         context: Context,
         rationaleProvider: RationaleProvider,
-    ): PermissionHandler =
-        PermissionHandlerImpl(context, rationaleProvider)
+    ): PermissionHandler = PermissionHandlerImpl(context, rationaleProvider)
 
     @Provides
     @Singleton
@@ -88,6 +87,5 @@ object AppModule {
         context: Context,
         directoriesManager: DirectoriesManager,
         filesManager: FilesManager
-    ): PDFGeneratorHelper =
-        PDFGeneratorHelperImpl(context, directoriesManager, filesManager)
+    ): PDFHelper = PDFHelperImpl(context, directoriesManager, filesManager)
 }

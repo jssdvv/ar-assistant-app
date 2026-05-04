@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.jssdvv.ara.core.domain.repository.BarcodeWriter
 import com.jssdvv.ara.core.domain.repository.FilesManager
-import com.jssdvv.ara.core.domain.repository.PDFGeneratorHelper
+import com.jssdvv.ara.core.domain.repository.PDFHelper
 import com.jssdvv.ara.core.domain.repository.VibratorHelper
 import com.jssdvv.ara.machines.domain.model.Document
 import com.jssdvv.ara.machines.domain.model.Marker
@@ -48,10 +48,10 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class MarkersViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val vibratorHelper: VibratorHelper,
     private val barcodeWriter: BarcodeWriter,
-    private val pdfGeneratorHelper: PDFGeneratorHelper,
+    private val pdfHelper: PDFHelper,
     private val markersDataManager: MarkersDataManager,
     private val documentsDataManager: DocumentsDataManager,
     private val filesManager: FilesManager,
@@ -255,12 +255,10 @@ class MarkersViewModel @Inject constructor(
 
                 barcodeWriter.deleteBitmapFromInternalStorage(
                     machineId = machineId,
-                    displayName = currentMarker.imageUri.path?.split("/")?.last() ?: ""
+                    displayName = filesManager.getFileName(currentMarker.imageUri) ?: ""
                 )
             }
         }
-
-
     }
 
     private fun getCurrentMarker(id: Int): Marker? =
@@ -274,7 +272,7 @@ class MarkersViewModel @Inject constructor(
         val markerDocName = "markers.pdf"
 
         viewModelScope.launch {
-            val fileUri = pdfGeneratorHelper.generateMarkersPDF(
+            val fileUri = pdfHelper.generateMarkersPDF(
                 fileName = markerDocName,
                 machineId = machineId,
                 markers = selectedMarkers

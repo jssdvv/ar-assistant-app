@@ -134,8 +134,7 @@ class ModelsCalibrationViewModel @Inject constructor(
         .mapNotNull { it?.let { marker -> marker.id to marker.imageUri } }
         .distinctUntilChanged()
         .mapLatest { (id, imageUri) ->
-            filesManager.getBitmapFromInputStream(filesManager.getInputStreamFromUri(imageUri))
-                ?.let { BitmapInfo(id, it) }
+            filesManager.getBitmap(imageUri)?.let { BitmapInfo(id, it) }
         }
         .flowOn(Dispatchers.IO)
         .stateIn(
@@ -325,7 +324,7 @@ class ModelsCalibrationViewModel @Inject constructor(
     private fun insertModel(contentUri: Uri) {
 
         val modelFile = filesManager.copyModelToInternalStorage(
-            contentUri = contentUri,
+            uri = contentUri,
             machineId = machineId,
         )
 

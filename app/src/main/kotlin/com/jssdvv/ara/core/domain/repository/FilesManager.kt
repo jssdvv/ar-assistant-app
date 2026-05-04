@@ -11,9 +11,8 @@ interface FilesManager {
     fun getUriType(uri: Uri): UriType?
     fun getFileName(uri: Uri?): String?
     fun getInputStream(uri: Uri?): InputStream?
-    fun getSvgTextPaths(svgUri: Uri = Uri.EMPTY) : Array<String>
-    fun getBitmap(inputStream: InputStream?): Bitmap?
-
+    fun getSvgTextPaths(svgUri: Uri = Uri.EMPTY): Array<String>
+    fun getBitmap(uri: Uri?): Bitmap?
     fun copyModelToInternalStorage(uri: Uri, machineId: Int): File?
     fun copyImageToInternalStorage(uri: Uri, machineId: Int): File?
     fun copyDocToInternalStorage(uri: Uri, machineId: Int): File?

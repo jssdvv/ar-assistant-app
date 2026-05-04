@@ -9,23 +9,27 @@ import android.graphics.pdf.PdfDocument.PageInfo
 import android.graphics.pdf.PdfRenderer
 import android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
 import android.net.Uri
+import androidx.compose.ui.unit.IntSize
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import com.jssdvv.ara.core.domain.repository.DirectoriesManager
 import com.jssdvv.ara.core.domain.repository.FilesManager
-import com.jssdvv.ara.core.domain.repository.PDFGeneratorHelper
+import com.jssdvv.ara.core.domain.repository.PDFHelper
 import com.jssdvv.ara.machines.domain.model.Marker
+import com.jssdvv.ara.machines.presentation.destination.documents.DocumentSearchResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.max
 
-class PDFGeneratorHelperImpl(
+class PDFHelperImpl(
     private val context: Context,
     private val directoriesManager: DirectoriesManager,
     private val filesManager: FilesManager,
-) : PDFGeneratorHelper {
+) : PDFHelper {
     companion object {
         // PDF properties
         // Paper size (8.5 in x 11 in) in points (1 point = 1/72 inch)
@@ -45,19 +49,64 @@ class PDFGeneratorHelperImpl(
     private val usableWidth by lazy { SHEET_WIDTH_PTS - 2 * SHEET_MARGIN_PTS.toFloat() }
     private val usableHeight by lazy { SHEET_HEIGHT_PTS - 2 * SHEET_MARGIN_PTS.toFloat() }
 
-    override suspend fun renderPDF(uri: Uri?, onRenderer: (PdfRenderer) -> Unit): List<Bitmap> {
-        return withContext(Dispatchers.IO) {
-            val descriptor = filesManager.getFileDescriptor(uri) ?: return@withContext emptyList()
+    private val rendererMutex = Mutex()
 
-            descriptor.use {
-                PdfRenderer(it).use { renderer ->
-                    onRenderer(renderer)
-                    (0 until renderer.pageCount).map { index ->
-                        renderer.openPage(index).use { page ->
-                            createBitmap(page.width, page.height).also { bitmap ->
-                                Canvas(bitmap).drawColor(Color.WHITE)
-                                page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY)
-                            }
+    override suspend fun openRenderer(uri: Uri, onRenderer: (PdfRenderer) -> Unit): Int {
+        return withContext(Dispatchers.IO) {
+            rendererMutex.withLock {
+                val descriptor = filesManager.getFileDescriptor(uri) ?: return@withContext 0
+                PdfRenderer(descriptor).also(onRenderer).pageCount
+            }
+        }
+    }
+
+    override suspend fun closeRenderer(renderer: PdfRenderer?) {
+        withContext(Dispatchers.IO) {
+            rendererMutex.withLock { runCatching { renderer?.close() } }
+        }
+    }
+
+    override suspend fun renderPage(renderer: PdfRenderer?, index: Int): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            rendererMutex.withLock {
+                renderer?.openPage(index)?.use { page ->
+                    createBitmap(page.width, page.height).also { bitmap ->
+                        Canvas(bitmap).drawColor(Color.WHITE)
+                        page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY)
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun getPageSizes(renderer: PdfRenderer?): Map<Int, IntSize> {
+        if (renderer == null) return emptyMap()
+        return withContext(Dispatchers.IO) {
+            (0 until renderer.pageCount).associate { index ->
+                rendererMutex.withLock {
+                    renderer.openPage(index).use { page ->
+                        index to IntSize(page.width, page.height)
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun searchInPDF(
+        renderer: PdfRenderer?,
+        query: String,
+        pageCount: Int,
+    ): List<DocumentSearchResult> {
+        if (query.isBlank() || renderer == null) return emptyList()
+        return withContext(Dispatchers.IO) {
+            (0 until pageCount).flatMap { index ->
+                rendererMutex.withLock {
+                    renderer.openPage(index).use { page ->
+                        page.searchText(query).map { bounds ->
+                            DocumentSearchResult(
+                                page = index,
+                                bounds = bounds,
+                            )
                         }
                     }
                 }
@@ -92,8 +141,7 @@ class PDFGeneratorHelperImpl(
 
             for (marker in markers) {
                 try {
-                    val markerInputStream = filesManager.getInputStream(marker.imageUri)
-                    val markerOriginalBitmap = filesManager.getBitmap(markerInputStream)
+                    val markerOriginalBitmap = filesManager.getBitmap(marker.imageUri)
                         ?: throw IllegalStateException("Failed to load bitmap from uri: ${marker.imageUri}")
 
                     var markerWidthPts =

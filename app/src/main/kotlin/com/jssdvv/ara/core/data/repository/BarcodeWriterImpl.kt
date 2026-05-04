@@ -9,6 +9,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.net.Uri
+import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -106,11 +107,7 @@ class BarcodeWriterImpl(
         sideLength: Int,
     ): Bitmap {
         val pixels = getQRCodeIntArray(text, sideLength)
-        return Bitmap.createBitmap(
-            sideLength,
-            sideLength,
-            bitmapConfig
-        ).apply {
+        return createBitmap(sideLength, sideLength, bitmapConfig).apply {
 
             // Set the pixels of the bitmap with the int array of pixels.
             // The parameters to this function are:
@@ -161,11 +158,7 @@ class BarcodeWriterImpl(
         val finalWidth = maxOf(bitmap.width + padding * 2, textWidth + padding * 2)
         val finalHeight = bitmap.height + padding * 2 + spacingBetweenQrAndText + textSize
 
-        val newBitmap = Bitmap.createBitmap(
-            finalWidth.toInt(),
-            finalHeight.toInt(),
-            Bitmap.Config.ARGB_8888
-        )
+        val newBitmap = createBitmap(finalWidth.toInt(), finalHeight.toInt())
 
         val borderPaint = Paint().apply {
             color = Color.BLACK

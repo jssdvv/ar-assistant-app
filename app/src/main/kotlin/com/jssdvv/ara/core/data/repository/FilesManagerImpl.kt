@@ -97,8 +97,8 @@ class FilesManagerImpl(
         }
     }
 
-    override fun getBitmap(inputStream: InputStream?): Bitmap? {
-        return inputStream?.use { BitmapFactory.decodeStream(it) }
+    override fun getBitmap(uri: Uri?): Bitmap? {
+        return getInputStream(uri).use { BitmapFactory.decodeStream(it) }
     }
 
     override fun getSvgTextPaths(
@@ -196,7 +196,7 @@ class FilesManagerImpl(
         val widthRatio = realWidthPx / maxOf(sizeCentimeters, 15F)
 
         val imageBitmap = try {
-            getBitmap(getInputStream(contentUriImage))
+            getBitmap(contentUriImage)
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -270,11 +270,17 @@ class FilesManagerImpl(
     }
 
     override fun getFileDescriptor(uri: Uri?): ParcelFileDescriptor? {
-        if(uri == null) return null
+        if (uri == null) return null
         val uriType = getUriType(uri) ?: return null
         return when (uriType) {
             UriType.CONTENT -> context.contentResolver.openFileDescriptor(uri, "r")
-            UriType.FILE -> uri.path?.let { ParcelFileDescriptor.open(File(it), ParcelFileDescriptor.MODE_READ_ONLY) }
+            UriType.FILE -> uri.path?.let {
+                ParcelFileDescriptor.open(
+                    File(it),
+                    ParcelFileDescriptor.MODE_READ_ONLY
+                )
+            }
+
             UriType.ASSET,
             UriType.RESOURCE -> {
                 File(context.cacheDir, "tmp_${uri.lastPathSegment}").let { tempFile ->
@@ -290,7 +296,7 @@ class FilesManagerImpl(
     }
 
     override fun getShareableUri(uri: Uri?): Uri? {
-        if(uri == null) return null
+        if (uri == null) return null
         val uriType = getUriType(uri) ?: return null
         return when (uriType) {
             UriType.CONTENT -> uri
