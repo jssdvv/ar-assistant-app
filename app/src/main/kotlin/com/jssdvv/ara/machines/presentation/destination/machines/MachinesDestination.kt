@@ -21,13 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.domain.type.OrderType
+import com.jssdvv.ara.core.domain.type.OrderKey
+import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.foundation.component.OrderSection
 import com.jssdvv.ara.core.presentation.foundation.component.SearchBarSurface
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.core.domain.type.OrderKey
 import com.jssdvv.ara.machines.presentation.destination.machines.component.MachineCard
 
 /**
@@ -66,8 +66,7 @@ internal fun MachinesScreen(
 
         is MachinesUiState.Success -> {
             MachinesContent(
-                orderKey = uiState.orderKey,
-                orderType = uiState.orderType,
+                orderState = uiState.orderState,
                 machines = uiState.machines,
                 onEvent = onEvent,
                 onNavigateToMachineDetails = onNavigateToSpecs
@@ -78,8 +77,7 @@ internal fun MachinesScreen(
 
 @Composable
 internal fun MachinesContent(
-    orderKey: OrderKey,
-    orderType: OrderType,
+    orderState: OrderState,
     machines: List<Machine>,
     onEvent: (MachinesEvent) -> Unit,
     onNavigateToMachineDetails: (Int) -> Unit,
@@ -92,10 +90,9 @@ internal fun MachinesContent(
         placeholder = { Text(stringResource(R.string.search_bar_machines_supporting_text)) },
         bottomRow = {
             OrderSection(
-                orderType = orderType,
-                orderKey = orderKey,
-                orderKeys = OrderKey.entries,
-                onChangeSorting = { key, type -> onEvent(MachinesEvent.OrderMachines(key, type)) }
+                orderState = orderState,
+                usedOrderKeys = OrderKey.entries,
+                onChangeOrder = { onEvent(MachinesEvent.OrderMachines(it)) }
             )
         }
     ) {

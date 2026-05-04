@@ -55,6 +55,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.domain.type.OrderKey
+import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.core.presentation.common.component.ArrowDropDownIcon
 import com.jssdvv.ara.core.presentation.common.component.CheckIcon
@@ -62,7 +64,6 @@ import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.common.component.SearchIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
-import com.jssdvv.ara.machines.domain.type.OrderKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,11 +203,10 @@ fun DocumentSearchTopBar(
 
 @Composable
 fun OrderSection(
+    orderState: OrderState,
+    onChangeOrder: (OrderState) -> Unit,
     modifier: Modifier = Modifier,
-    orderType: OrderType,
-    orderKey: OrderKey,
-    orderKeys: List<OrderKey>,
-    onChangeSorting: (orderKey: OrderKey, OrderType) -> Unit,
+    usedOrderKeys: List<OrderKey> = OrderKey.entries,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(targetValue = if (expanded) 180F else 0F)
@@ -218,7 +218,7 @@ fun OrderSection(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        Text(stringResource(orderKey.orderKeyNameId))
+        Text(stringResource(orderState.key.orderKeyNameId))
         Box {
             IconButton(
                 modifier = Modifier.rotate(rotation),
@@ -242,28 +242,28 @@ fun OrderSection(
                 onDismissRequest = { expanded = false },
             ) {
                 Text(stringResource(R.string.order_type_sort_action))
-                orderKeys.forEach { key ->
+                usedOrderKeys.forEach { key ->
                     DropdownMenuItem(
                         text = { Text(stringResource(key.orderKeyNameId)) },
                         onClick = {
-                            onChangeSorting(key, orderType)
+                            onChangeOrder(orderState.copy(key = key))
                             expanded = false
                         },
-                        leadingIcon = { if (orderKey == key) CheckIcon() }
+                        leadingIcon = { if (key == orderState.key) CheckIcon() }
                     )
                 }
                 HorizontalDivider()
                 listOf(
-                    OrderType.ASCENDING to orderKey.orderTypeAscendingNameId,
-                    OrderType.DESCENDING to orderKey.orderTypeDescendingNameId
+                    OrderType.ASCENDING to orderState.key.orderTypeAscendingNameId,
+                    OrderType.DESCENDING to orderState.key.orderTypeDescendingNameId
                 ).forEach { (type, typeNameId) ->
                     DropdownMenuItem(
                         text = { Text(stringResource(typeNameId)) },
                         onClick = {
-                            onChangeSorting(orderKey, type)
+                            onChangeOrder(orderState.copy(type = type))
                             expanded = false
                         },
-                        leadingIcon = { if (orderType == type) CheckIcon() }
+                        leadingIcon = { if (type == orderState.type) CheckIcon() }
                     )
                 }
             }

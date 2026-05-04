@@ -21,7 +21,7 @@ class StepRepositoryImpl(
         val query = """
             SELECT * FROM ${StepEntity.TABLE_NAME}
             WHERE ${StepEntity.COLUMN_ACTIVITY_ID} = ?
-            ORDER BY `${StepEntity.COLUMN_ORDER}` ${orderType.asString()}
+            ORDER BY `${StepEntity.COLUMN_ORDER}` ${orderType.queryString}
         """.trimIndent()
         val simpleSQLiteQuery = SimpleSQLiteQuery(query, arrayOf(activityId.toString()))
         return dao.selectStepsOrdered(simpleSQLiteQuery)

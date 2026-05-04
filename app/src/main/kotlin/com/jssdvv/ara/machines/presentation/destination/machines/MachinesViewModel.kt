@@ -2,9 +2,8 @@ package com.jssdvv.ara.machines.presentation.destination.machines
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jssdvv.ara.core.domain.type.OrderType
+import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.core.domain.type.OrderKey
 import com.jssdvv.ara.machines.domain.usecase.SearchMachines
 import com.jssdvv.ara.machines.domain.usecase.SelectMachines
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,8 +23,7 @@ class MachineryViewModel @Inject constructor(
     private val searchMachinesUseCase: SearchMachines
 ) : ViewModel() {
 
-    private val orderKey = MutableStateFlow(OrderKey.NAME)
-    private val orderType = MutableStateFlow(OrderType.ASCENDING)
+    private val orderState = MutableStateFlow(OrderState())
     private val machines = MutableStateFlow(emptyList<Machine>())
     private val searchedMachines = MutableStateFlow(emptyList<Machine>())
 
@@ -33,12 +31,11 @@ class MachineryViewModel @Inject constructor(
     private var searchMachinesJob: Job? = null
 
     init {
-        getMachines(orderType.value, orderKey.value)
+        getMachines(orderState.value)
     }
 
     val uiState: StateFlow<MachinesUiState> = combine(
-        orderType,
-        orderKey,
+        orderState,
         machines,
         searchedMachines,
         MachinesUiState::Success
@@ -48,52 +45,42 @@ class MachineryViewModel @Inject constructor(
         initialValue = MachinesUiState.Loading
     )
 
-    private fun getMachines(orderType: OrderType, orderKey: OrderKey) {
+    private fun getMachines(orderState: OrderState) {
         getMachinesJob?.cancel()
-        getMachinesJob = selectMachinesUseCase(orderKey, orderType).onEach { machines ->
+        getMachinesJob = selectMachinesUseCase(orderState).onEach { machines ->
             this.machines.value = machines
         }.launchIn(viewModelScope)
     }
 
     fun onEvent(event: MachinesEvent) {
         when (event) {
-            is MachinesEvent.OrderMachines -> onOrderMachines(event.orderKey, event.orderType)
+            is MachinesEvent.OrderMachines -> onOrderMachines(event.orderState)
             is MachinesEvent.SearchMachines -> onSearchMachines(event.search)
         }
     }
 
-    private fun onOrderMachines(orderKey: OrderKey, orderType: OrderType) {
-        this.orderType.value = orderType
-        this.orderKey.value = orderKey
-        getMachines(orderType, orderKey)
+    private fun onOrderMachines(orderState: OrderState) {
+        this.orderState.value = orderState
+        getMachines(orderState)
     }
 
     private fun onSearchMachines(search: String) {
         searchMachinesJob?.cancel()
-        searchMachinesJob = searchMachinesUseCase(
-            search = search,
-            orderKey = orderKey.value,
-            orderType = orderType.value
-        ).onEach { machines ->
+        searchMachinesJob = searchMachinesUseCase(search, orderState.value).onEach { machines ->
             searchedMachines.value = machines
         }.launchIn(viewModelScope)
     }
 }
 
 sealed class MachinesEvent {
-    data class OrderMachines(
-        val orderKey: OrderKey,
-        val orderType: OrderType,
-    ) : MachinesEvent()
-
+    data class OrderMachines(val orderState: OrderState) : MachinesEvent()
     data class SearchMachines(val search: String) : MachinesEvent()
 }
 
 sealed interface MachinesUiState {
     data object Loading : MachinesUiState
     data class Success(
-        val orderType: OrderType,
-        val orderKey: OrderKey,
+        val orderState: OrderState,
         val machines: List<Machine>,
         val searchedMachines: List<Machine>,
     ) : MachinesUiState

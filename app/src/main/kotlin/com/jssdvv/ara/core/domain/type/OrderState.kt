@@ -59,10 +59,8 @@ enum class OrderType(
         orderTypeDateNameId = R.string.order_type_descending_date_label
     );
 
-    fun asString(): String = when (this) {
-        ASCENDING -> "ASC"
-        DESCENDING -> "DESC"
-    }
+    val queryString: String
+        get() = if (this == ASCENDING) "ASC" else "DESC"
 }
 
 @Immutable

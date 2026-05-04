@@ -26,7 +26,7 @@ class OperationRepositoryImpl(
             """
             SELECT * FROM ${OperationEntity.TABLE_NAME}
             WHERE ${OperationEntity.COLUMN_STEP_ID} IN ($placeHolders)
-            ORDER BY `${OperationEntity.COLUMN_ORDER}` ${orderType.asString()}
+            ORDER BY `${OperationEntity.COLUMN_ORDER}` ${orderType.queryString}
             """.trimIndent()
         val simpleSQLiteQuery = SimpleSQLiteQuery(query, stepsIds.toTypedArray())
         return dao.selectOperationsWithTargetsByStepsIdsOrdered(simpleSQLiteQuery)

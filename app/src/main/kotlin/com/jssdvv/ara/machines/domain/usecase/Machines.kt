@@ -1,11 +1,10 @@
 package com.jssdvv.ara.machines.domain.usecase
 
-import com.jssdvv.ara.core.domain.type.OrderType
+import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
-import com.jssdvv.ara.core.domain.type.OrderKey
 import kotlinx.coroutines.flow.Flow
 
 data class MachinesDataManager(
@@ -17,11 +16,8 @@ data class MachinesDataManager(
 class SearchMachines(
     private val repository: MachineRepository,
 ) {
-    operator fun invoke(
-        search: String,
-        orderKey: OrderKey,
-        orderType: OrderType,
-    ): Flow<List<Machine>> = repository.searchModelsOrdered(search, orderKey, orderType)
+    operator fun invoke(search: String, orderState: OrderState): Flow<List<Machine>> =
+        repository.searchModelsOrdered(search, orderState)
 }
 
 class SelectMachineAndDetails(private val repository: MachineRepository) {
@@ -30,8 +26,8 @@ class SelectMachineAndDetails(private val repository: MachineRepository) {
 }
 
 class SelectMachines(private val repository: MachineRepository) {
-    operator fun invoke(orderKey: OrderKey, orderType: OrderType): Flow<List<Machine>> =
-        repository.selectModelsOrdered(orderKey, orderType)
+    operator fun invoke(orderState: OrderState): Flow<List<Machine>> =
+        repository.selectModelsOrdered(orderState)
 }
 
 class UpsertMachines(private val repository: MachineRepository) {

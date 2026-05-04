@@ -2,7 +2,8 @@ package com.jssdvv.ara.machines.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.jssdvv.ara.core.domain.type.OrderType
+import com.jssdvv.ara.core.domain.type.OrderKey
+import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.machines.data.local.dao.MachineDao
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
 import com.jssdvv.ara.machines.data.local.mapper.machine.toDomain
@@ -11,7 +12,6 @@ import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
-import com.jssdvv.ara.core.domain.type.OrderKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -29,17 +29,9 @@ class MachineRepositoryImpl(
         OrderKey.MODIFICATION_DATE -> MachineEntity.COLUMN_MODIFIED_AT
     }
 
-    private fun getOrderType(
-        orderType: OrderType = OrderType.ASCENDING,
-    ): String = when (orderType) {
-        OrderType.ASCENDING -> "ASC"
-        OrderType.DESCENDING -> "DESC"
-    }
-
     private fun buildSearchQuery(
         search: String,
-        orderKey: OrderKey = OrderKey.NAME,
-        orderType: OrderType = OrderType.ASCENDING,
+        orderState: OrderState = OrderState()
     ): SupportSQLiteQuery {
         val query =
             """
@@ -48,20 +40,17 @@ class MachineRepositoryImpl(
                 ${MachineEntity.COLUMN_NAME} LIKE '%' || ? || '%' OR
                 ${MachineEntity.COLUMN_CODE} LIKE '%' || ? || '%' OR
                 ${MachineEntity.COLUMN_TYPE} LIKE '%' || ? || '%'
-            ORDER BY ${getOrderKey(orderKey)} ${getOrderType(orderType)}
+            ORDER BY ${getOrderKey(orderState.key)} ${orderState.type.queryString}
             """.trimIndent()
 
         return SimpleSQLiteQuery(query, arrayOf(search, search, search))
     }
 
-    private fun buildSelectQuery(
-        orderKey: OrderKey = OrderKey.NAME,
-        orderType: OrderType = OrderType.ASCENDING,
-    ): SupportSQLiteQuery {
+    private fun buildSelectQuery(orderState: OrderState = OrderState()): SupportSQLiteQuery {
         val query =
             """
             SELECT * FROM ${MachineEntity.TABLE_NAME}
-            ORDER BY ${getOrderKey(orderKey)} ${getOrderType(orderType)}
+            ORDER BY ${getOrderKey(orderState.key)} ${orderState.type.queryString}
             """.trimIndent()
 
         return SimpleSQLiteQuery(query)
@@ -70,19 +59,12 @@ class MachineRepositoryImpl(
     override suspend fun selectMachineAndDetailsByMachineId(machineId: Int): MachineDetails =
         dao.selectEntityAndDetails(machineId).toDomain()
 
-    override fun searchModelsOrdered(
-        search: String,
-        orderKey: OrderKey,
-        orderType: OrderType,
-    ): Flow<List<Machine>> =
-        dao.selectEntitiesOrdered(buildSearchQuery(search, orderKey, orderType))
+    override fun searchModelsOrdered(search: String, orderState: OrderState): Flow<List<Machine>> =
+        dao.selectEntitiesOrdered(buildSearchQuery(search, orderState))
             .map { it.map(MachineEntity::toDomain) }
 
-    override fun selectModelsOrdered(
-        orderKey: OrderKey,
-        orderType: OrderType,
-    ): Flow<List<Machine>> =
-        dao.selectEntitiesOrdered(buildSelectQuery(orderKey, orderType))
+    override fun selectModelsOrdered(orderState: OrderState): Flow<List<Machine>> =
+        dao.selectEntitiesOrdered(buildSelectQuery(orderState))
             .map { it.map(MachineEntity::toDomain) }
 
     override suspend fun upsertMachine(vararg model: Machine) =
