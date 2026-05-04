@@ -2,7 +2,6 @@ package com.jssdvv.ara.machines.presentation.sceneview.node
 
 import androidx.core.net.toFile
 import com.google.android.filament.Engine
-import com.jssdvv.ara.core.domain.utility.forEachApply
 import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.presentation.sceneview.utility.AxisNodesMap
@@ -98,7 +97,7 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
     }
 
     fun setAxisVisibility(axis: Axis?, materialLoader: MaterialLoader) {
-        axisNodes.values.forEachApply { isVisible = false }
+        axisNodes.values.onEach { it.isVisible = false }
         if (axis == null) return
         val axisNode = axisNodes[axis]
         if (axisNode != null) {

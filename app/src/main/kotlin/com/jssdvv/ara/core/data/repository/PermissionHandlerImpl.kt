@@ -4,11 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
 import com.jssdvv.ara.core.domain.repository.RationaleProvider
 import com.jssdvv.ara.core.domain.type.PermissionState
-import androidx.core.content.edit
 
 /**
  * This class is responsible for managing manifestString states and counts using shared preferences.
