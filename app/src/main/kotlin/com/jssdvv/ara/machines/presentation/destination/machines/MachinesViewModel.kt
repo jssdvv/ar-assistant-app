@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.machines.domain.type.OrderKey
+import com.jssdvv.ara.core.domain.type.OrderKey
 import com.jssdvv.ara.machines.domain.usecase.SearchMachines
 import com.jssdvv.ara.machines.domain.usecase.SelectMachines
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -2,7 +2,6 @@ package com.jssdvv.ara.machines.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.jssdvv.ara.core.domain.type.OrderType
-import com.jssdvv.ara.core.domain.type.getOrderTypeAsString
 import com.jssdvv.ara.machines.data.local.dao.OperationDao
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
 import com.jssdvv.ara.machines.data.local.mapper.operation.toComposite
@@ -27,7 +26,7 @@ class OperationRepositoryImpl(
             """
             SELECT * FROM ${OperationEntity.TABLE_NAME}
             WHERE ${OperationEntity.COLUMN_STEP_ID} IN ($placeHolders)
-            ORDER BY `${OperationEntity.COLUMN_ORDER}` ${getOrderTypeAsString(orderType)}
+            ORDER BY `${OperationEntity.COLUMN_ORDER}` ${orderType.asString()}
             """.trimIndent()
         val simpleSQLiteQuery = SimpleSQLiteQuery(query, stepsIds.toTypedArray())
         return dao.selectOperationsWithTargetsByStepsIdsOrdered(simpleSQLiteQuery)

@@ -2,7 +2,7 @@ package com.jssdvv.ara.core.domain.repository
 
 import android.Manifest
 import androidx.core.content.ContextCompat
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.domain.type.PermissionState
 
 interface PermissionHandler {
 

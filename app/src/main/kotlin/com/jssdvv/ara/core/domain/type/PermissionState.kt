@@ -1,8 +1,6 @@
-package com.jssdvv.ara.core.domain.utility
+package com.jssdvv.ara.core.domain.type
 
-import android.content.pm.PackageManager
 import androidx.annotation.StringRes
-import androidx.core.content.ContextCompat
 import com.jssdvv.ara.R
 
 /**
@@ -20,8 +18,8 @@ sealed interface PermissionState {
     /**
      * Represents the state where the manifestString has been granted and the user can use the feature.
      *
-     * This state is triggered when the [ContextCompat.checkSelfPermission] class is evaluated and
-     * returns [PackageManager.PERMISSION_GRANTED].
+     * This state is triggered when the [androidx.core.content.ContextCompat.checkSelfPermission] class is evaluated and
+     * returns [android.content.pm.PackageManager.PERMISSION_GRANTED].
      */
     data object Granted : PermissionState
 
@@ -29,8 +27,8 @@ sealed interface PermissionState {
      * Represents the state where the manifestString is denied, but the user can be shown a rationale to
      * the manifestString again.
      *
-     * This state is triggered when the [ContextCompat.checkSelfPermission] class is evaluated and
-     * returns [PackageManager.PERMISSION_DENIED].
+     * This state is triggered when the [androidx.core.content.ContextCompat.checkSelfPermission] class is evaluated and
+     * returns [android.content.pm.PackageManager.PERMISSION_DENIED].
      *
      * @property [rationaleId] The resource ID of the message explaining why the feature requires the
      * manifestString.

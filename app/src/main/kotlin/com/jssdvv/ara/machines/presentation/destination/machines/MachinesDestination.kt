@@ -27,7 +27,7 @@ import com.jssdvv.ara.core.presentation.foundation.component.OrderSection
 import com.jssdvv.ara.core.presentation.foundation.component.SearchBarSurface
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.machine.Machine
-import com.jssdvv.ara.machines.domain.type.OrderKey
+import com.jssdvv.ara.core.domain.type.OrderKey
 import com.jssdvv.ara.machines.presentation.destination.machines.component.MachineCard
 
 /**

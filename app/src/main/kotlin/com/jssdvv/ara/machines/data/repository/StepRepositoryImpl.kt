@@ -2,7 +2,6 @@ package com.jssdvv.ara.machines.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.jssdvv.ara.core.domain.type.OrderType
-import com.jssdvv.ara.core.domain.type.getOrderTypeAsString
 import com.jssdvv.ara.machines.data.local.dao.StepDao
 import com.jssdvv.ara.machines.data.local.entity.StepEntity
 import com.jssdvv.ara.machines.data.local.mapper.toDomain
@@ -22,7 +21,7 @@ class StepRepositoryImpl(
         val query = """
             SELECT * FROM ${StepEntity.TABLE_NAME}
             WHERE ${StepEntity.COLUMN_ACTIVITY_ID} = ?
-            ORDER BY `${StepEntity.COLUMN_ORDER}` ${getOrderTypeAsString(orderType)}
+            ORDER BY `${StepEntity.COLUMN_ORDER}` ${orderType.asString()}
         """.trimIndent()
         val simpleSQLiteQuery = SimpleSQLiteQuery(query, arrayOf(activityId.toString()))
         return dao.selectStepsOrdered(simpleSQLiteQuery)

@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.domain.type.PermissionState
 import com.jssdvv.ara.core.presentation.common.state.Permission
 import com.jssdvv.ara.core.presentation.theme.spacing
 

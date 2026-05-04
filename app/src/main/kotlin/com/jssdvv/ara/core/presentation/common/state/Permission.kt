@@ -1,7 +1,7 @@
 package com.jssdvv.ara.core.presentation.common.state
 
 import androidx.compose.runtime.Immutable
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.domain.type.PermissionState
 
 typealias ManifestString = String
 

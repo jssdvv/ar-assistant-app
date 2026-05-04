@@ -7,7 +7,8 @@ import androidx.core.content.ContextCompat
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
 import com.jssdvv.ara.core.domain.repository.RationaleProvider
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.domain.type.PermissionState
+import androidx.core.content.edit
 
 /**
  * This class is responsible for managing manifestString states and counts using shared preferences.
@@ -69,10 +70,7 @@ class PermissionHandlerImpl(
 
     override fun onPermissionDialogInteraction(permission: String) {
         val preferenceValueKey = getPreferenceValueKey(permission)
-        sharedPreference
-            .edit()
-            .putBoolean(preferenceValueKey, true)
-            .apply()
+        sharedPreference.edit { putBoolean(preferenceValueKey, true) }
     }
 
     override fun isPermissionGranted(permission: String): Boolean =

@@ -5,7 +5,7 @@ import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
-import com.jssdvv.ara.machines.domain.type.OrderKey
+import com.jssdvv.ara.core.domain.type.OrderKey
 import kotlinx.coroutines.flow.Flow
 
 data class MachinesDataManager(
