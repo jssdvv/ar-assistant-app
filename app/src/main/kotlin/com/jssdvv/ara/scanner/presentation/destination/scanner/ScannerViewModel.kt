@@ -4,7 +4,7 @@ import android.Manifest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jssdvv.ara.core.domain.repository.PermissionHandler
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.domain.type.PermissionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

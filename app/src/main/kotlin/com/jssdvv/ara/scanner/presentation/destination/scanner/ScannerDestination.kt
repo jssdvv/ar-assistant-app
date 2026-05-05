@@ -33,7 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.domain.utility.PermissionState
+import com.jssdvv.ara.core.domain.type.PermissionState
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.scanner.data.repository.MLKitBarcodeAnalyzer
 import com.jssdvv.ara.scanner.presentation.destination.scanner.component.CameraPreview

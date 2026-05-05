@@ -62,7 +62,6 @@ import com.jssdvv.ara.machines.presentation.sceneview.node.PivotNode
 import dev.romainguy.kotlin.math.max
 import io.github.sceneview.math.Transform
 import io.github.sceneview.math.quaternion
-import io.github.sceneview.math.Position
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 enum class BottomSheetScreen { MAIN, ENTITIES, OPERATIONS }
