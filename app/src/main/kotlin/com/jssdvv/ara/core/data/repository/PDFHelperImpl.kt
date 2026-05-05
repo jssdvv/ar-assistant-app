@@ -114,6 +114,27 @@ class PDFHelperImpl(
         }
     }
 
+    override suspend fun generateDocumentPreview(uri: Uri, machineId: Int): Uri? {
+        return withContext(Dispatchers.IO) {
+            val bitmap = rendererMutex.withLock {
+                val descriptor = filesManager.getFileDescriptor(uri) ?: return@withContext null
+                PdfRenderer(descriptor).use { renderer ->
+                    renderer.openPage(0).use { page ->
+                        createBitmap(page.width, page.height).also { bitmap ->
+                            Canvas(bitmap).drawColor(Color.WHITE)
+                            page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY)
+                        }
+                    }
+                }
+            }
+            val previewFile = filesManager.saveBitmapToInternalStorage(
+                bitmap = bitmap,
+                targetDir = directoriesManager.getDocumentsDir(machineId),
+            ) ?: return@withContext null
+            Uri.fromFile(previewFile)
+        }
+    }
+
     override fun generateTechnicalSheetPDF() {
         TODO("Generate it from machine details")
     }

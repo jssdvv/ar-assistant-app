@@ -18,6 +18,7 @@ interface PDFHelper {
         pageCount: Int
     ): List<DocumentSearchResult>
 
+    suspend fun generateDocumentPreview(uri: Uri, machineId: Int): Uri?
     fun generateTechnicalSheetPDF()
     suspend fun generateMarkersPDF(
         fileName: String,
