@@ -7,21 +7,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BitmapShader
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Shader
-import android.graphics.Typeface
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
-import android.text.Layout
-import android.text.StaticLayout
-import android.text.TextPaint
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
-import androidx.core.graphics.withTranslation
 import com.jssdvv.ara.core.domain.repository.DirectoriesManager
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.type.FileType
@@ -29,8 +22,6 @@ import com.jssdvv.ara.core.domain.type.UriType
 import com.jssdvv.ara.core.domain.utility.fileExtension
 import com.jssdvv.ara.core.domain.utility.randomFileName
 import com.jssdvv.ara.core.domain.utility.requireExtension
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -182,91 +173,31 @@ class FilesManagerImpl(
         }
     }
 
-    override suspend fun generateLabelBitmap(
-        name: String,
-        description: String,
-        sizeCentimeters: Float,
-        contentUriImage: Uri?,
+    override fun saveBitmapToInternalStorage(
+        bitmap: Bitmap,
+        targetDir: File,
+        rename: String?
+    ): File? {
+        return runCatching {
+            val fileName = rename?.let { "$it.png" } ?: "png".randomFileName()
+            File(targetDir, fileName).also { file ->
+                file.outputStream().use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                }
+            }
+        }.getOrNull()
+    }
+
+    override fun saveMarkerToInternalStorage(
+        bitmap: Bitmap,
         machineId: Int,
-    ): Uri? = withContext(Dispatchers.IO) {
-
-        val density = context.resources.displayMetrics.density
-        val padding = 32F * density
-        val realWidthPx = 300
-        val widthRatio = realWidthPx / maxOf(sizeCentimeters, 15F)
-
-        val imageBitmap = try {
-            getBitmap(contentUriImage)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-
-        val imageHeightPx = imageBitmap
-            ?.let { realWidthPx * it.height / it.width.toFloat() }
-            ?: 0F
-
-        val textWidth = realWidthPx - 2 * padding
-        val textSizeTitlePx = (if (name.isBlank()) 0F else 2F) * widthRatio
-        val textSizeDescriptionPx = (if (description.isBlank()) 0F else 1.5F) * widthRatio
-
-        val paintTitle = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.BLACK
-            textSize = textSizeTitlePx
-            typeface = Typeface.DEFAULT_BOLD
-        }
-
-        val paintDescription = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.DKGRAY
-            textSize = textSizeDescriptionPx
-            typeface = Typeface.DEFAULT
-        }
-
-        val titleLayout = StaticLayout.Builder
-            .obtain(name, 0, name.length, paintTitle, textWidth.toInt())
-            .setAlignment((Layout.Alignment.ALIGN_CENTER))
-            .build()
-
-        val descriptionLayout = StaticLayout.Builder
-            .obtain(description, 0, description.length, paintDescription, textWidth.toInt())
-            .setAlignment((Layout.Alignment.ALIGN_NORMAL))
-            .build()
-
-        val totalHeightPx = imageHeightPx +
-                titleLayout.height +
-                descriptionLayout.height +
-                3 * padding
-
-        val bitmap = createBitmap(realWidthPx, totalHeightPx.toInt())
-        val canvas = Canvas(bitmap)
-
-        canvas.drawRoundRect(
-            RectF(0f, 0f, realWidthPx.toFloat(), totalHeightPx),
-            24f * density,
-            24f * density,
-            Paint().apply { color = Color.WHITE; isAntiAlias = true }
+        rename: String?,
+    ): File? {
+        return saveBitmapToInternalStorage(
+            bitmap = bitmap,
+            targetDir = directoriesManager.getMarkersDir(machineId),
+            rename = rename,
         )
-
-        imageBitmap?.let {
-            canvas.drawBitmap(it.scale(realWidthPx, imageHeightPx.toInt()), 0F, 0F, null)
-        }
-
-        canvas.withTranslation(0F, imageHeightPx) { titleLayout.draw(this) }
-        canvas.withTranslation(
-            0F,
-            imageHeightPx + titleLayout.height + padding
-        ) { descriptionLayout.draw(this) }
-
-        val outputFile =
-            File(directoriesManager.getMediaFilesDir(machineId), "webp".randomFileName())
-
-        outputFile.outputStream().use { outputStream ->
-            bitmap
-                .toRoundedBitmap(15F * density)
-                .compress(Bitmap.CompressFormat.WEBP, 100, outputStream)
-        }
-
-        Uri.fromFile(outputFile)
     }
 
     override fun getFileDescriptor(uri: Uri?): ParcelFileDescriptor? {

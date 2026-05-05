@@ -179,69 +179,34 @@ class MarkersViewModel @Inject constructor(
     }
 
     private fun onSaveMarker() {
-
-        // This gets the marker that is being edited from the database.
         val currentMarker = currentMarker.value
-
-        val openedId = this.currentMarker.value?.id?.coerceAtLeast(0) ?: 0
-
-        // This gets the already stored in database markers indexes.
+        val openedId = currentMarker?.id?.coerceAtLeast(0) ?: 0
         val indexes = markers.value.map { it.index }
+        val indexesWithoutEdited = currentMarker?.let { indexes - it.index } ?: indexes
+        val openedIndex = if (index.value == null || index.value!! in indexesWithoutEdited) {
+            findFirstMissingInt(indexesWithoutEdited)
+        } else index.value!!
+        val openedSize = sizeCentimeters.value ?: 9F
+        val displayName = "M${machineId}P${openedIndex}"
 
-        // This gets the already stored in database markers indexes
-        // without the one that is being edited.
-        val markerIndexesWithoutEdited = currentMarker?.let { indexes - it.index } ?: indexes
+        viewModelScope.launch {
+            val qrBitmap = qrBitmap.value ?: return@launch
+            val markerBitmap = barcodeWriter.generateMarkerBitmap(displayName, qrBitmap)
+            val markerUri = filesManager.saveMarkerToInternalStorage(
+                bitmap = markerBitmap,
+                machineId = machineId,
+                rename = displayName,
+            )?.let { Uri.fromFile(it) } ?: return@launch
 
-        // A marker index can't be null or already in the database.
-        val openedIndex =
-            if (index.value == null || index.value!! in markerIndexesWithoutEdited) {
-                findFirstMissingInt(markerIndexesWithoutEdited)
-            } else index.value!!
-
-        // A marker size can't be null
-        val openedSize = sizeCentimeters.value ?: 9F // Recommended size in centimeters
-
-        when (openedId) {
-            // For creation of a new marker
-            0 -> {
-                viewModelScope.launch {
-                    markersDataManager.upsert(
-                        Marker(
-                            id = 0,
-                            machineId = machineId,
-                            index = openedIndex,
-                            sizeCentimeters = openedSize,
-                            imageUri = barcodeWriter.saveBitmapToInternalStorage(
-                                machineId = machineId,
-                                displayName = "M${machineId}P${openedIndex}",
-                                bitmap = qrBitmap.value!!,
-                                format = Bitmap.CompressFormat.PNG,
-                                quality = 100
-                            )
-                        )
-                    )
-                }
-            }
-            // For update of an existing marker
-            else -> {
-                viewModelScope.launch {
-                    markersDataManager.upsert(
-                        Marker(
-                            id = openedId,
-                            machineId = machineId,
-                            index = openedIndex,
-                            sizeCentimeters = openedSize,
-                            imageUri = barcodeWriter.saveBitmapToInternalStorage(
-                                machineId = machineId,
-                                displayName = "M${machineId}P${openedIndex}",
-                                bitmap = qrBitmap.value!!,
-                                format = Bitmap.CompressFormat.PNG,
-                                quality = 100
-                            )
-                        )
-                    )
-                }
-            }
+            markersDataManager.upsert(
+                Marker(
+                    id = openedId,
+                    machineId = machineId,
+                    index = openedIndex,
+                    sizeCentimeters = openedSize,
+                    imageUri = markerUri,
+                )
+            )
         }
     }
 

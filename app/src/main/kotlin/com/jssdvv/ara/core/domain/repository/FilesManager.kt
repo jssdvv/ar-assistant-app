@@ -16,17 +16,10 @@ interface FilesManager {
     fun copyModelToInternalStorage(uri: Uri, machineId: Int): File?
     fun copyImageToInternalStorage(uri: Uri, machineId: Int): File?
     fun copyDocToInternalStorage(uri: Uri, machineId: Int): File?
-
     fun getFileDescriptor(uri: Uri?): ParcelFileDescriptor?
+    fun saveBitmapToInternalStorage(bitmap: Bitmap, targetDir: File, rename: String? = null): File?
 
-    suspend fun generateLabelBitmap(
-        name: String,
-        description: String,
-        sizeCentimeters: Float,
-        contentUriImage: Uri?,
-        machineId: Int
-    ): Uri?
-
+    fun saveMarkerToInternalStorage(bitmap: Bitmap, machineId: Int, rename: String? = null): File?
     fun getShareableUri(uri: Uri?): Uri?
     fun shareFile(uri: Uri?)
     fun deleteFile(file: File)

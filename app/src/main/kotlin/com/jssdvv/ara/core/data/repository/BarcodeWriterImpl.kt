@@ -8,7 +8,6 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
-import android.net.Uri
 import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
@@ -35,12 +34,6 @@ class BarcodeWriterImpl(
     val lightCellColor: Int = Color.WHITE,
     val errorCorrectionLevel: ErrorCorrectionLevel = ErrorCorrectionLevel.L,
 ) : BarcodeWriter {
-
-    companion object {
-        private val DEFAULT_FORMAT = Bitmap.CompressFormat.PNG
-        private const val DEFAULT_QUALITY = 100
-    }
-
     private val qrCodeWriter by lazy { QRCodeWriter() }
 
     /**
@@ -122,18 +115,11 @@ class BarcodeWriterImpl(
         }
     }
 
-    override fun saveBitmapToInternalStorage(
-        machineId: Int,
+    override fun generateMarkerBitmap(
         displayName: String,
         bitmap: Bitmap,
-        format: Bitmap.CompressFormat?,
-        quality: Int?,
-    ): Uri {
-        val dir = directoriesManager.getMarkersDir(machineId)
-        val actualFormat = format ?: DEFAULT_FORMAT
-        val actualQuality = quality ?: DEFAULT_QUALITY
+    ): Bitmap {
         val density = context.resources.displayMetrics.density
-
         val padding = 5F * density
         val cornerRadius = 8F * density
         val textSize = 40F * density
@@ -158,8 +144,6 @@ class BarcodeWriterImpl(
         val finalWidth = maxOf(bitmap.width + padding * 2, textWidth + padding * 2)
         val finalHeight = bitmap.height + padding * 2 + spacingBetweenQrAndText + textSize
 
-        val newBitmap = createBitmap(finalWidth.toInt(), finalHeight.toInt())
-
         val borderPaint = Paint().apply {
             color = Color.BLACK
             style = Paint.Style.STROKE
@@ -176,47 +160,20 @@ class BarcodeWriterImpl(
             finalHeight - halfStrokeWidth
         )
 
-        val qrLeft = (finalWidth - bitmap.width) / 2
-
-        Canvas(newBitmap).apply {
-            // Background color
-            drawColor(Color.WHITE)
-
-            // QR code
-            drawBitmap(
-                bitmap,
-                qrLeft,
-                padding,
-                null
-            )
-
-            // Border Rect
-            drawRoundRect(
-                roundedRect,
-                cornerRadius,
-                cornerRadius,
-                borderPaint
-            )
-
-            // Display name below the QR
-            if (displayName.isNotBlank()) {
-                drawText(
-                    displayName,
-                    finalWidth / 2,
-                    padding + bitmap.height + spacingBetweenQrAndText + textHeight / 2,
-                    textPaint
-                )
+        return createBitmap(finalWidth.toInt(), finalHeight.toInt()).also { newBitmap ->
+            Canvas(newBitmap).apply {
+                drawColor(Color.WHITE)
+                drawBitmap(bitmap, (finalWidth - bitmap.width) / 2, padding, null)
+                drawRoundRect(roundedRect, cornerRadius, cornerRadius, borderPaint)
+                if (displayName.isNotBlank()) {
+                    drawText(
+                        displayName,
+                        finalWidth / 2,
+                        padding + bitmap.height + spacingBetweenQrAndText + textHeight / 2,
+                        textPaint
+                    )
+                }
             }
-        }
-
-        if (!dir.exists()) dir.mkdirs()
-        val file = File(dir, "$displayName.${actualFormat.name.lowercase()}")
-
-        return try {
-            file.outputStream().use { newBitmap.compress(actualFormat, actualQuality, it) }
-            Uri.fromFile(file)
-        } catch (e: Exception) {
-            Uri.EMPTY
         }
     }
 
