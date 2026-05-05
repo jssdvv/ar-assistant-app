@@ -24,17 +24,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
-import com.jssdvv.ara.core.domain.type.OrderType
+import com.jssdvv.ara.core.domain.type.OrderKey
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.foundation.component.OrderSection
 import com.jssdvv.ara.core.presentation.foundation.component.SearchTopBar
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Document
-import com.jssdvv.ara.machines.domain.type.OrderKey
 import com.jssdvv.ara.machines.presentation.destination.documents.component.DocumentCreationDialog
 import com.jssdvv.ara.machines.presentation.destination.documents.component.DocumentDeletionDialog
 import com.jssdvv.ara.machines.presentation.destination.documents.component.DocumentFAB
+import com.jssdvv.ara.machines.presentation.destination.documents.component.DocumentVisor
 import com.jssdvv.ara.machines.presentation.destination.documents.component.MiniDocumentPreviewCard
 
 @Composable
@@ -61,13 +61,10 @@ internal fun DocumentsScreen(
     when (uiState) {
         DocumentsUiState.Loading -> LoadingWheelScreen()
         is DocumentsUiState.Success -> DocumentsContent(
-            orderType = uiState.orderType,
-            orderKey = uiState.orderKey,
-            searchQuery = uiState.searchQuery,
-            filteredDocuments = uiState.filteredDocuments,
-            shownDocument = uiState.shownDocument,
+            data = uiState.data,
+            openedDoc = uiState.shownDocument,
             onEvent = onEvent,
-            onNavigateBack = onNavigateBack,
+            onNavigateUp = onNavigateBack,
             modifier = modifier
         )
     }
@@ -76,13 +73,10 @@ internal fun DocumentsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentsContent(
-    orderType: OrderType,
-    orderKey: OrderKey,
-    searchQuery: String,
-    filteredDocuments: List<Document>,
-    shownDocument: Document?,
+    data: DocumentsData,
+    openedDoc: RenderedDocument?,
     onEvent: (DocumentsEvent) -> Unit,
-    onNavigateBack: () -> Unit,
+    onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showCreationDialog by remember { mutableStateOf(false) }
@@ -95,18 +89,15 @@ fun DocumentsContent(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SearchTopBar(
-                value = searchQuery,
+                value = data.searchQuery,
                 onValueChange = { onEvent(DocumentsEvent.OnSearchDocuments(it)) },
                 placeholder = { Text(stringResource(R.string.search_bar_documents_supporting_text)) },
-                navigationIcon = { NavigationUpIconButton(onNavigateBack) },
+                navigationIcon = { NavigationUpIconButton(onNavigateUp) },
                 bottomRow = {
                     OrderSection(
-                        orderType = orderType,
-                        orderKey = orderKey,
-                        orderKeys = listOf(OrderKey.NAME, OrderKey.TYPE, OrderKey.CREATION_DATE),
-                        onChangeSorting = { key, type ->
-                            onEvent(DocumentsEvent.OnSortDocuments(type, key))
-                        }
+                        orderState = data.orderState,
+                        usedOrderKeys = listOf(OrderKey.NAME, OrderKey.TYPE, OrderKey.CREATION_DATE),
+                        onChangeOrder = { onEvent(DocumentsEvent.OnSortDocuments(it)) }
                     )
                 }
             )
@@ -120,7 +111,7 @@ fun DocumentsContent(
             )
         }
     ) { paddingValues ->
-        if (filteredDocuments.isEmpty()) {
+        if (data.filteredDocuments.isEmpty()) {
             Box(
                 modifier = modifier
                     .fillMaxSize()
@@ -144,7 +135,7 @@ fun DocumentsContent(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
             ) {
                 items(
-                    items = filteredDocuments,
+                    items = data.filteredDocuments,
                     key = { it.id }
                 ) { document ->
                     MiniDocumentPreviewCard(
@@ -193,6 +184,20 @@ fun DocumentsContent(
                 showDeletionDialog = false
                 documentToDelete = null
             }
+        )
+    }
+
+    if(openedDoc != null) {
+        DocumentVisor(
+            document = openedDoc.document,
+            pageCount = openedDoc.pageCount,
+            pageSizes = openedDoc   .pageSizes,
+            pageBitmaps = openedDoc.pageBitmaps,
+            currentPage = openedDoc.currentPage,
+            search = openedDoc.search,
+            onLoadPage = {onEvent(DocumentsEvent.OnLoadPage(it))},
+            onShareDocument = { onEvent(DocumentsEvent.OnShareDocument(it)) },
+            onCloseDocument = { onEvent(DocumentsEvent.OnClearShownDocument) }
         )
     }
 }
