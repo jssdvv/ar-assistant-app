@@ -3,7 +3,7 @@ package com.jssdvv.ara.machines.domain.model
 import android.net.Uri
 import androidx.annotation.StringRes
 import com.jssdvv.ara.R
-import java.util.Date
+import java.time.Instant
 
 data class Document(
     val id: Int = 0,
@@ -12,7 +12,7 @@ data class Document(
     val name: String,
     val previewUri: Uri = Uri.EMPTY,
     val fileUri: Uri,
-    val createdAt: Date = Date()
+    val createdAt: Instant = Instant.now()
 )
 
 enum class DocumentCategory(

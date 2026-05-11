@@ -6,7 +6,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.util.Date
+import java.time.Instant
+import java.time.LocalDate
 
 /**
  * Entity representing the motor details.
@@ -75,16 +76,16 @@ data class MotorIdentityEntity(
     val price: Double?,
 
     @ColumnInfo(name = COLUMN_ACQUISITION_DATE)
-    val acquisitionDate: Date?,
+    val acquisitionDate: LocalDate?,
 
     @ColumnInfo(name = COLUMN_IMAGE_URI)
     val imageUri: Uri?,
 
     @ColumnInfo(name = COLUMN_CREATED_AT)
-    val createdAt: Date,
+    val createdAt: Instant,
 
     @ColumnInfo(name = COLUMN_MODIFIED_AT)
-    val modifiedAt: Date,
+    val modifiedAt: Instant,
 ) {
     companion object {
         const val TABLE_NAME = "motor_identity"

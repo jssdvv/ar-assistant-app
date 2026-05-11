@@ -1,16 +1,22 @@
 package com.jssdvv.ara.core.data.local.converter
 
 import androidx.room.TypeConverter
-import java.util.Date
+import java.time.Instant
+import java.time.LocalDate
 
 /**
- * Converts [Date] objects to [Long] timestamps and vice versa for Room database storage.
+ * Converts [Instant] objects to [Long] timestamps and vice versa for Room database storage.
  */
 class DateTypeConverter {
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Instant? = value?.let(Instant::ofEpochMilli)
 
     @TypeConverter
-    fun fromTimestamp(value: Long?): Date? = value?.let { Date(it) }
+    fun toTimestamp(instant: Instant?): Long? = instant?.toEpochMilli()
 
     @TypeConverter
-    fun toTimestamp(date: Date?): Long? = date?.time
+    fun fromLocalDate(date: LocalDate?): String? = date?.toString()
+
+    @TypeConverter
+    fun toLocalDate(value: String?): LocalDate? = value?.let(LocalDate::parse)
 }

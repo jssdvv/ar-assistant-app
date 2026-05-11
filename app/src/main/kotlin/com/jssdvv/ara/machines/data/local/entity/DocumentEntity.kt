@@ -8,7 +8,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
 import com.jssdvv.ara.machines.domain.model.DocumentCategory
-import java.util.Date
+import java.time.Instant
 
 @Entity(
     tableName = DocumentEntity.TABLE_NAME,
@@ -48,7 +48,7 @@ data class DocumentEntity(
     val fileUri: Uri,
 
     @ColumnInfo(name = COLUMN_CREATED_AT)
-    val createdAt: Date = Date()
+    val createdAt: Instant
 ) {
     companion object {
         const val TABLE_NAME = "document"

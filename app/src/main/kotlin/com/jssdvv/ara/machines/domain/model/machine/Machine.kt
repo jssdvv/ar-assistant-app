@@ -2,7 +2,8 @@ package com.jssdvv.ara.machines.domain.model.machine
 
 import android.net.Uri
 import com.jssdvv.ara.machines.domain.type.MachineType
-import java.util.Date
+import java.time.Instant
+import java.time.LocalDate
 
 /**
  * Data class for mapping machine details from MachineEntity.
@@ -35,10 +36,10 @@ data class Machine(
     val serial: String? = null,
     val fabricationYear: Int? = null,
     val price: Double? = null,
-    val acquisitionDate: Date? = null,
+    val acquisitionDate: LocalDate? = null,
     val imageUri: Uri? = null,
-    val createdAt: Date = Date(),
-    val modifiedAt: Date = Date()
+    val createdAt: Instant = Instant.now(),
+    val modifiedAt: Instant = Instant.now()
 )
 
 data class MachineDetails(

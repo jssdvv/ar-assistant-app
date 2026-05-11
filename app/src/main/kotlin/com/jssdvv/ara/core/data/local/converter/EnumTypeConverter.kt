@@ -7,6 +7,7 @@ import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.MachineType
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.domain.type.ToolType
+import com.jssdvv.ara.schedule.domain.type.RecurrenceUnit
 
 /**
  * Converts [Enum] objects to [Int] ordinals and vice versa for Room database storage.
@@ -48,4 +49,10 @@ class EnumTypeConverter {
 
     @TypeConverter
     fun fromDocument(type: DocumentCategory) = type.ordinal
+
+    @TypeConverter
+    fun toRecurrenceUnit(ordinal: Int): RecurrenceUnit = enumValues<RecurrenceUnit>()[ordinal]
+
+    @TypeConverter
+    fun fromRecurrenceUnit(type: RecurrenceUnit) = type.ordinal
 }

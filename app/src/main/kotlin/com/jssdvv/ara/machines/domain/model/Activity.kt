@@ -2,7 +2,7 @@ package com.jssdvv.ara.machines.domain.model
 
 import android.net.Uri
 import com.jssdvv.ara.machines.domain.type.ActivityType
-import java.util.Date
+import java.time.Instant
 
 data class Activity(
     val id: Int = 0,
@@ -13,6 +13,6 @@ data class Activity(
     val frequency: Int? = null,
     val frequencyUnit: String? = null,
     val imageUri: Uri? = null,
-    val createdAt: Date = Date(),
-    val modifiedAt: Date = Date()
+    val createdAt: Instant = Instant.now(),
+    val modifiedAt: Instant = Instant.now()
 )

@@ -33,7 +33,6 @@ import com.jssdvv.ara.core.presentation.common.component.TextIcon
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.presentation.component.DetailListItem
 import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard
-import java.util.Date
 
 @Composable
 fun MachineSpecsCard(
@@ -43,15 +42,7 @@ fun MachineSpecsCard(
     onClickEditCard: (MachineDetailsCard) -> Unit,
     onClickSaveCard: (MachineSpecs) -> Unit,
 ) {
-    var machineSpecsState by remember {
-        mutableStateOf(
-            MachineSpecs(
-                machineId = 0,
-                createdAt = Date(0L),
-                modifiedAt = Date(0L)
-            )
-        )
-    }
+    var machineSpecsState by remember { mutableStateOf(MachineSpecs(machineId = 0)) }
     machineSpecs?.let { machineSpecsState = it }
 
     OutlinedCard(

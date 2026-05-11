@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.util.Date
+import java.time.Instant
 
 /**
  * Entity representing the specifications of a motor.
@@ -133,10 +133,10 @@ data class MotorSpecsEntity(
     val weight: Double?,
 
     @ColumnInfo(name = COLUMN_CREATED_AT)
-    val createdAt: Date,
+    val createdAt: Instant,
 
     @ColumnInfo(name = COLUMN_MODIFIED_AT)
-    val modifiedAt: Date,
+    val modifiedAt: Instant,
 ) {
     companion object {
         const val TABLE_NAME = "motor_specs"

@@ -18,21 +18,22 @@ import com.jssdvv.ara.core.presentation.common.component.CheckIcon
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerModal(
     modifier: Modifier = Modifier,
-    currentDateSelected: Date? = null,
-    onDateSelected: (Date) -> Unit,
+    currentDateSelected: LocalDate? = null,
+    onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val initialMillis = currentDateSelected?.toInstant()?.toEpochMilli()
+    val initialMillis = currentDateSelected
+        ?.atStartOfDay(ZoneOffset.UTC)
+        ?.toInstant()
+        ?.toEpochMilli()
         ?: LocalDate.now()
-            .atStartOfDay(ZoneId.systemDefault())
+            .atStartOfDay(ZoneOffset.UTC)
             .toInstant()
             .toEpochMilli()
 
@@ -45,13 +46,13 @@ fun DatePickerModal(
         confirmButton = {
             Button(
                 onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val localDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneOffset.UTC)
-                            .toLocalDate()
-                            .atStartOfDay(ZoneId.systemDefault())
-                        onDateSelected(Date.from(localDate.toInstant()))
-                    } ?: onDateSelected(Date(System.currentTimeMillis()))
+                    val localDate = datePickerState.selectedDateMillis
+                        ?.let { millis ->
+                            Instant.ofEpochMilli(millis)
+                                .atZone(ZoneOffset.UTC)
+                                .toLocalDate()
+                        } ?: LocalDate.now()
+                    onDateSelected(localDate)
                     onDismiss()
                 }
             ) {

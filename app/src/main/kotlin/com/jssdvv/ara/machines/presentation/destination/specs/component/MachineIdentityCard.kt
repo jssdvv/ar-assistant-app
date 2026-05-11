@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.domain.utility.formatMedium
 import com.jssdvv.ara.core.presentation.common.component.CheckIcon
 import com.jssdvv.ara.core.presentation.foundation.component.DatePickerModal
 import com.jssdvv.ara.machines.domain.model.machine.Machine
@@ -46,7 +47,6 @@ import com.jssdvv.ara.machines.domain.type.MachineType
 import com.jssdvv.ara.machines.presentation.component.DetailListItem
 import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard
 import java.text.SimpleDateFormat
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,9 +63,6 @@ fun MachineIdentityCard(
             Machine(
                 code = "",
                 name = "",
-                type = MachineType.UNKNOWN,
-                createdAt = Date(0L),
-                modifiedAt = Date(0L)
             )
         )
     }
@@ -299,7 +296,7 @@ fun MachineIdentityCard(
                         onDateSelected = {
                             machineState = machineState.copy(acquisitionDate = it)
                         },
-                        onDismiss = { showDatePickerDialog = false },
+                        onDismiss = { showDatePickerDialog = false }
                     )
                 }
             }
@@ -353,7 +350,7 @@ fun MachineIdentityCard(
                     DetailListItem(
                         painter = painterResource(R.drawable.ic_date),
                         headline = stringResource(R.string.text_field_acquisition_date_label),
-                        text = machine.acquisitionDate?.let { dateFormat.format(it) } ?: ""
+                        text = machine.acquisitionDate?.formatMedium() ?: ""
                     )
                 }
             } ?: Box(

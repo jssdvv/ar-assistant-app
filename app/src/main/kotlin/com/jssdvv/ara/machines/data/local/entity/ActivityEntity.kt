@@ -8,7 +8,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
 import com.jssdvv.ara.machines.domain.type.ActivityType
-import java.util.Date
+import java.time.Instant
 
 /**
  * Entity representing a maintenance activity for a machine.
@@ -70,10 +70,10 @@ data class ActivityEntity(
     val imageUri: Uri?,
 
     @ColumnInfo(name = COLUMN_CREATED_AT)
-    val createdAt: Date,
+    val createdAt: Instant,
 
     @ColumnInfo(name = COLUMN_MODIFIED_AT)
-    val modifiedAt: Date,
+    val modifiedAt: Instant,
 ) {
     companion object {
         const val TABLE_NAME = "activity"

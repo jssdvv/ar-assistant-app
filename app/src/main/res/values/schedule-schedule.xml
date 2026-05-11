@@ -14,13 +14,13 @@
     <!--CALENDAR DAYS [COMPONENT]-->
 
     <string-array name="calendar_days_symbol_designation">
-        <item>S</item>
-        <item>M</item>
-        <item>T</item>
-        <item>W</item>
-        <item>T</item>
-        <item>F</item>
-        <item>S</item>
+        <item>Sun</item>
+        <item>Mon</item>
+        <item>Thu</item>
+        <item>Wed</item>
+        <item>Tue</item>
+        <item>Fri</item>
+        <item>Sat</item>
     </string-array>
 
 </resources>

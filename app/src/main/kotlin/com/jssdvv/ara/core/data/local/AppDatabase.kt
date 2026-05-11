@@ -49,8 +49,7 @@ import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
         ModelEntity::class,
         MarkerEntity::class,
     ],
-    version = 1,
-    exportSchema = true
+    version = 1
 )
 @TypeConverters(
     UriTypeConverter::class,

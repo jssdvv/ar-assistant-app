@@ -17,10 +17,6 @@ import com.jssdvv.ara.machines.domain.usecase.SelectMotors
 import com.jssdvv.ara.machines.domain.usecase.UpdateMotorSpecs
 import com.jssdvv.ara.machines.domain.usecase.UpsertMachineSpecs
 import com.jssdvv.ara.machines.domain.usecase.UpsertMachines
-import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard.MACHINE
-import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard.MACHINE_SPECS
-import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard.MOTOR
-import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard.MOTOR_SPECS
 import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard.NONE
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,12 +29,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class SpecsViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val selectMachineAndDetailsUseCase: SelectMachineAndDetails,
     private val upsertMachinesUseCase: UpsertMachines,
     private val upsertMachineSpecsUseCase: UpsertMachineSpecs,
@@ -113,7 +108,6 @@ class SpecsViewModel @Inject constructor(
                     fabricationYear = event.machine.fabricationYear,
                     price = event.machine.price,
                     acquisitionDate = event.machine.acquisitionDate,
-                    modifiedAt = Date(System.currentTimeMillis()),
                 )
                 machineState.value?.let {
                     viewModelScope.launch {
@@ -142,7 +136,6 @@ class SpecsViewModel @Inject constructor(
                     hoursPerDay = event.machineSpecs.hoursPerDay,
                     roomTemp = event.machineSpecs.roomTemp,
                     additionalDesc = event.machineSpecs.additionalDesc,
-                    modifiedAt = Date(System.currentTimeMillis())
                 )
                 machineSpecsState.value?.let {
                     viewModelScope.launch {
@@ -169,7 +162,6 @@ class SpecsViewModel @Inject constructor(
                     price = event.motorIdentity.price,
                     acquisitionDate = event.motorIdentity.acquisitionDate,
                     imageUri = event.motorIdentity.imageUri,
-                    modifiedAt = Date(System.currentTimeMillis()),
                 )
                 motorIdentityState.value?.let {
                     viewModelScope.launch {
@@ -209,7 +201,6 @@ class SpecsViewModel @Inject constructor(
                     insulationClass = event.motorSpecs.insulationClass,
                     insulationClassTemp = event.motorSpecs.insulationClassTemp,
                     weight = event.motorSpecs.weight,
-                    modifiedAt = Date(System.currentTimeMillis())
                 )
                 motorSpecsState.value?.let {
                     viewModelScope.launch {

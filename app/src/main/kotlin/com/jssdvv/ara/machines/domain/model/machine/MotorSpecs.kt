@@ -1,6 +1,6 @@
 package com.jssdvv.ara.machines.domain.model.machine
 
-import java.util.Date
+import java.time.Instant
 
 /**
  * Data class representing the specifications of a motor.
@@ -59,6 +59,6 @@ data class MotorSpecs(
     val insulationClass: String? = null,
     val insulationClassTemp: Double? = null,
     val weight: Double? = null,
-    val createdAt: Date = Date(),
-    val modifiedAt: Date =Date()
+    val createdAt: Instant = Instant.now(),
+    val modifiedAt: Instant = Instant.now()
 )

@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.domain.utility.formatMedium
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
 import com.jssdvv.ara.core.presentation.foundation.component.LazyColumnScaffold
@@ -46,7 +47,6 @@ import com.jssdvv.ara.machines.presentation.destination.specs.component.MachineI
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MachineSpecsCard
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MotorIdentityCard
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MotorSpecsCard
-import java.text.SimpleDateFormat
 
 @Composable
 fun SpecsDestination(
@@ -121,7 +121,7 @@ fun SpecsContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16/9F),
+                    .aspectRatio(16 / 9F),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 AsyncImage(
@@ -154,7 +154,6 @@ fun SpecsContent(
 
         item {
             // Titles
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy")
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,7 +169,7 @@ fun SpecsContent(
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = "Created on ${machine?.createdAt?.let { dateFormat.format(it) }}",
+                    text = "Created on ${machine?.createdAt?.formatMedium()}",
                     style = MaterialTheme.typography.labelMedium
                 )
             }
