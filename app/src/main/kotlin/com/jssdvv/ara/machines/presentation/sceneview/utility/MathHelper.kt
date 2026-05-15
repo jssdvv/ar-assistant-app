@@ -6,19 +6,40 @@ import io.github.sceneview.math.Position
 import io.github.sceneview.math.Transform
 import io.github.sceneview.math.quaternion
 
-fun Position.objectOffset(offset: Position, quaternion: Quaternion) = this + quaternion * offset
-fun Position.globalOffset(offset: Position) = this + offset
+fun Position.objectOffset(offset: Position, quaternion: Quaternion): Position {
+    return this + quaternion * offset
+}
 
-fun Quaternion.objectOffset(offset: Quaternion) = normalize(this * offset)
-fun Quaternion.globalOffset(offset: Quaternion) = normalize(offset * this)
+fun Position.globalOffset(offset: Position): Position {
+    return this + offset
+}
+
+fun Quaternion.objectOffset(offset: Quaternion): Quaternion {
+    return normalize(this * offset)
+}
+
+fun Quaternion.globalOffset(offset: Quaternion): Quaternion {
+    return normalize(offset * this)
+}
 
 fun Transform.objectOffset(offset: Transform) = Transform(
     position = position.objectOffset(offset.position, quaternion),
     quaternion = quaternion.objectOffset(offset.quaternion)
 )
+
+fun Transform.objectOffset(offset: Position) = Transform(
+    position = position.objectOffset(offset, quaternion),
+    quaternion = normalize(quaternion)
+)
+
 fun Transform.globalOffset(offset: Transform) = Transform(
     position = position.globalOffset(offset.position),
     quaternion = quaternion.globalOffset(offset.quaternion)
+)
+
+fun Transform.globalOffset(offset: Position) = Transform(
+    position = position.globalOffset(offset),
+    quaternion = normalize(quaternion)
 )
 
 fun Position.offset(offset: Position, quaternion: Quaternion, global: Boolean = false): Position {
@@ -30,5 +51,5 @@ fun Quaternion.offset(offset: Quaternion, global: Boolean = false): Quaternion {
 }
 
 fun Transform.offset(offset: Transform, global: Boolean = false): Transform {
-    return if ( global) globalOffset(offset) else objectOffset(offset)
+    return if (global) globalOffset(offset) else objectOffset(offset)
 }

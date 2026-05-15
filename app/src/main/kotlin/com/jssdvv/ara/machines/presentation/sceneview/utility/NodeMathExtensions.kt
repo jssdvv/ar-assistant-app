@@ -6,25 +6,25 @@ import io.github.sceneview.math.Transform
 import io.github.sceneview.node.Node
 
 fun Node.offset(offset: Position, global: Boolean = false): Position {
-    return worldPosition.offset(offset, worldQuaternion, global)
+    return position.offset(offset, quaternion, global)
 }
 
 fun Node.offset(offset: Quaternion, global: Boolean = false): Quaternion {
-    return worldQuaternion.offset(offset, global)
+    return quaternion.offset(offset, global)
 }
 
 fun Node.offset(offset: Transform, global: Boolean = false): Transform {
-    return worldTransform.offset(offset, global)
+    return transform.offset(offset, global)
 }
 
 fun Node.applyOffset(offset: Position, global: Boolean = false) {
-    worldPosition = offset(offset, global)
+    position = offset(offset, global)
 }
 
 fun Node.applyOffset(offset: Quaternion, global: Boolean = false) {
-    worldQuaternion = offset(offset, global)
+    quaternion = offset(offset, global)
 }
 
 fun Node.applyOffset(offset: Transform, global: Boolean = false) {
-    worldTransform = offset(offset, global)
+    transform = offset(offset, global)
 }
