@@ -28,7 +28,7 @@ import java.time.Instant
  * @property [driveEnd] Drive-end bearings (DE).
  * @property [nonDriveEnd] Non-drive-end bearings (NDE).
  * @property [insulationClass] Insulation class (INS.CL.).
- * @property [insulationClassTemp] Insulation class temperature (ΔT).
+ * @property [insulationTemp] Insulation class temperature (ΔT).
  * @property [weight] Weight in kg (kg).
  * @property [createdAt] CreationDate when created.
  * @property [modifiedAt] CreationDate when updated.
@@ -57,7 +57,7 @@ data class MotorSpecs(
     val driveEnd: String? = null,
     val nonDriveEnd: String? = null,
     val insulationClass: String? = null,
-    val insulationClassTemp: Double? = null,
+    val insulationTemp: Double? = null,
     val weight: Double? = null,
     val createdAt: Instant = Instant.now(),
     val modifiedAt: Instant = Instant.now()

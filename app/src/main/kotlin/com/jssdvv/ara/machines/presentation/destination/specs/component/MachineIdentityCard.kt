@@ -274,11 +274,7 @@ fun MachineIdentityCard(
                                 if (upEvent != null) showDatePickerDialog = true
                             }
                         },
-                    value = machineState.acquisitionDate?.let { date ->
-                        dateFormat.format(
-                            date
-                        )
-                    } ?: "",
+                    value = machineState.acquisitionDate?.formatMedium() ?: "",
                     onValueChange = { },
                     label = { Text(stringResource(R.string.text_field_acquisition_date_label)) },
                     maxLines = 1,

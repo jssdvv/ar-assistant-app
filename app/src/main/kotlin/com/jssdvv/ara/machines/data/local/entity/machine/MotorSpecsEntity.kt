@@ -33,7 +33,7 @@ import java.time.Instant
  * @property [driveEnd] Drive-end bearings (DE).
  * @property [nonDriveEnd] Non-drive-end bearings (NDE).
  * @property [insulationClass] Insulation class (INS.CL.).
- * @property [insulationClassTemp] Insulation class temperature (ΔT).
+ * @property [insulationTemp] Insulation class temperature (ΔT).
  * @property [weight] Weight in kg (kg).
  * @property [createdAt] CreationDate when created.
  * @property [modifiedAt] CreationDate when updated.
@@ -126,8 +126,8 @@ data class MotorSpecsEntity(
     @ColumnInfo(name = COLUMN_INSULATION_CLASS)
     val insulationClass: String?,
 
-    @ColumnInfo(name = COLUMN_INSULATION_CLASS_TEMP)
-    val insulationClassTemp: Double?,
+    @ColumnInfo(name = COLUMN_INSULATION_TEMP)
+    val insulationTemp: Double?,
 
     @ColumnInfo(name = COLUMN_WEIGHT)
     val weight: Double?,
@@ -163,7 +163,7 @@ data class MotorSpecsEntity(
         const val COLUMN_DRIVE_END = "drive_end"
         const val COLUMN_NON_DRIVE_END = "non_drive_end"
         const val COLUMN_INSULATION_CLASS = "insulation_class"
-        const val COLUMN_INSULATION_CLASS_TEMP = "insulation_class_temp"
+        const val COLUMN_INSULATION_TEMP = "insulation_temp"
         const val COLUMN_WEIGHT = "weight"
         const val COLUMN_CREATED_AT = "created_at"
         const val COLUMN_MODIFIED_AT = "modified_at"

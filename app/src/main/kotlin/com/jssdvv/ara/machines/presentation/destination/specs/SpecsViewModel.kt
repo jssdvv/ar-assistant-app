@@ -1,10 +1,12 @@
 package com.jssdvv.ara.machines.presentation.destination.specs
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
@@ -12,11 +14,7 @@ import com.jssdvv.ara.machines.domain.model.machine.MotorIdentity
 import com.jssdvv.ara.machines.domain.model.machine.MotorSpecs
 import com.jssdvv.ara.machines.domain.usecase.CountActivities
 import com.jssdvv.ara.machines.domain.usecase.CountDocuments
-import com.jssdvv.ara.machines.domain.usecase.SelectMachineAndDetails
-import com.jssdvv.ara.machines.domain.usecase.SelectMotors
-import com.jssdvv.ara.machines.domain.usecase.UpdateMotorSpecs
-import com.jssdvv.ara.machines.domain.usecase.UpsertMachineSpecs
-import com.jssdvv.ara.machines.domain.usecase.UpsertMachines
+import com.jssdvv.ara.machines.domain.usecase.MachinesDataManager
 import com.jssdvv.ara.machines.presentation.destination.specs.MachineDetailsCard.NONE
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,18 +27,16 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class SpecsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val selectMachineAndDetailsUseCase: SelectMachineAndDetails,
-    private val upsertMachinesUseCase: UpsertMachines,
-    private val upsertMachineSpecsUseCase: UpsertMachineSpecs,
-    private val selectMotorsUseCase: SelectMotors,
-    private val updateMotorSpecsUseCase: UpdateMotorSpecs,
+    private val machinesDataManager: MachinesDataManager,
     private val countActivitiesUseCase: CountActivities,
     private val countDocumentsUseCase: CountDocuments,
+    private val filesManager: FilesManager,
 ) : ViewModel() {
 
     private val machineId = savedStateHandle.toRoute<MachinesGraph.SpecsRoute>().machineId
@@ -112,7 +108,7 @@ class SpecsViewModel @Inject constructor(
                 machineState.value?.let {
                     viewModelScope.launch {
                         try {
-                            upsertMachinesUseCase(it)
+                            machinesDataManager.upsert(it)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -140,7 +136,7 @@ class SpecsViewModel @Inject constructor(
                 machineSpecsState.value?.let {
                     viewModelScope.launch {
                         try {
-                            upsertMachineSpecsUseCase(it)
+                            machinesDataManager.upsert(it)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -166,7 +162,7 @@ class SpecsViewModel @Inject constructor(
                 motorIdentityState.value?.let {
                     viewModelScope.launch {
                         try {
-                            selectMotorsUseCase(it)
+                            machinesDataManager.upsert(it)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -199,13 +195,13 @@ class SpecsViewModel @Inject constructor(
                     driveEnd = event.motorSpecs.driveEnd,
                     nonDriveEnd = event.motorSpecs.nonDriveEnd,
                     insulationClass = event.motorSpecs.insulationClass,
-                    insulationClassTemp = event.motorSpecs.insulationClassTemp,
+                    insulationTemp = event.motorSpecs.insulationTemp,
                     weight = event.motorSpecs.weight,
                 )
                 motorSpecsState.value?.let {
                     viewModelScope.launch {
                         try {
-                            updateMotorSpecsUseCase(it)
+                            machinesDataManager.upsert(it)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -214,13 +210,49 @@ class SpecsViewModel @Inject constructor(
                 currentCard.value = NONE
             }
 
-            is SpecsEvent.OnSaveMachineName -> {}
-            is SpecsEvent.OnSaveMachineImageUri -> {}
+            is SpecsEvent.OnSaveMachineBasicData -> {
+                viewModelScope.launch {
+                    val currentMachine = machineState.value ?: return@launch
+                    val imageUri = when (event.imageUri) {
+                        currentMachine.imageUri, null -> currentMachine.imageUri
+                        else -> replaceImage(currentMachine.imageUri, event.imageUri)?.toUri()
+                            ?: currentMachine.imageUri
+                    }
+                    machineState.value = currentMachine.copy(
+                        code = event.code,
+                        name = event.name,
+                        imageUri = imageUri,
+                    )
+                    machineState.value?.let {
+                        try {
+                            machinesDataManager.upsert(it)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    currentCard.value = NONE
+                }
+            }
+
+            is SpecsEvent.OnDeleteMachine -> {
+                viewModelScope.launch {
+                    machineState.value?.let {
+                        try {
+                            it.imageUri?.path?.let { imagePath ->
+                                filesManager.deleteFile(File(imagePath))
+                            }
+                            machinesDataManager.delete(it)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
         }
     }
 
     private suspend fun getMachineDetails(machineId: Int): MachineDetails =
-        selectMachineAndDetailsUseCase(machineId)
+        machinesDataManager.select.selectMachineAndDetails(machineId)
 
     private fun getCounters(machineId: Int) {
         fun collectCount(
@@ -239,6 +271,22 @@ class SpecsViewModel @Inject constructor(
             counters.copy(activitiesCount = count)
         }
     }
+
+    private fun replaceImage(
+        currentImageUri: Uri? = null,
+        newImageContentUri: Uri? = null,
+    ): File? {
+        if (newImageContentUri == null) return null
+        return filesManager.copyImageToInternalStorage(newImageContentUri, machineId)?.also {
+            currentImageUri?.path?.let { currentImageFilePath ->
+                try {
+                    filesManager.deleteFile(File(currentImageFilePath))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
 }
 
 sealed class SpecsEvent {
@@ -250,8 +298,13 @@ sealed class SpecsEvent {
     data class OnSaveMotorIdentificationCard(val motorIdentity: MotorIdentity) : SpecsEvent()
     data class OnSaveMotorSpecificationsCard(val motorSpecs: MotorSpecs) : SpecsEvent()
 
-    data class OnSaveMachineName(val name: String) : SpecsEvent()
-    data class OnSaveMachineImageUri(val imageUri: Uri?) : SpecsEvent()
+    data class OnSaveMachineBasicData(
+        val code: String,
+        val name: String,
+        val imageUri: Uri?,
+    ) : SpecsEvent()
+
+    data object OnDeleteMachine : SpecsEvent()
 }
 
 sealed interface SpecsCardsUiState {

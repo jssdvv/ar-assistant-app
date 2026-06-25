@@ -13,12 +13,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -32,7 +38,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.formatMedium
+import com.jssdvv.ara.core.presentation.common.component.DeleteIcon
+import com.jssdvv.ara.core.presentation.common.component.EditIcon
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
+import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
 import com.jssdvv.ara.core.presentation.foundation.component.LazyColumnScaffold
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
@@ -43,6 +52,7 @@ import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.model.machine.MotorIdentity
 import com.jssdvv.ara.machines.domain.model.machine.MotorSpecs
+import com.jssdvv.ara.machines.presentation.destination.specs.component.EditMachineDialog
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MachineIdentityCard
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MachineSpecsCard
 import com.jssdvv.ara.machines.presentation.destination.specs.component.MotorIdentityCard
@@ -111,10 +121,16 @@ fun SpecsContent(
 ) {
     val lazyListState = rememberLazyListState()
     val titleVisible by remember { derivedStateOf { lazyListState.firstVisibleItemIndex >= 2 } }
-    // TODO: Add editing of machine title and image, also add a delete button at the end of the screen
+    var showEditDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     LazyColumnScaffold(
         topBarTitle = if (titleVisible) machine?.name.orEmpty() else "",
         navigationIcon = { NavigationUpIconButton(onNavigateUp) },
+        actions = {
+            IconButton(onClick = { showEditDialog = true }) {
+                EditIcon()
+            }
+        },
         lazyListState = lazyListState
     ) {
         item {
@@ -248,5 +264,65 @@ fun SpecsContent(
                 }
             )
         }
+
+        item {
+            Spacer(Modifier.height(MaterialTheme.spacing.medium))
+            ButtonWithIcon(
+                onClick = { showDeleteDialog = true },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = MaterialTheme.spacing.medium),
+                icon = { DeleteIcon() },
+                content = { Text(stringResource(R.string.specs_delete_machine_action)) }
+            )
+            Spacer(Modifier.height(MaterialTheme.spacing.extraLarge))
+        }
+    }
+
+    if (showEditDialog && machine != null) {
+        EditMachineDialog(
+            machine = machine,
+            onConfirm = { updatedMachine ->
+                onEvent(
+                    SpecsEvent.OnSaveMachineBasicData(
+                        code = updatedMachine.code,
+                        name = updatedMachine.name,
+                        imageUri = updatedMachine.imageUri,
+                    )
+                )
+                showEditDialog = false
+            },
+            onDismiss = { showEditDialog = false }
+        )
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = {
+                Text(text = stringResource(R.string.dialog_delete_machine_title))
+            },
+            text = {
+                Text(text = stringResource(R.string.dialog_delete_machine_warning))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onEvent(SpecsEvent.OnDeleteMachine)
+                    showDeleteDialog = false
+                    onNavigateUp()
+                }) {
+                    Text(text = stringResource(R.string.button_delete_action))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(text = stringResource(R.string.button_cancel_action))
+                }
+            }
+        )
     }
 }
