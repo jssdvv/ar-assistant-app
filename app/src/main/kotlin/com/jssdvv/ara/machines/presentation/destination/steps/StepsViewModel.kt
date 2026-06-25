@@ -9,11 +9,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.jssdvv.ara.core.domain.repository.FilesManager
 import com.jssdvv.ara.core.domain.type.OrderType
+import com.jssdvv.ara.machines.domain.model.Activity
 import com.jssdvv.ara.machines.domain.model.Model
 import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.model.Step
+import com.jssdvv.ara.machines.domain.type.ActivityType
+import com.jssdvv.ara.machines.domain.usecase.ActivitiesDataManager
 import com.jssdvv.ara.machines.domain.usecase.ModelsDataManager
 import com.jssdvv.ara.machines.domain.usecase.OperationDataManager
 import com.jssdvv.ara.machines.domain.usecase.StepsDataManager
@@ -41,6 +44,7 @@ class StepsViewModel @Inject constructor(
     modelsDataManager: ModelsDataManager,
     private val stepsDataManager: StepsDataManager,
     private val opsDataManager: OperationDataManager,
+    private val activitiesDataManager: ActivitiesDataManager,
     private val filesManager: FilesManager,
 ) : ViewModel() {
 
@@ -62,6 +66,15 @@ class StepsViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = emptyList()
+        )
+
+    private val activity: StateFlow<Activity?> = activitiesDataManager
+        .select(machineId)
+        .map { list -> list.find { it.id == activityId } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = null
         )
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -89,17 +102,14 @@ class StepsViewModel @Inject constructor(
 
     private val selectedOperationId = MutableStateFlow<Int?>(null)
     private val selectionEnabled = MutableStateFlow(false)
-    private val editingOperation = MutableStateFlow<Operation?>(null)
-    private val currentOperation: StateFlow<Operation?> = combine(
-        editingOperation,
+    private val editingTargets = MutableStateFlow<OperationTargets?>(null)
+    private val currentTargets: StateFlow<OperationTargets?> = combine(
+        editingTargets,
         operationsTargets,
         selectedOperationId
-    ) { editingOperation, operationsTargets, selectedOperationId ->
-        editingOperation ?: operationsTargets
-                .firstOrNull { it.operation.id == selectedOperationId }
-                .let { it ?: operationsTargets.lastOrNull() }
-                ?.apply { animatedPivots.value = pivots }
-                ?.operation
+    ) { editingTargets, operationsTargets, selectedOperationId ->
+        editingTargets ?: operationsTargets.firstOrNull { it.operation.id == selectedOperationId }
+        ?: operationsTargets.lastOrNull()
     }
         .stateIn(
             scope = viewModelScope,
@@ -107,13 +117,12 @@ class StepsViewModel @Inject constructor(
             initialValue = null
         )
 
-    private val animatedPivots = MutableStateFlow(emptySet<Pivot>())
-    private val transformedTargets: StateFlow<List<OperationTargets>> = combine(
+    private val precedentTargets: StateFlow<List<OperationTargets>> = combine(
         operationsTargets,
-        currentOperation
-    ) { opsTargets, current ->
-        if (current == null) return@combine emptyList()
-        opsTargets.takeWhile { it.operation.id != current.id }
+        currentTargets
+    ) { operationTargets, currentTargets ->
+        if (currentTargets == null) return@combine emptyList()
+        operationTargets.takeWhile { it.operation.id != currentTargets.operation.id }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
@@ -124,10 +133,9 @@ class StepsViewModel @Inject constructor(
     private val currentStep: StateFlow<Step?> = combine(
         steps,
         editingStep,
-        currentOperation
-    ) { steps, editingStep, currentOperation ->
-        editingStep ?: steps
-            .firstOrNull { it.id == currentOperation?.stepId }
+        currentTargets
+    ) { steps, editingStep, currentTargets ->
+        editingStep ?: steps.firstOrNull { it.id == currentTargets?.operation?.stepId }
     }
         .distinctUntilChanged()
         .stateIn(
@@ -140,6 +148,7 @@ class StepsViewModel @Inject constructor(
         models,
         steps,
         operationsTargets,
+        activity,
         ::StepsData
     ).stateIn(
         scope = viewModelScope,
@@ -150,16 +159,14 @@ class StepsViewModel @Inject constructor(
     val items: StateFlow<StepsItems> = combine(
         selectionEnabled,
         currentStep,
-        currentOperation,
-        editingOperation
-    ){ selectionEnabled, currentStep,currentOperation, editingOperation ->
-        val editionEnabled = editingOperation != null
+        editingTargets
+    ) { selectionEnabled, currentStep, editingTargets ->
+        val editionEnabled = editingTargets != null
         StepsItems(
             selectionEnabled = selectionEnabled && editionEnabled,
             editionEnabled = editionEnabled,
             currentStep = currentStep,
-            currentOperation = currentOperation,
-            editingOperation = editingOperation
+            currentEditingTargets = editingTargets
         )
     }.stateIn(
         scope = viewModelScope,
@@ -167,9 +174,9 @@ class StepsViewModel @Inject constructor(
         initialValue = StepsItems()
     )
 
-    val edition: StateFlow<StepsAnimation> = combine(
-        transformedTargets,
-        animatedPivots,
+    val animation: StateFlow<StepsAnimation> = combine(
+        precedentTargets,
+        currentTargets,
         ::StepsAnimation
     ).stateIn(
         scope = viewModelScope,
@@ -180,7 +187,7 @@ class StepsViewModel @Inject constructor(
     val uiState: StateFlow<StepsUiState> = combine(
         data,
         items,
-        edition,
+        animation,
         StepsUiState::Success
     ).stateIn(
         scope = viewModelScope,
@@ -200,8 +207,8 @@ class StepsViewModel @Inject constructor(
                 selectionEnabled.value = event.enabled
             }
 
-            is StepsEvent.OnSelectPivots -> selectPivot(event.info)
-            is StepsEvent.OnUnselectPivot -> unselectPivot(event.info)
+            is StepsEvent.OnSelectPivots -> selectPivot(event.pivot)
+            is StepsEvent.OnUnselectPivot -> unselectPivot(event.pivot)
 
             is StepsEvent.OnCreateOperation -> createOperation(event.stepId)
             StepsEvent.OnEditCurrentOperation -> editCurrentOperation()
@@ -211,14 +218,26 @@ class StepsViewModel @Inject constructor(
             is StepsEvent.OnSaveEditingOperation -> saveEditingOperation()
             StepsEvent.OnCancelEditingOperation -> cancelEditingOperation()
             is StepsEvent.OnDeleteOperation -> {}
+            is StepsEvent.OnSaveActivityData -> onSaveActivityData(event)
+            StepsEvent.OnDeleteActivity -> onDeleteActivity()
         }
     }
 
-    private fun selectPivot(pivot: Pivot) = animatedPivots.update { it + pivot }
-    private fun unselectPivot(pivot: Pivot) = animatedPivots.update { it - pivot }
+    private fun selectPivot(pivot: Pivot) {
+        editingTargets.update {
+            val pivots = it?.pivots ?: return@update null
+            it.copy(pivots = pivots + pivot)
+        }
+    }
+    private fun unselectPivot(pivot: Pivot) {
+        editingTargets.update {
+            val pivots = it?.pivots ?: return@update null
+            it.copy(pivots = pivots - pivot)
+        }
+    }
 
     private fun createStep() {
-        editingOperation.value = null
+        editingTargets.value = null
         editingStep.value = Step(activityId = activityId)
     }
 
@@ -231,8 +250,10 @@ class StepsViewModel @Inject constructor(
     }
 
     private fun createOperation(stepId: Int) {
-        editingOperation.value = Operation(stepId = stepId)
-        animatedPivots.value = emptySet()
+        editingTargets.value = OperationTargets(
+            operation = Operation(stepId = stepId),
+            pivots = emptySet()
+        )
     }
 
     private fun selectOperation(operationId: Int) {
@@ -240,23 +261,24 @@ class StepsViewModel @Inject constructor(
     }
 
     private fun editCurrentOperation() {
-        currentOperation.value?.id?.apply(::editOperation)
+        currentTargets.value?.operation?.id?.let(::editOperation)
     }
 
     private fun editOperation(operationId: Int) {
         operationsTargets.value.firstOrNull { it.operation.id == operationId }?.apply {
-            editingOperation.value = operation
-            animatedPivots.value = pivots
+            editingTargets.value = this
             selectOperation(operation.id)
         }
     }
 
     private fun changeEditingOperation(operation: Operation) {
-        if (operation.id == editingOperation.value?.id) editingOperation.value = operation
+        if (operation.id == editingTargets.value?.operation?.id) {
+            editingTargets.update { it?.copy(operation = operation) }
+        }
     }
 
     private fun cancelEditingOperation() {
-        editingOperation.value = null
+        editingTargets.value = null
         selectionEnabled.value = false
     }
 
@@ -271,8 +293,9 @@ class StepsViewModel @Inject constructor(
             if (existingStep == step) return@launch
 
             val imageUri = when (step.imageUri) {
-                existingStep?.imageUri -> existingStep?.imageUri
+                existingStep?.imageUri,
                 null -> existingStep?.imageUri
+
                 else -> replaceImage(existingStep?.imageUri, step.imageUri)?.toUri()
                     ?: existingStep?.imageUri
             }
@@ -315,8 +338,43 @@ class StepsViewModel @Inject constructor(
                     }
                 }
                 stepsDataManager.upsert(*updatedList.toTypedArray())
-                editingStep.value = steps.value.find { it.id == existingStep.id }
             }
+            editingStep.value = null
+        }
+    }
+
+    private fun onSaveActivityData(event: StepsEvent.OnSaveActivityData) {
+        viewModelScope.launch {
+            val currentActivity = activity.value ?: return@launch
+            val imageUri = when (event.imageUri) {
+                currentActivity.imageUri, null -> currentActivity.imageUri
+                else -> replaceImage(currentActivity.imageUri, event.imageUri)?.toUri()
+                    ?: currentActivity.imageUri
+            }
+            activitiesDataManager.upsert(
+                currentActivity.copy(
+                    name = event.name,
+                    type = event.type,
+                    description = event.description,
+                    frequency = event.frequency,
+                    frequencyUnit = event.frequencyUnit,
+                    imageUri = imageUri,
+                )
+            )
+        }
+    }
+
+    private fun onDeleteActivity() {
+        viewModelScope.launch {
+            val currentActivity = activity.value ?: return@launch
+            currentActivity.imageUri?.path?.let { imagePath ->
+                try {
+                    filesManager.deleteFile(File(imagePath))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            activitiesDataManager.delete(currentActivity)
         }
     }
 
@@ -338,61 +396,54 @@ class StepsViewModel @Inject constructor(
         }
     }
 
-
     private fun saveEditingOperation() {
         viewModelScope.launch {
-            val pivots = animatedPivots.value
-            val operation = editingOperation.value ?: return@launch
-            val operations = operationsTargets.value
-                .filter { it.operation.stepId == operation.stepId }
+            val editingTargets = this@StepsViewModel.editingTargets.value ?: return@launch
+            val stepOperations = this@StepsViewModel.operationsTargets.value
+                .filter { it.operation.stepId == editingTargets.operation.stepId }
                 .map { it.operation }
-                .sortedBy { it.order }
 
-            val existingOperation = operations.find { it.id == operation.id }
-
-            if (existingOperation == null) {
-                // New Operation
-                val maxOrderNumber = operations.maxOfOrNull { it.order } ?: 0
-                val operationTargets = OperationTargets(
-                    operation = operation.copy(order = maxOrderNumber + 1),
-                    pivots = pivots
-                )
-
-                opsDataManager.upsert(operationTargets)
+            if (stepOperations.none { it.id == editingTargets.operation.id }) {
+                saveNewOperation(editingTargets, stepOperations)
             } else {
-                // Existing Operation
-                val reorderNumber = operation.order.coerceIn(1, operations.size)
-                val updatedList = operations.toMutableList().apply {
-                    val currentIndex = indexOfFirst { it.id == operation.id }
-                    if (currentIndex != -1) removeAt(currentIndex)
-
-                    add(
-                        index = reorderNumber - 1,
-                        element = operation.copy(
-                            id = existingOperation.id,
-                            stepId = existingOperation.stepId,
-                            order = reorderNumber
-                        )
-                    )
-
-                    forEachIndexed { index, operation ->
-                        this[index] = operation.copy(order = index + 1)
-                    }
-                }
-
-                val (editedOperations, reorderedOperations) =
-                    updatedList.partition { it.id == operation.id }
-
-                if (reorderedOperations.isNotEmpty()) opsDataManager.upsert(*reorderedOperations.toTypedArray())
-                opsDataManager.upsert(
-                    OperationTargets(
-                        operation = editedOperations.first(),
-                        pivots = pivots
-                    )
-                )
+                saveExistingOperation(editingTargets, stepOperations)
             }
             cancelEditingOperation()
         }
+    }
+
+    private suspend fun saveNewOperation(
+        editingTargets: OperationTargets,
+        stepOperations: List<Operation>
+    ) {
+        val newOrder = (stepOperations.maxOfOrNull { it.order } ?: 0) + 1
+        opsDataManager.upsert(
+            editingTargets.copy(
+                operation = editingTargets.operation.copy(order = newOrder),
+            )
+        )
+    }
+
+    private suspend fun saveExistingOperation(
+        editingTargets: OperationTargets,
+        stepOperations: List<Operation>
+    ) {
+        val reorderNumber = editingTargets.operation.order.coerceIn(1, stepOperations.size)
+        val updatedList = stepOperations
+            .filter { it.id != editingTargets.operation.id }
+            .toMutableList()
+            .apply { add(reorderNumber - 1, editingTargets.operation.copy(order = reorderNumber)) }
+            .mapIndexed { index, operation -> operation.copy(order = index + 1) }
+
+        val reorderedOperations = updatedList.filter { it.id != editingTargets.operation.id }
+        if (reorderedOperations.isNotEmpty()) {
+            opsDataManager.upsert(*reorderedOperations.toTypedArray())
+        }
+        opsDataManager.upsert(
+            editingTargets.copy(
+                operation = updatedList.first { it.id == editingTargets.operation.id },
+            )
+        )
     }
 }
 
@@ -404,8 +455,8 @@ sealed interface StepsEvent {
     data class OnDeleteStep(val step: Step) : StepsEvent
 
     data class OnSelectionChange(val enabled: Boolean) : StepsEvent
-    data class OnSelectPivots(val info: Pivot) : StepsEvent
-    data class OnUnselectPivot(val info: Pivot) : StepsEvent
+    data class OnSelectPivots(val pivot: Pivot) : StepsEvent
+    data class OnUnselectPivot(val pivot: Pivot) : StepsEvent
 
     data class OnCreateOperation(val stepId: Int) : StepsEvent
     data object OnEditCurrentOperation : StepsEvent
@@ -415,6 +466,15 @@ sealed interface StepsEvent {
     data object OnSaveEditingOperation : StepsEvent
     data object OnCancelEditingOperation : StepsEvent
     data class OnDeleteOperation(val operationId: Int) : StepsEvent
+    data class OnSaveActivityData(
+        val name: String,
+        val type: ActivityType,
+        val description: String?,
+        val frequency: Int?,
+        val frequencyUnit: String?,
+        val imageUri: Uri?,
+    ) : StepsEvent
+    data object OnDeleteActivity : StepsEvent
 }
 
 sealed interface StepsUiState {
@@ -433,7 +493,8 @@ sealed interface StepsUiState {
 data class StepsData(
     val models: List<Model> = emptyList(),
     val steps: List<Step> = emptyList(),
-    val operationsTargets: List<OperationTargets> = emptyList()
+    val operationsTargets: List<OperationTargets> = emptyList(),
+    val activity: Activity? = null,
 )
 
 @Immutable
@@ -441,12 +502,11 @@ data class StepsItems(
     val selectionEnabled: Boolean = false,
     val editionEnabled: Boolean = false,
     val currentStep: Step? = null,
-    val currentOperation: Operation? = null,
-    val editingOperation: Operation? = null
+    val currentEditingTargets: OperationTargets? = null
 )
 
 @Immutable
 data class StepsAnimation(
-    val transformedTargets: List<OperationTargets> = emptyList(),
-    val animatedPivots: Set<Pivot> = emptySet()
+    val precedentTargets: List<OperationTargets> = emptyList(),
+    val currentTargets: OperationTargets? = null
 )

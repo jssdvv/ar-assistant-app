@@ -23,25 +23,24 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.SideSheet
 import com.jssdvv.ara.core.presentation.theme.spacing
-import com.jssdvv.ara.machines.domain.model.Operation
+import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Step
 
 @Composable
 fun StepsSideSheet(
     visible: Boolean,
     steps: List<Step>,
-    operations: List<Operation>,
-    editingStep: Step?,
+    operationsTargets: List<OperationTargets>,
     currentStep: Step?,
-    currentOperation: Operation?,
+    currentOperationTargets: OperationTargets?,
     onDismiss: () -> Unit,
     onEditStep: (Int?) -> Unit,
     onCreateStep: () -> Unit,
     onSaveEditingStep: (Step) -> Unit,
     onChangeEditingStep: (Step) -> Unit,
-    onSelectOperation: (Int) -> Unit,
     onCreateOperation: (stepId: Int) -> Unit,
-    onEditOperation: (Operation) -> Unit,
+    onSelectOperation: (OperationTargets) -> Unit,
+    onEditOperation: (OperationTargets) -> Unit,
     modifier: Modifier = Modifier,
 ) = SideSheet(
     isVisible = visible,
@@ -77,13 +76,16 @@ fun StepsSideSheet(
                 items = steps,
                 key = { it.id }
             ) { step ->
-                val stepOperations = remember(operations) {
-                    operations.filter { it.stepId == step.id }
+                val stepOperations = remember(operationsTargets) {
+                    operationsTargets.filter { it.operation.stepId == step.id }
                 }
                 StepCard(
                     onClick = {
-                        if (currentOperation?.stepId != step.id && stepOperations.isNotEmpty()) {
-                            onSelectOperation(stepOperations.last().id)
+                        if (
+                            currentOperationTargets?.operation?.stepId != step.id &&
+                            stepOperations.isNotEmpty()
+                        ) {
+                            onSelectOperation(stepOperations.first())
                         }
                     },
                     step = step,
@@ -92,10 +94,10 @@ fun StepsSideSheet(
                         onEditStep(it.id)
                         showStepDialog = true
                     },
-                    operations = stepOperations,
-                    selectedOperation = currentOperation,
+                    operationsTargets = stepOperations,
+                    selectedOperation = currentOperationTargets?.operation,
+                    onCreateOperation = { onCreateOperation(step.id) },
                     onSelectOperation = onSelectOperation,
-                    onAddOperation = { onCreateOperation(step.id) },
                     onEditOperation = onEditOperation
                 )
             }
@@ -106,9 +108,9 @@ fun StepsSideSheet(
             showStepDialog = true
         }
 
-        if (showStepDialog && editingStep != null) {
+        if (showStepDialog && currentStep != null) {
             StepDialog(
-                currentStep = editingStep,
+                currentStep = currentStep,
                 onUpdateStep = onChangeEditingStep,
                 onDismissRequest = {
                     showStepDialog = false

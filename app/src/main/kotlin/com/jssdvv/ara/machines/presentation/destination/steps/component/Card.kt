@@ -53,6 +53,7 @@ import com.jssdvv.ara.core.presentation.common.component.WarningIcon
 import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
+import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.model.Step
 import kotlinx.coroutines.launch
@@ -63,15 +64,15 @@ fun StepCard(
     step: Step,
     isSelected: Boolean,
     onEditStep: (Step) -> Unit,
-    operations: List<Operation>,
+    operationsTargets: List<OperationTargets>,
     selectedOperation: Operation?,
-    onSelectOperation: (Int) -> Unit,
-    onAddOperation: () -> Unit,
-    onEditOperation: (Operation) -> Unit,
+    onCreateOperation: () -> Unit,
+    onSelectOperation: (OperationTargets) -> Unit,
+    onEditOperation: (OperationTargets) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(isSelected) }
-    val noOperations = operations.isEmpty()
+    val noOperations = operationsTargets.isEmpty()
     val interactionSource = remember { MutableInteractionSource() }
     val rotation by animateFloatAsState(
         targetValue = if (isSelected) 180f else 0f,
@@ -173,12 +174,12 @@ fun StepCard(
                             style = MaterialTheme.typography.titleMedium
                         )
                         // OperationItem is the only component that doesn't use padding compensation
-                        operations.sortedBy { it.order }.forEach { operation ->
+                        operationsTargets.sortedBy { it.operation.order }.forEach { targets ->
                             OperationItem(
-                                onClick = { onSelectOperation((operation.id)) },
-                                isSelected = selectedOperation?.id == operation.id,
-                                operation = operation,
-                                onEditOperation = { onEditOperation(operation) },
+                                onClick = { onSelectOperation((targets)) },
+                                isSelected = selectedOperation?.id == targets.operation.id,
+                                operation = targets.operation,
+                                onEditOperation = { onEditOperation(targets) },
                             )
                         }
                     }
@@ -186,7 +187,7 @@ fun StepCard(
                 if (noOperations || expanded) {
                     AddOperationButton(
                         modifier = this.align(Alignment.End),
-                        onClick = onAddOperation
+                        onClick = onCreateOperation
                     )
                 }
             }

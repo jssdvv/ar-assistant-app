@@ -33,15 +33,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.presentation.common.component.EditIcon
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
 import com.jssdvv.ara.core.presentation.common.component.SearchIcon
 import com.jssdvv.ara.core.presentation.foundation.component.BoxedScaffold
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
-import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.presentation.destination.steps.component.AnimatedToolBar
 import com.jssdvv.ara.machines.presentation.destination.steps.component.AnimationIcon
 import com.jssdvv.ara.machines.presentation.destination.steps.component.DraggableDrawer
+import com.jssdvv.ara.machines.presentation.destination.steps.component.EditActivityDialog
 import com.jssdvv.ara.machines.presentation.destination.steps.component.InformationChips
 import com.jssdvv.ara.machines.presentation.destination.steps.component.OperationBottomSheet
 import com.jssdvv.ara.machines.presentation.destination.steps.component.RenderableItem
@@ -53,9 +54,9 @@ import com.jssdvv.ara.machines.presentation.destination.steps.functions.CustomCa
 import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberCustomCameraManipulator
 import com.jssdvv.ara.machines.presentation.sceneview.node.PivotNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.PivotNodesMap
-import com.jssdvv.ara.machines.presentation.sceneview.utility.applyOffset
 import com.jssdvv.ara.machines.presentation.sceneview.utility.createMainEnvironment
 import com.jssdvv.ara.machines.presentation.sceneview.utility.findAncestorOrNull
+import com.jssdvv.ara.machines.presentation.sceneview.utility.pivotsOffsets
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberCameraNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberContainerNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberLightNode
@@ -105,6 +106,7 @@ internal fun StepsScreen(
             )
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
@@ -138,6 +140,7 @@ fun StepsContent(
     // Components Visibility
     val drawerState = rememberDraggableDrawerState()
     var showSideSheet by remember { mutableStateOf(false) }
+    var showEditActivityDialog by remember { mutableStateOf(false) }
 
     val updatedSelectionEnabled by rememberUpdatedState(items.selectionEnabled)
 
@@ -146,8 +149,10 @@ fun StepsContent(
     val gestureListener = rememberOnGestureListener(
         onSingleTapConfirmed = { _, node ->
             if (!updatedSelectionEnabled) return@rememberOnGestureListener
-            node?.findAncestorOrNull<PivotNode>()
-                ?.apply { onEvent(StepsEvent.OnSelectPivots(pivot)) }
+            node?.findAncestorOrNull<PivotNode>()?.apply {
+                setSelection(materialLoader)
+                onEvent(StepsEvent.OnSelectPivots(pivot))
+            }
         }
     )
 
@@ -199,76 +204,37 @@ fun StepsContent(
         data.operationsTargets.map { it.operation }
     }
 
-    var previousAddedPivots by remember { mutableStateOf(setOf<Pivot>()) }
-    var previousAnimatedPivots by remember { mutableStateOf(setOf<Pivot>()) }
-    LaunchedEffect(
-        animation.animatedPivots,
-        items.editionEnabled,
-        items.currentOperation?.id,
-        items.currentOperation?.global
-    ) {
-        if (items.currentOperation?.id == 0 && animation.animatedPivots.isEmpty()) {
-            previousAnimatedPivots.forEach {
-                pivotNodesMap[it]?.setSelection(
-                    false,
-                    materialLoader
-                )
-            }
+
+
+    var transformedPivots by remember { mutableStateOf(setOf<Pivot>()) }
+    LaunchedEffect(animation) {
+        transformedPivots.forEach { pivotNodesMap[it]?.restoreInitialTransform() }
+
+        val precedentPivots = animation.precedentTargets.flatMapTo(mutableSetOf()) { it.pivots }
+
+        pivotsOffsets(pivotNodesMap, animation.precedentTargets).forEach { (pivot, transform) ->
+            pivotNodesMap[pivot]?.transform = transform
         }
 
-        previousAddedPivots = if (items.editionEnabled) {
-            val animatedPivots = animation.animatedPivots
-
-            // Removed
-            (previousAddedPivots - animatedPivots).forEach {
-                pivotNodesMap[it]?.setSelection(false, materialLoader)
+        animation.currentTargets?.let { (operation, currentPivots) ->
+            transformedPivots = precedentPivots + currentPivots
+            coroutineScope {
+                currentPivots.mapNotNull(pivotNodesMap::get).map {
+                    it.updateGizmoOrientation(operation.global)
+                    launch { it.animate(operation) }
+                }.joinAll()
             }
-
-            // Added
-            (animatedPivots - previousAddedPivots).forEach {
-                pivotNodesMap[it]?.setSelection(true, materialLoader)
-            }
-
-            animatedPivots
-        } else {
-            animation.animatedPivots.forEach { pivotNodesMap[it]?.setPlaying(materialLoader) }
-            emptySet()
-        }
-        previousAnimatedPivots = animation.animatedPivots
-    }
-
-    var previousTransformedPivots by remember { mutableStateOf(emptySet<Pivot>()) }
-    LaunchedEffect(animation, items.currentOperation) {
-        val transformedPivots: Set<Pivot> = animation.transformedTargets
-            .flatMapTo(mutableSetOf(), OperationTargets::pivots)
-
-        val animatedPivots = animation.animatedPivots
-
-        previousTransformedPivots.forEach { pivotNodesMap[it]?.restoreTransform() }
-        previousTransformedPivots = transformedPivots + animatedPivots
-
-        // Calculate offset of transformed targets pivots
-        animation.transformedTargets.forEach { opTargets ->
-            val operation = opTargets.operation
-            opTargets.pivots.forEach { pivot ->
-                pivotNodesMap[pivot]?.applyOffset(operation.offsetTransform, operation.global)
-            }
-        }
-
-        val currentOperation = items.currentOperation ?: return@LaunchedEffect
-        val nodesToAnimate = animatedPivots.mapNotNull(pivotNodesMap::get)
-        val global = currentOperation.global
-
-        coroutineScope {
-            nodesToAnimate
-                .onEach { it.updateGizmoOrientation(global) }
-                .map { launch { it.animate(currentOperation) } }.joinAll()
         }
     }
 
     BoxedScaffold(
         topBarTitle = stringResource(R.string.screen_editor_activity_title),
-        navigationIcon = { NavigationUpIconButton(onNavigateUp) }
+        navigationIcon = { NavigationUpIconButton(onNavigateUp) },
+        actions = {
+            IconButton(onClick = { showEditActivityDialog = true }) {
+                EditIcon()
+            }
+        }
     ) {
         Scene(
             modifier = Modifier
@@ -294,9 +260,9 @@ fun StepsContent(
 
         InformationChips(
             currentStepOrder = items.currentStep?.order ?: 0,
-            currentOperationOrder = items.currentOperation?.order ?: 0,
+            currentOperationOrder = animation.currentTargets?.operation?.order ?: 0,
             stepsCount = data.steps.size,
-            operationsCount = data.operationsTargets.size,
+            operationsCount = data.operationsTargets.filter { it.operation.stepId == items.currentStep?.id }.size,
             modifier = Modifier.align(Alignment.TopEnd),
         )
 
@@ -319,7 +285,8 @@ fun StepsContent(
                         RenderableItem(
                             name = it.renderableNode?.name ?: "Unknown",
                             isVisible = it.renderableVisible,
-                            isSelected = animation.animatedPivots.contains(it.pivot),
+                            isSelected = animation.currentTargets?.pivots?.contains(it.pivot)
+                                ?: false,
                             onVisibilityChange = { it.toggleVisibility() }
                         )
                     }
@@ -328,12 +295,11 @@ fun StepsContent(
         }
 
         StepsSideSheet(
-            visible = showSideSheet && items.currentOperation?.id != 0,
+            visible = showSideSheet && animation.currentTargets?.operation?.id != 0,
             steps = data.steps,
-            operations = operations,
-            editingStep = items.currentStep,
+            operationsTargets = data.operationsTargets,
             currentStep = items.currentStep,
-            currentOperation = items.currentOperation,
+            currentOperationTargets = animation.currentTargets,
             onDismiss = { showSideSheet = false },
             onEditStep = { onEvent(StepsEvent.OnEditStep(it)) },
             onCreateStep = { onEvent(StepsEvent.OnCreateStep) },
@@ -343,11 +309,17 @@ fun StepsContent(
                 onEvent(StepsEvent.OnCreateOperation(stepId))
                 showSideSheet = false
             },
-            onEditOperation = { operation ->
-                onEvent(StepsEvent.OnEditOperation(operation.id))
+            onEditOperation = { operationTargets ->
+                animation.currentTargets?.pivots?.forEach { pivotNodesMap[it]?.reset(materialLoader) }
+                operationTargets.pivots.forEach { pivotNodesMap[it]?.setSelection(materialLoader) }
+                onEvent(StepsEvent.OnEditOperation(operationTargets.operation.id))
                 showSideSheet = false
             },
-            onSelectOperation = { onEvent(StepsEvent.OnSelectOperation(it)) }
+            onSelectOperation = { operationTargets ->
+                animation.currentTargets?.pivots?.forEach { pivotNodesMap[it]?.reset(materialLoader) }
+                operationTargets.pivots.forEach { pivotNodesMap[it]?.setPlaying(materialLoader) }
+                onEvent(StepsEvent.OnSelectOperation(operationTargets.operation.id))
+            }
         )
 
         AnimatedToolBar(
@@ -360,6 +332,9 @@ fun StepsContent(
             )
             IconButton(
                 onClick = {
+                    animation.currentTargets?.pivots?.forEach {
+                        pivotNodesMap[it]?.setSelection(materialLoader)
+                    }
                     onEvent(StepsEvent.OnEditCurrentOperation)
                     showSideSheet = false
                 },
@@ -371,22 +346,68 @@ fun StepsContent(
             )
         }
 
-        if (items.currentOperation != null) {
+        if (items.currentEditingTargets != null) {
             OperationBottomSheet(
                 visible = items.editionEnabled,
-                selectedPivots = animation.animatedPivots.mapNotNullTo(
+                selectedPivots = items.currentEditingTargets.pivots.mapNotNullTo(
                     mutableSetOf(),
                     pivotNodesMap::get
                 ),
-                onUnselectPivot = { onEvent(StepsEvent.OnUnselectPivot(it)) },
+                onUnselectPivot = { pivot ->
+                    pivotNodesMap[pivot]?.apply {
+                        setSelection(materialLoader, false)
+                        onEvent(StepsEvent.OnUnselectPivot(pivot))
+                    }
+                },
                 onSelectionChange = { onEvent(StepsEvent.OnSelectionChange(it)) },
-                editingOperation = items.currentOperation,
-                onChangeEditingOperation = { onEvent(StepsEvent.OnChangeEditingOperation(it)) },
-                onSaveEditingOperation = { onEvent(StepsEvent.OnSaveEditingOperation) },
-                onCancelEditingOperation = { onEvent(StepsEvent.OnCancelEditingOperation) },
-                onDeleteEditingOperation = {}, // TODO add this
+                editingTargets = items.currentEditingTargets,
+                onChangeInfo = { onEvent(StepsEvent.OnChangeEditingOperation(it)) },
+                onSaveEditing = {
+                    items.currentEditingTargets.pivots.forEach {
+                        pivotNodesMap[it]?.apply{
+                            setSelection(materialLoader, false)
+                            setPlaying(materialLoader)
+                        }
+                    }
+                    onEvent(StepsEvent.OnSaveEditingOperation)
+                },
+                onCancelEditing = {
+                    items.currentEditingTargets.pivots.forEach {
+                        pivotNodesMap[it]?.apply{
+                            setSelection(materialLoader, false)
+                            setPlaying(materialLoader)
+                        }
+                    }
+                    onEvent(StepsEvent.OnCancelEditingOperation)
+                },
+                onDeleteOperation = {}, // TODO add this
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
+    }
+
+    if (showEditActivityDialog && data.activity != null) {
+        EditActivityDialog(
+            activity = data.activity,
+            onConfirm = { name, type, description, frequency, frequencyUnit, imageUri ->
+                onEvent(
+                    StepsEvent.OnSaveActivityData(
+                        name = name,
+                        type = type,
+                        description = description,
+                        frequency = frequency,
+                        frequencyUnit = frequencyUnit,
+                        imageUri = imageUri,
+                    )
+                )
+                showEditActivityDialog = false
+            },
+            onDelete = {
+                onEvent(StepsEvent.OnDeleteActivity)
+                showEditActivityDialog = false
+                onNavigateUp()
+            },
+            onDismiss = { showEditActivityDialog = false }
+        )
     }
 }

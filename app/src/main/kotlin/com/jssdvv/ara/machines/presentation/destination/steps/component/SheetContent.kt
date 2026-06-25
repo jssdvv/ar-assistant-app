@@ -45,23 +45,17 @@ import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
+import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.OperationType
-import com.jssdvv.ara.machines.domain.type.measurement.Translation
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.extractSingleAxisDegrees
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiRotationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberMultiTranslationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberSingleRotationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberSingleTranslationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.rememberTimeState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalRotation
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTransformPair
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalTranslation
 import com.jssdvv.ara.machines.presentation.sceneview.node.PivotNode
-import dev.romainguy.kotlin.math.max
+import com.jssdvv.ara.machines.presentation.sceneview.utility.TransformState
+import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberTimeState
+import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberTransformState
 import io.github.sceneview.math.Transform
 import io.github.sceneview.math.quaternion
+import io.github.sceneview.math.toQuaternion
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 enum class BottomSheetScreen { MAIN, ENTITIES, OPERATIONS }
@@ -71,12 +65,12 @@ fun OperationBottomSheet(
     visible: Boolean,
     selectedPivots: Set<PivotNode>,
     onUnselectPivot: (Pivot) -> Unit,
-    onSelectionChange: (isActive: Boolean) -> Unit,
-    editingOperation: Operation,
-    onChangeEditingOperation: (Operation) -> Unit,
-    onSaveEditingOperation: () -> Unit,
-    onCancelEditingOperation: () -> Unit,
-    onDeleteEditingOperation: () -> Unit,
+    onSelectionChange: (active: Boolean) -> Unit,
+    editingTargets: OperationTargets,
+    onChangeInfo: (Operation) -> Unit,
+    onSaveEditing: () -> Unit,
+    onCancelEditing: () -> Unit,
+    onDeleteOperation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var currentSheetScreen by remember { mutableStateOf(BottomSheetScreen.MAIN) }
@@ -116,8 +110,8 @@ fun OperationBottomSheet(
                     BottomSheetScreen.MAIN -> {
                         BottomSheetMainHeader(
                             title = "Edit Operation",
-                            onSaveClick = onSaveEditingOperation,
-                            onCancelClick = onCancelEditingOperation
+                            onSaveClick = onSaveEditing,
+                            onCancelClick = onCancelEditing
                         )
                     }
 
@@ -148,25 +142,128 @@ fun OperationBottomSheet(
                 }
             }
         ) { currentScreen ->
-            val settingsContent = when (editingOperation.type) {
+            val transformState = rememberTransformState(
+                initialPosition = editingTargets.operation.offsetTransform.position,
+                initialQuaternion = editingTargets.operation.offsetTransform.quaternion,
+                initialAxis = editingTargets.operation.axis,
+                initialTurns = editingTargets.operation.turns
+            )
+
+            val settingsContent = when (editingTargets.operation.type) {
                 OperationType.POINT_TO_POINT -> pointToPointSettings(
-                    editingOperation,
-                    onChangeEditingOperation
+                    transformState = transformState,
+                    onTranslationChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                offsetTransform = Transform(
+                                    position = transformState.multiTranslation.meters,
+                                    quaternion = editingTargets.operation.offsetTransform.quaternion
+                                )
+                            )
+                        )
+                    },
+                    onOrientationChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                offsetTransform = Transform(
+                                    position = editingTargets.operation.offsetTransform.position,
+                                    quaternion = transformState.multiOrientation.degrees.toQuaternion()
+                                )
+                            )
+                        )
+                    }
                 )
 
-                OperationType.SCREW -> screwSettings(editingOperation, onChangeEditingOperation)
+                OperationType.SCREW -> screwSettings(
+                    transformState = transformState,
+                    onTranslationChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                offsetTransform = Transform(
+                                    position = transformState.singleAxisTranslationMeters,
+                                    quaternion = editingTargets.operation.offsetTransform.quaternion
+                                )
+                            )
+                        )
+                    },
+                    onAxisChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                axis = transformState.universalAxis,
+                                offsetTransform = Transform(
+                                    position = transformState.singleAxisTranslationMeters,
+                                    quaternion = transformState.singleAxisQuaternionDegrees
+                                )
+                            )
+                        )
+                    },
+                    onTurnsChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                turns = transformState.turns,
+                                offsetTransform = Transform(
+                                    position = editingTargets.operation.offsetTransform.position,
+                                    quaternion = transformState.singleAxisQuaternionDegrees
+                                )
+                            )
+                        )
+                    },
+                )
+
                 OperationType.CYLINDRICAL -> cylindricalSettings(
-                    editingOperation,
-                    onChangeEditingOperation
+                    transformState = transformState,
+                    onTranslationChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                offsetTransform = Transform(
+                                    position = transformState.singleAxisTranslationMeters,
+                                    quaternion = editingTargets.operation.offsetTransform.quaternion
+                                )
+                            )
+                        )
+                    },
+                    onOrientationChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                offsetTransform = Transform(
+                                    position = editingTargets.operation.offsetTransform.position,
+                                    quaternion = transformState.singleAxisQuaternionDegrees
+                                )
+                            )
+                        )
+                    },
+                    onAxisChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                axis = transformState.universalAxis,
+                                offsetTransform = Transform(
+                                    position = transformState.singleAxisTranslationMeters,
+                                    quaternion = transformState.singleAxisQuaternionDegrees
+                                )
+                            )
+                        )
+                    }
                 )
 
-                else -> jointSettings(editingOperation, onChangeEditingOperation)
+                else -> jointSettings(
+                    transformState = transformState,
+                    onOrientationChange = {
+                        onChangeInfo(
+                            editingTargets.operation.copy(
+                                offsetTransform = Transform(
+                                    position = editingTargets.operation.offsetTransform.position,
+                                    quaternion = transformState.singleAxisQuaternionDegrees
+                                )
+                            )
+                        )
+                    }
+                )
             }
 
             val lazyListContent = when (currentScreen) {
                 BottomSheetScreen.MAIN -> stepsMainBottomScreen(
-                    operation = editingOperation,
-                    onChangeEditingOperation = onChangeEditingOperation,
+                    operation = editingTargets.operation,
+                    onChangeEditingOperation = onChangeInfo,
                     onNavigateToBottomScreen = { currentSheetScreen = it },
                     selectedEntitiesCount = selectedPivots.size,
                     entitiesInteractionSource = interactionSource,
@@ -180,8 +277,8 @@ fun OperationBottomSheet(
                 )
 
                 BottomSheetScreen.OPERATIONS -> selectedOperationBottomScreen(
-                    operation = editingOperation,
-                    onOperationChange = onChangeEditingOperation,
+                    operation = editingTargets.operation,
+                    onOperationChange = onChangeInfo,
                     onNavigateBack = { currentSheetScreen = BottomSheetScreen.MAIN }
                 )
             }
@@ -258,6 +355,7 @@ fun stepsMainBottomScreen(
             TimeTextField(
                 name = "delay",
                 state = delayState,
+                onValueChange = {},
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -265,6 +363,7 @@ fun stepsMainBottomScreen(
             TimeTextField(
                 name = "duration",
                 state = durationState,
+                onValueChange = {},
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -356,6 +455,7 @@ fun selectedOperationBottomScreen(
                     .fillMaxWidth()
                     .height(56.dp)
                     .clickable {
+                        //todo check this
                         if (operationType == OperationType.JOINT) {
                             onOperationChange(
                                 updatedOperation.value.copy(
@@ -389,60 +489,38 @@ fun selectedOperationBottomScreen(
 
 @Composable
 fun pointToPointSettings(
-    currentOperation: Operation,
-    onOperationChange: (Operation) -> Unit,
+    transformState: TransformState,
+    onTranslationChange: () -> Unit,
+    onOrientationChange: () -> Unit,
 ): LazyListScope.() -> Unit {
-    val multiTranslationState = rememberMultiTranslationState(
-        initialXMeters = currentOperation.offsetTransform.position.x,
-        initialYMeters = currentOperation.offsetTransform.position.y,
-        initialZMeters = currentOperation.offsetTransform.position.z
-    )
-    val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = currentOperation.offsetTransform.quaternion.toEulerAngles()
-    )
-    val updatedCurrentOperation = rememberUpdatedState(currentOperation)
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { multiTranslationState.position to multiRotationState.quaternion }
-            .distinctUntilChanged()
-            .collect { (position, rotation) ->
-                onOperationChange(
-                    updatedCurrentOperation.value.copy(
-                        offsetTransform = Transform(
-                            position = position,
-                            quaternion = rotation
-                        )
-                    )
-                )
-            }
-    }
-
     return {
         item { HorizontalDivider() }
         items(
             listOf(
-                Axis.X to multiTranslationState.x,
-                Axis.Y to multiTranslationState.y,
-                Axis.Z to multiTranslationState.z
+                Axis.X to transformState.multiTranslation.x,
+                Axis.Y to transformState.multiTranslation.y,
+                Axis.Z to transformState.multiTranslation.z
             )
         ) { (axis, state) ->
             TranslationTextField(
                 name = axis.name,
                 state = state,
+                onValueChange = onTranslationChange,
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item { HorizontalDivider() }
         items(
             listOf(
-                Axis.X to multiRotationState.x,
-                Axis.Y to multiRotationState.y,
-                Axis.Z to multiRotationState.z
+                Axis.X to transformState.multiOrientation.x,
+                Axis.Y to transformState.multiOrientation.y,
+                Axis.Z to transformState.multiOrientation.z
             )
         ) { (axis, state) ->
             RotationTextField(
                 name = stringResource(axis.rotationNameId),
                 state = state,
+                onValueChange = onOrientationChange,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -451,131 +529,36 @@ fun pointToPointSettings(
 
 @Composable
 fun screwSettings(
-    operation: Operation,
-    onOperationChange: (Operation) -> Unit,
+    transformState: TransformState,
+    onTranslationChange: () -> Unit,
+    onAxisChange: () -> Unit,
+    onTurnsChange: () -> Unit,
 ): LazyListScope.() -> Unit {
-
-    var selectedAxis by remember { mutableStateOf(operation.axis) }
-    var usePitch by remember { mutableStateOf(false) }
-
-    val translationState =
-        rememberSingleTranslationState(initialMeters = max(operation.offsetTransform.position))
-    val pitchState = rememberSingleTranslationState(
-        initialMeters = if (operation.turns == 0F) {
-            0F
-        } else max(operation.offsetTransform.position) / operation.turns
-    )
-    val turnsState = rememberSingleTranslationState(
-        initialMeters = operation.turns,
-        initialTranslation = Translation.METERS
-    )
-
-    fun updateFromDistance() {
-        val distance = translationState.meters
-        val pitch = pitchState.meters
-        val turns = turnsState.numeric
-
-        when {
-            distance == 0F -> return
-            usePitch -> {
-                val calculatedTurns = if (pitch == 0F) 0F else distance / pitch
-                turnsState.updateUnits(calculatedTurns.toString())
-            }
-
-            else -> {
-                val calculatedPitch = if (turns == 0F) 0F else distance / turns
-                pitchState.updateMeters(calculatedPitch)
-            }
-        }
-    }
-
-    fun updateFromPitch() {
-        val pitch = pitchState.meters
-        val distance = translationState.meters
-
-        when {
-            pitch > distance -> turnsState.updateUnits("1")
-            distance != 0F && pitch != 0f -> {
-                val calculatedTurns = translationState.meters / pitch
-                turnsState.updateUnits(calculatedTurns.toString())
-            }
-        }
-    }
-
-    fun updateFromTurns() {
-        val turns = turnsState.numeric
-        val distance = translationState.meters
-
-        when {
-            distance != 0F && turns != 0F -> {
-                val calculatedPitchMeters = distance / turns
-                pitchState.updateMeters(calculatedPitchMeters)
-            }
-
-            else -> {
-                pitchState.updateUnits("0")
-            }
-        }
-    }
-
-    LaunchedEffect(
-        translationState.meters,
-        pitchState.meters,
-        turnsState.numeric,
-        selectedAxis,
-        usePitch
-    ) {
-        val pitch = pitchState.meters
-        val distance = translationState.meters
-        val turns = when {
-            usePitch -> if (pitch != 0F) distance / pitch else 0F
-            else -> turnsState.numeric
-        }
-
-        onOperationChange(
-            operation.copy(
-                offsetTransform = Transform(
-                    position = unidirectionalTranslation(selectedAxis, distance),
-                    quaternion = unidirectionalRotation(selectedAxis, turns * 360F)
-                ),
-                turns = turns,
-                axis = selectedAxis
-            )
-        )
-    }
-
     return {
         item {
             AxisSelector(
-                axis = selectedAxis,
-                onAxisChange = { selectedAxis = it },
+                axis = transformState.universalAxis,
+                onAxisChange = {
+                    transformState.universalAxis = it
+                    onAxisChange()
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             TranslationTextField(
-                name = selectedAxis.name,
-                state = translationState,
-                onValueChange = {
-                    updateFromDistance()
-                },
+                name = transformState.universalAxis.name,
+                state = transformState.universalTranslation,
+                onValueChange = onTranslationChange,
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             PitchTextField(
-                name = if (usePitch) "Pitch" else "Revs", // TODO create strings
-                state = if (usePitch) pitchState else turnsState,
-                onValueChange = { units ->
-                    if (usePitch) {
-                        pitchState.updateUnits(units)
-                        updateFromPitch()
-                    } else {
-                        turnsState.updateUnits(units)
-                        updateFromTurns()
-                    }
-                },
-                isPitch = usePitch,
+                name = if (transformState.universalPitchTurns.useTurns) "Revs" else "Pitch", // TODO create strings
+                state = transformState.universalPitchTurns,
+                onValueChange = onTurnsChange,
+                isPitch = !transformState.universalPitchTurns.useTurns,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -584,17 +567,12 @@ fun screwSettings(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        val checked = !usePitch
-                        usePitch = checked
-                        if (checked) updateFromPitch() else updateFromTurns()
-                    }
+                    .clickable { transformState.universalPitchTurns.toggleTurns() }
             ) {
                 Checkbox(
-                    checked = usePitch,
-                    onCheckedChange = { checked ->
-                        usePitch = checked
-                        if (checked) updateFromPitch() else updateFromTurns()
+                    checked = !transformState.universalPitchTurns.useTurns,
+                    onCheckedChange = {
+                        transformState.universalPitchTurns.updateUseTurns(!it)
                     }
                 )
                 Text(stringResource(R.string.operation_checkbox_use_pitch_supporting_text))
@@ -605,66 +583,35 @@ fun screwSettings(
 
 @Composable
 fun cylindricalSettings(
-    operation: Operation,
-    onOperationChange: (Operation) -> Unit,
+    transformState: TransformState,
+    onTranslationChange: () -> Unit,
+    onOrientationChange: () -> Unit,
+    onAxisChange: () -> Unit
 ): LazyListScope.() -> Unit {
-    var selectedAxis by remember { mutableStateOf(operation.axis) }
-    val translationState = rememberSingleTranslationState(
-        initialMeters = max(operation.offsetTransform.position)
-    )
-    val rotationState = rememberSingleRotationState(
-        initialDegrees = operation.offsetTransform.quaternion.extractSingleAxisDegrees(selectedAxis)
-    )
-    val updatedCurrentOperation by rememberUpdatedState(operation)
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { translationState.meters to rotationState.degrees }
-            .distinctUntilChanged()
-            .collect { (meters, degrees) ->
-                onOperationChange(
-                    updatedCurrentOperation.copy(
-                        offsetTransform = Transform(
-                            position = unidirectionalTranslation(selectedAxis, meters),
-                            quaternion = unidirectionalRotation(selectedAxis, degrees)
-                        ),
-                        axis = selectedAxis
-                    )
-                )
-            }
-    }
-
     return {
         item {
             AxisSelector(
-                axis = selectedAxis,
-                onAxisChange = { axis ->
-                    selectedAxis = axis
-                    val (newPosition, newRotation) = unidirectionalTransformPair(
-                        axis = axis,
-                        translationUnits = translationState.meters,
-                        rotationUnits = rotationState.degrees,
-                    )
-                    onOperationChange(
-                        updatedCurrentOperation.copy(
-                            offsetTransform = Transform(newPosition, newRotation),
-                            axis = axis
-                        )
-                    )
+                axis = transformState.universalAxis,
+                onAxisChange = {
+                    transformState.universalAxis = it
+                    onAxisChange()
                 },
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             TranslationTextField(
-                name = selectedAxis.name,
-                state = translationState,
+                name = transformState.universalAxis.name,
+                state = transformState.universalTranslation,
+                onValueChange = onTranslationChange,
                 modifier = Modifier.fillMaxWidth()
             )
         }
         item {
             RotationTextField(
-                name = stringResource(selectedAxis.rotationNameId),
-                state = rotationState,
+                name = stringResource(transformState.universalAxis.rotationNameId),
+                state = transformState.universalOrientation,
+                onValueChange = onOrientationChange,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -673,37 +620,21 @@ fun cylindricalSettings(
 
 @Composable
 fun jointSettings(
-    operation: Operation,
-    onOperationChange: (Operation) -> Unit,
+    transformState: TransformState,
+    onOrientationChange: () -> Unit,
 ): LazyListScope.() -> Unit {
-    val multiRotationState = rememberMultiRotationState(
-        initialEulerDegrees = operation.offsetTransform.quaternion.toEulerAngles()
-    )
-    val updatedCurrentOperation by rememberUpdatedState(operation)
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { multiRotationState.quaternion }
-            .distinctUntilChanged()
-            .collect { quaternion ->
-                onOperationChange(
-                    updatedCurrentOperation.copy(
-                        offsetTransform = Transform(quaternion = quaternion)
-                    )
-                )
-            }
-    }
-
     return {
         items(
             listOf(
-                Axis.X to multiRotationState.x,
-                Axis.Y to multiRotationState.y,
-                Axis.Z to multiRotationState.z
+                Axis.X to transformState.multiOrientation.x,
+                Axis.Y to transformState.multiOrientation.y,
+                Axis.Z to transformState.multiOrientation.z
             )
         ) { (axis, state) ->
             RotationTextField(
                 name = axis.name,
                 state = state,
+                onValueChange = onOrientationChange,
                 modifier = Modifier.fillMaxWidth()
             )
         }

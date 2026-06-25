@@ -24,22 +24,23 @@ import com.jssdvv.ara.core.presentation.common.component.ArrowPreviousItemIcon
 import com.jssdvv.ara.machines.domain.model.Tool
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.component.TranslationMeasurementMenu
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.SingleRotationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.SingleTranslationState
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.TimeState
+import com.jssdvv.ara.machines.presentation.sceneview.utility.PitchTurnsState
+import com.jssdvv.ara.machines.presentation.sceneview.utility.SingleOrientationState
+import com.jssdvv.ara.machines.presentation.sceneview.utility.SingleTranslationState
+import com.jssdvv.ara.machines.presentation.sceneview.utility.TimeState
 
 
 @Composable
 fun TranslationTextField(
     name: String,
     state: SingleTranslationState,
-    onValueChange: (String) -> Unit = {},
+    onValueChange: () -> Unit,
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
-    value = state.units,
+    value = state.value,
     onValueChange = {
-        state.updateUnits(it)
-        onValueChange(it)
+        state.updateValue(it)
+        onValueChange()
     },
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
@@ -55,8 +56,8 @@ fun TranslationTextField(
     },
     trailingIcon = {
         TranslationMeasurementMenu(
-            translation = state.translation,
-            onMeasurementChange = { state.updateMeasurement(it) }
+            translation = state.units,
+            onMeasurementChange = { state.units = it }
         )
     }
 )
@@ -64,13 +65,16 @@ fun TranslationTextField(
 @Composable
 fun PitchTextField(
     name: String,
-    state: SingleTranslationState,
-    onValueChange: (String) -> Unit,
+    state: PitchTurnsState,
+    onValueChange: () -> Unit,
     isPitch: Boolean,
     modifier: Modifier = Modifier
 ) = OutlinedTextField(
-    value = state.units,
-    onValueChange = onValueChange,
+    value = state.value,
+    onValueChange = {
+        state.updateValue(it)
+        onValueChange()
+    },
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
@@ -86,8 +90,8 @@ fun PitchTextField(
     trailingIcon = if (isPitch) {
         {
             TranslationMeasurementMenu(
-                translation = state.translation,
-                onMeasurementChange = { state.updateMeasurement(it) }
+                translation = state.units,
+                onMeasurementChange = { state.units = it }
             )
         }
     } else null
@@ -96,11 +100,15 @@ fun PitchTextField(
 @Composable
 fun RotationTextField(
     name: String,
-    state: SingleRotationState,
+    state: SingleOrientationState,
+    onValueChange: () -> Unit,
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
-    value = state.units,
-    onValueChange = { state.updateUnits(it) },
+    value = state.value,
+    onValueChange = {
+        state.updateValue(it)
+        onValueChange()
+    },
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
@@ -221,10 +229,14 @@ fun ToolsTextField(
 fun TimeTextField(
     name: String,
     state: TimeState,
+    onValueChange: () -> Unit,
     modifier: Modifier = Modifier,
 ) = OutlinedTextField(
-    value = state.units,
-    onValueChange = { state.updateUnits(it) },
+    value = state.value,
+    onValueChange = {
+        state.updateValue(it)
+        onValueChange()
+    },
     modifier = modifier,
     shape = MaterialTheme.shapes.small,
     keyboardOptions = KeyboardOptions(
