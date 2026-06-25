@@ -15,6 +15,10 @@
     <string name="dialog_tool_create_title">New tool</string>
     <string name="dialog_tool_edit_title">Edit tool</string>
 
+    <!--TOOL TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_placeholder_optional">Optional</string>
+
     <!--TOOLS SEARCH BAR [COMPONENT]-->
 
     <string name="search_bar_tools_supporting_text">Search tools</string>

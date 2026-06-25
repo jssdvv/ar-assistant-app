@@ -15,6 +15,10 @@
     <string name="dialog_tool_create_title">Nueva herramienta</string>
     <string name="dialog_tool_edit_title">Editar herramienta</string>
 
+    <!--TOOL TEXT FIELD [COMPONENT]-->
+
+    <string name="text_field_placeholder_optional">Opcional</string>
+
     <!--TOOL TYPE [ENUM]-->
 
     <string name="tool_type_wrenches_label">Llave</string>
