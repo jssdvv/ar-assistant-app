@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.jssdvv.ara.machines.domain.model.Activity
 import com.jssdvv.ara.machines.domain.usecase.CountMarkers
 import com.jssdvv.ara.machines.domain.usecase.SelectActivities
+import com.jssdvv.ara.machines.domain.usecase.UpsertActivities
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -17,12 +18,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ActivitiesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val selectActivitiesUseCase: SelectActivities,
+    private val upsertActivitiesUseCase: UpsertActivities,
     private val countMarkersUseCase: CountMarkers,
 ) : ViewModel() {
 
@@ -49,7 +52,11 @@ class ActivitiesViewModel @Inject constructor(
 
     fun onEvent(event: ActivitiesEvent) {
         when (event) {
-            else -> {}
+            is ActivitiesEvent.OnCreateActivity -> {
+                viewModelScope.launch {
+                    upsertActivitiesUseCase(event.activity)
+                }
+            }
         }
     }
 
@@ -71,7 +78,9 @@ class ActivitiesViewModel @Inject constructor(
     }
 }
 
-sealed class ActivitiesEvent
+sealed class ActivitiesEvent {
+    data class OnCreateActivity(val activity: Activity) : ActivitiesEvent()
+}
 
 sealed interface ActivitiesUiState {
 

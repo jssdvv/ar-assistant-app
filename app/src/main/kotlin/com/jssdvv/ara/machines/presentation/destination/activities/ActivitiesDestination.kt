@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,9 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.presentation.common.component.AddIcon
 import com.jssdvv.ara.core.presentation.foundation.component.CounterButton
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.navigation.CalibrationIcon
@@ -31,6 +35,7 @@ import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Activity
 import com.jssdvv.ara.machines.presentation.destination.activities.components.ActivitiesListTopBar
 import com.jssdvv.ara.machines.presentation.destination.activities.components.ActivityCard
+import com.jssdvv.ara.machines.presentation.destination.activities.components.CreateActivityDialog
 
 @Composable
 fun ActivitiesDestination(
@@ -44,6 +49,7 @@ fun ActivitiesDestination(
     ActivitiesScreen(
         machineId = viewModel.machineId,
         uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
+        onEvent = viewModel::onEvent,
         onNavigateBack = onNavigateBack,
         onNavigateToMarkers = onNavigateToMarkers,
         onNavigateToModels = onNavigateToCalibration,
@@ -62,7 +68,9 @@ fun ActivitiesScreen(
     onNavigateToModels: (Int) -> Unit,
     onNavigateToARCamera: (Int, Int) -> Unit,
     onNavigateToEditActivity: (Int, Int) -> Unit,
+    onEvent: (ActivitiesEvent) -> Unit,
 ) {
+    var showCreateDialog by remember { mutableStateOf(false) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -70,7 +78,13 @@ fun ActivitiesScreen(
                 onBackClick = onNavigateBack
             )
         },
-        floatingActionButton = {}
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { showCreateDialog = true },
+                icon = { AddIcon() },
+                text = { Text(stringResource(R.string.fab_activities_create_action)) }
+            )
+        }
     ) { paddingValues ->
         when (uiState) {
             ActivitiesUiState.Loading -> LoadingWheelScreen()
@@ -88,6 +102,17 @@ fun ActivitiesScreen(
                 )
             }
         }
+    }
+
+    if (showCreateDialog) {
+        CreateActivityDialog(
+            machineId = machineId,
+            onConfirm = { activity ->
+                onEvent(ActivitiesEvent.OnCreateActivity(activity))
+                showCreateDialog = false
+            },
+            onDismiss = { showCreateDialog = false }
+        )
     }
 }
 
@@ -135,7 +160,7 @@ fun ActivitiesContent(
                 .fillMaxWidth()
                 .weight(1F)
                 .padding(horizontal = MaterialTheme.spacing.medium),
-            contentPadding = PaddingValues(vertical = MaterialTheme.spacing.small),
+            contentPadding = PaddingValues(top = MaterialTheme.spacing.small, bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
         ) {

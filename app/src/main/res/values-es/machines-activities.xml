@@ -5,6 +5,20 @@
 
     <string name="top_bar_activities_title">Actividades</string>
 
+    <!--ACTIVITIES FAB [COMPONENT]-->
+
+    <string name="fab_activities_create_action">Nueva actividad</string>
+
+    <!--ACTIVITIES DIALOG [COMPONENT]-->
+
+    <string name="dialog_activity_create_title">Crear actividad</string>
+    <string name="dialog_activity_edit_title">Editar actividad</string>
+    <string name="dialog_delete_activity_warning">¿Estás seguro de que deseas eliminar esta actividad?</string>
+    <string name="text_field_activity_name_label">Nombre de actividad</string>
+    <string name="text_field_activity_description_label">Descripción</string>
+    <string name="text_field_activity_frequency_label">Frecuencia</string>
+    <string name="text_field_activity_frequency_unit_label">Unidad de frecuencia</string>
+
     <!--ACTIVITY TYPE [ENUM]-->
 
     <string name="activity_type_general_label">General</string>
