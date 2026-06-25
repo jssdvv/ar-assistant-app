@@ -4,6 +4,7 @@
     <!--MARKERS SCREEN-->
 
     <string name="top_bar_markers_title">Marcadores</string>
+    <string name="fab_markers_create_action">Nuevo marcador</string>
 
     <!--MARKER DIALOG [COMPONENT]-->
 
@@ -14,5 +15,10 @@
     <!--MARKER BUTTON [COMPONENT]-->
 
     <string name="button_image_change_select_action">Seleccionar imagen</string>
+
+    <!--DIÁLOGO ELIMINAR MARCADORES [COMPONENTE]-->
+
+    <string name="dialog_delete_markers_title">Eliminar marcadores</string>
+    <string name="dialog_delete_markers_warning">¿Estás seguro de que deseas eliminar los marcadores seleccionados?</string>
 
 </resources>

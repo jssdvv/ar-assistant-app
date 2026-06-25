@@ -129,6 +129,7 @@ class MarkersViewModel @Inject constructor(
             is OnUnselectItem -> onUnselectItem(event.markerIndex)
             is OnSelectionModeChange -> onSelectionModeChange(event.isSelectionMode)
             MarkersEvent.OnExportSelectedMarkers -> onExportSelectedMarkers()
+            MarkersEvent.OnDeleteSelectedMarkers -> onDeleteSelectedMarkers()
         }
     }
 
@@ -229,6 +230,23 @@ class MarkersViewModel @Inject constructor(
     private fun getCurrentMarker(id: Int): Marker? =
         markersDataManager.select.selectSingleMarkerById(id)
 
+    private fun onDeleteSelectedMarkers() {
+        viewModelScope.launch {
+            val selectedMarkerList = markers.value.filterIndexed { index, _ ->
+                selectedItems.value.contains(index)
+            }
+            selectedMarkerList.forEach { marker ->
+                barcodeWriter.deleteBitmapFromInternalStorage(
+                    machineId = machineId,
+                    displayName = filesManager.getFileName(marker.imageUri) ?: ""
+                )
+            }
+            markersDataManager.delete(*selectedMarkerList.toTypedArray())
+            onClearSelectedItems()
+            onSelectionModeChange(false)
+        }
+    }
+
     private fun onExportSelectedMarkers() {
         val selectedMarkers = markers.value.filterIndexed { index, _ ->
             selectedItems.value.contains(index)
@@ -301,6 +319,7 @@ sealed class MarkersEvent {
     data class OnUnselectItem(val markerIndex: Int) : MarkersEvent()
     data class OnSelectionModeChange(val isSelectionMode: Boolean) : MarkersEvent()
     data object OnExportSelectedMarkers : MarkersEvent()
+    data object OnDeleteSelectedMarkers : MarkersEvent()
 }
 
 sealed interface MarkersUiState {

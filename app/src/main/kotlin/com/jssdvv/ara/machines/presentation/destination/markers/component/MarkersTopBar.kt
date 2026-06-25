@@ -13,6 +13,7 @@ import androidx.compose.ui.res.painterResource
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.component.CheckListIcon
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
+import com.jssdvv.ara.core.presentation.common.component.DeleteIcon
 import com.jssdvv.ara.core.presentation.common.component.ShareIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +26,7 @@ fun MarkersTopBar(
     selectedCountItems: Int,
     onNavigateBack: () -> Unit,
     onExportSelectedMarkers: () -> Unit,
+    onDeleteSelectedMarkers: () -> Unit,
 ) {
     val context = LocalContext.current
     TopAppBar(
@@ -67,6 +69,12 @@ fun MarkersTopBar(
                     content = { CheckListIcon() }
                 )
             } else {
+                if (selectedCountItems > 0) {
+                    IconButton(
+                        onClick = onDeleteSelectedMarkers,
+                        content = { DeleteIcon() }
+                    )
+                }
                 IconButton(
                     onClick = {
                         if(selectedCountItems > 0){
