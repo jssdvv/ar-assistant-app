@@ -30,6 +30,7 @@
     <!--FAB-->
 
     <string name="fab_upload_document_label">Upload document</string>
+    <string name="fab_documents_create_action">New document</string>
 
     <!--MINI CARD-->
 

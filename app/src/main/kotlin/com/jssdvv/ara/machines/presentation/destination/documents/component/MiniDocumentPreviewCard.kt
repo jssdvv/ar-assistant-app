@@ -22,12 +22,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jssdvv.ara.R
+import com.jssdvv.ara.core.domain.utility.formatShort
 import com.jssdvv.ara.core.presentation.common.component.DeleteIcon
 import com.jssdvv.ara.core.presentation.foundation.component.FocusableCard
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Document
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
 fun MiniDocumentPreviewCard(
@@ -91,13 +90,8 @@ fun MiniDocumentPreviewCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                val dateFormat = SimpleDateFormat(
-                    stringResource(R.string.date_format),
-                    Locale.getDefault()
-                )
                 Text(
-                    text = dateFormat.format(document.createdAt),
+                    text = document.createdAt.formatShort(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

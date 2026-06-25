@@ -5,4 +5,8 @@
 
     <string name="top_bar_documents_title">Documentos</string>
 
+    <!--FAB-->
+
+    <string name="fab_documents_create_action">Nuevo documento</string>
+
 </resources>
