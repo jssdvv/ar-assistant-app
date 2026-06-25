@@ -25,6 +25,6 @@ enum class Measurement(
  * Data class for the mode of transformation of a model in the editor.
  */
 data class MeasurementMode(
-    val translation: Translation = Translation.DECIMETERS,
+    val translation: TranslationUnits = TranslationUnits.DECIMETERS,
     val rotation: Rotation = Rotation.DEGREES_10,
 )

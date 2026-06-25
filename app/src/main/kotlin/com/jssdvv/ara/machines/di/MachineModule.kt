@@ -4,10 +4,9 @@ import com.jssdvv.ara.core.data.local.AppDatabase
 import com.jssdvv.ara.machines.data.repository.MachineRepositoryImpl
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
 import com.jssdvv.ara.machines.domain.usecase.DeleteMachines
+import com.jssdvv.ara.machines.domain.usecase.MachinesDataManager
 import com.jssdvv.ara.machines.domain.usecase.SearchMachines
-import com.jssdvv.ara.machines.domain.usecase.SelectMachineAndDetails
 import com.jssdvv.ara.machines.domain.usecase.SelectMachines
-import com.jssdvv.ara.machines.domain.usecase.UpsertMachineSpecs
 import com.jssdvv.ara.machines.domain.usecase.UpsertMachines
 import dagger.Module
 import dagger.Provides
@@ -36,11 +35,6 @@ object MachineModule {
 
     @Provides
     @Singleton
-    fun provideGetMachineDetailsUseCase(repository: MachineRepository): SelectMachineAndDetails =
-        SelectMachineAndDetails(repository)
-
-    @Provides
-    @Singleton
     fun provideDeleteMachineUseCase(repository: MachineRepository): DeleteMachines =
         DeleteMachines(repository)
 
@@ -51,6 +45,9 @@ object MachineModule {
 
     @Provides
     @Singleton
-    fun provideUpdateMachineSpecsUseCase(repository: MachineRepository): UpsertMachineSpecs =
-        UpsertMachineSpecs(repository)
+    fun provideMachinesDataManager(
+        select: SelectMachines,
+        upsert: UpsertMachines,
+        delete: DeleteMachines
+    ) = MachinesDataManager(select, upsert, delete)
 }

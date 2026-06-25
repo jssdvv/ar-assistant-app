@@ -14,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.core.presentation.foundation.component.MenuTextButton
-import com.jssdvv.ara.machines.domain.type.measurement.Translation
+import com.jssdvv.ara.machines.domain.type.measurement.TranslationUnits
 
 @Composable
 fun TranslationMeasurementMenu(
-    translation: Translation,
-    onMeasurementChange: (Translation) -> Unit
+    translation: TranslationUnits,
+    onMeasurementChange: (TranslationUnits) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -35,7 +35,7 @@ fun TranslationMeasurementMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            Translation.entries.forEach {
+            TranslationUnits.entries.forEach {
                 DropdownMenuItem(
                     text = { Text(stringResource(it.symbolTextId)) },
                     onClick = { onMeasurementChange(it) }

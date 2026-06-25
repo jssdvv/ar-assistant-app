@@ -44,7 +44,7 @@ data class Machine(
 
 data class MachineDetails(
     val machine: Machine,
-    val machineSpecs: MachineSpecs,
-    val motorIdentity: MotorIdentity,
-    val motorSpecs: MotorSpecs
+    val machineSpecs: MachineSpecs = MachineSpecs(machineId = machine.id),
+    val motorIdentity: MotorIdentity = MotorIdentity(machineId = machine.id),
+    val motorSpecs: MotorSpecs = MotorSpecs(machineId = machine.id)
 )

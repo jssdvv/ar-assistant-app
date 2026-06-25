@@ -11,6 +11,8 @@ import com.jssdvv.ara.machines.data.local.mapper.machine.toEntity
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
+import com.jssdvv.ara.machines.domain.model.machine.MotorIdentity
+import com.jssdvv.ara.machines.domain.model.machine.MotorSpecs
 import com.jssdvv.ara.machines.domain.repository.MachineRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -67,8 +69,13 @@ class MachineRepositoryImpl(
         dao.selectEntitiesOrdered(buildSelectQuery(orderState))
             .map { it.map(MachineEntity::toDomain) }
 
-    override suspend fun upsertMachine(vararg model: Machine) =
+    override suspend fun upsertMachine(vararg model: Machine)  {
         dao.upsertEntity(*model.map(Machine::toEntity).toTypedArray())
+    }
+
+    override suspend fun upsertMachineAndDetails(relation: MachineDetails)  {
+        dao.upsertMachineAndDetails(relation.toEntity())
+    }
 
     override suspend fun deleteMachine(vararg model: Machine) =
         dao.deleteEntity(*model.map(Machine::toEntity).toTypedArray())
@@ -78,4 +85,20 @@ class MachineRepositoryImpl(
 
     override suspend fun deleteMachineSpecs(vararg model: MachineSpecs) =
         dao.deleteEntitySpecs(*model.map(MachineSpecs::toEntity).toTypedArray())
+
+    override suspend fun upsertMotorSpecs(vararg model: MotorSpecs) {
+        dao.upsertMotorSpecs(*model.map(MotorSpecs::toEntity).toTypedArray())
+    }
+
+    override suspend fun deleteMotorSpecs(vararg model: MotorSpecs) {
+        dao.deleteMotorSpecs(*model.map(MotorSpecs::toEntity).toTypedArray())
+    }
+
+    override suspend fun upsertMotorIdentity(vararg model: MotorIdentity) {
+        dao.upsertMotorIdentity(*model.map(MotorIdentity::toEntity).toTypedArray())
+    }
+
+    override suspend fun deleteMotorIdentity(vararg model: MotorIdentity) {
+        dao.deleteMotorIdentity(*model.map(MotorIdentity::toEntity).toTypedArray())
+    }
 }

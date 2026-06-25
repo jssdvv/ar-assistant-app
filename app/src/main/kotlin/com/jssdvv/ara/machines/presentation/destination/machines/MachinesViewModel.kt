@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.machines.domain.model.machine.Machine
+import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.usecase.SearchMachines
 import com.jssdvv.ara.machines.domain.usecase.SelectMachines
+import com.jssdvv.ara.machines.domain.usecase.UpsertMachines
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,12 +17,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MachineryViewModel @Inject constructor(
     private val selectMachinesUseCase: SelectMachines,
-    private val searchMachinesUseCase: SearchMachines
+    private val searchMachinesUseCase: SearchMachines,
+    private val upsertMachinesUseCase: UpsertMachines,
 ) : ViewModel() {
 
     private val orderState = MutableStateFlow(OrderState())
@@ -56,6 +60,7 @@ class MachineryViewModel @Inject constructor(
         when (event) {
             is MachinesEvent.OrderMachines -> onOrderMachines(event.orderState)
             is MachinesEvent.SearchMachines -> onSearchMachines(event.search)
+            is MachinesEvent.CreateMachine -> createMachine(event.machine)
         }
     }
 
@@ -70,11 +75,21 @@ class MachineryViewModel @Inject constructor(
             searchedMachines.value = machines
         }.launchIn(viewModelScope)
     }
+
+    private fun createMachine(machine: Machine) {
+
+        val relation = MachineDetails(machine = machine)
+
+        viewModelScope.launch {
+            upsertMachinesUseCase(relation)
+        }
+    }
 }
 
 sealed class MachinesEvent {
     data class OrderMachines(val orderState: OrderState) : MachinesEvent()
     data class SearchMachines(val search: String) : MachinesEvent()
+    data class CreateMachine(val machine: Machine) : MachinesEvent()
 }
 
 sealed interface MachinesUiState {

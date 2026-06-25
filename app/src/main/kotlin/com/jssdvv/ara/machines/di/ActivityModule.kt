@@ -3,6 +3,7 @@ package com.jssdvv.ara.machines.di
 import com.jssdvv.ara.core.data.local.AppDatabase
 import com.jssdvv.ara.machines.data.repository.ActivityRepositoryImpl
 import com.jssdvv.ara.machines.domain.repository.ActivityRepository
+import com.jssdvv.ara.machines.domain.usecase.ActivitiesDataManager
 import com.jssdvv.ara.machines.domain.usecase.CountActivities
 import com.jssdvv.ara.machines.domain.usecase.DeleteActivities
 import com.jssdvv.ara.machines.domain.usecase.SelectActivities
@@ -41,4 +42,12 @@ object ActivityModule {
     @Singleton
     fun provideDeleteActivityUseCase(repository: ActivityRepository): DeleteActivities =
         DeleteActivities(repository)
+
+    @Provides
+    @Singleton
+    fun provideActivitiesDataManager(
+        select: SelectActivities,
+        upsert: UpsertActivities,
+        delete: DeleteActivities
+    ) = ActivitiesDataManager(select, upsert, delete)
 }
