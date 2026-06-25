@@ -1,10 +1,10 @@
 package com.jssdvv.ara.tools.presentation.navigation
 
-import ToolsDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.jssdvv.ara.core.presentation.AppState
+import com.jssdvv.ara.tools.presentation.destination.tools.ToolsDestination
 import kotlinx.serialization.Serializable
 
 // Schedule Graph Route

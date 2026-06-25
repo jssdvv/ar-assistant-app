@@ -27,6 +27,9 @@ import com.jssdvv.ara.machines.data.local.entity.machine.MotorIdentityEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MotorSpecsEntity
 import com.jssdvv.ara.machines.data.local.entity.operation.OperationEntity
 import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
+import com.jssdvv.ara.schedule.data.local.dao.EventDao
+import com.jssdvv.ara.schedule.data.local.entity.EventEntity
+import com.jssdvv.ara.tools.data.local.ToolDao
 
 
 @Database(
@@ -48,6 +51,9 @@ import com.jssdvv.ara.machines.data.local.entity.operation.PivotComposite
         // Augmented Entities
         ModelEntity::class,
         MarkerEntity::class,
+
+        // Events
+        EventEntity::class
     ],
     version = 1
 )
@@ -72,4 +78,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val documentDao: DocumentDao
     abstract val stepDao: StepDao
     abstract val operationDao: OperationDao
+    abstract val toolDao: ToolDao
+    abstract val eventDao: EventDao
 }

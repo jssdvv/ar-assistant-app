@@ -4,6 +4,16 @@
     <!--TOOLS LIST SCREEN-->
 
     <string name="top_bar_tools_title">Herramientas</string>
+    <string name="screen_tools_empty_message">Sin herramientas</string>
+
+    <!--TOOLS FAB [COMPONENT]-->
+
+    <string name="fab_tools_create_action">Nueva herramienta</string>
+
+    <!--TOOL DIALOG [COMPONENT]-->
+
+    <string name="dialog_tool_create_title">Nueva herramienta</string>
+    <string name="dialog_tool_edit_title">Editar herramienta</string>
 
     <!--TOOL TYPE [ENUM]-->
 

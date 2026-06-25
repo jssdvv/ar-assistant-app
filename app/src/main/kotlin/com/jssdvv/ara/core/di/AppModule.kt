@@ -3,6 +3,7 @@ package com.jssdvv.ara.core.di
 import android.content.Context
 import androidx.room.Room
 import com.jssdvv.ara.core.data.local.AppDatabase
+import com.jssdvv.ara.core.data.local.SeedDatabaseCallback
 import com.jssdvv.ara.core.data.repository.BarcodeWriterImpl
 import com.jssdvv.ara.core.data.repository.DirectoriesManagerImpl
 import com.jssdvv.ara.core.data.repository.FilesManagerImpl
@@ -41,6 +42,7 @@ object AppModule {
             name = AppDatabase.DATABASE_NAME
         ).createFromAsset(AppDatabase.DATABASE_ASSET_PATH)
             //.fallbackToDestructiveMigration()
+            .addCallback(SeedDatabaseCallback())
             .build()
 
     @Provides

@@ -4,6 +4,16 @@
     <!--TOOLS LIST SCREEN-->
 
     <string name="top_bar_tools_title">Tools</string>
+    <string name="screen_tools_empty_message">No tools</string>
+
+    <!--TOOLS FAB [COMPONENT]-->
+
+    <string name="fab_tools_create_action">New tool</string>
+
+    <!--TOOL DIALOG [COMPONENT]-->
+
+    <string name="dialog_tool_create_title">New tool</string>
+    <string name="dialog_tool_edit_title">Edit tool</string>
 
     <!--TOOLS SEARCH BAR [COMPONENT]-->
 
