@@ -3,7 +3,7 @@ package com.jssdvv.ara.machines.domain.type.measurement
 import androidx.annotation.StringRes
 import com.jssdvv.ara.R
 
-enum class Translation(
+enum class TranslationUnits(
     @param:StringRes val symbolTextId: Int,
     val metersPerUnit: Double,
     val millisPerUnit: Int

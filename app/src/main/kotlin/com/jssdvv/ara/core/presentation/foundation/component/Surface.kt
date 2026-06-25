@@ -108,6 +108,7 @@ fun SearchBarSurface(
     placeholder: @Composable (() -> Unit)? = null,
     bottomRow: @Composable (() -> Unit)? = null,
     floatingActionButton: @Composable (() -> Unit) = {},
+    isExpandable: Boolean = false,
     content: @Composable (() -> Unit)
 ) {
     Scaffold(
@@ -118,7 +119,8 @@ fun SearchBarSurface(
                 onValueChange = onValueChange,
                 placeholder = placeholder,
                 bottomRow = bottomRow,
-                navigationIcon = navigationIcon
+                navigationIcon = navigationIcon,
+                isExpandable = isExpandable
             )
         },
         content = {

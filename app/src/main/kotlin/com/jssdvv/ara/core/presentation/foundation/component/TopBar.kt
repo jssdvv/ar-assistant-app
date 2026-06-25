@@ -59,6 +59,7 @@ import com.jssdvv.ara.core.domain.type.OrderKey
 import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.core.domain.type.OrderType
 import com.jssdvv.ara.core.presentation.common.component.ArrowDropDownIcon
+import com.jssdvv.ara.core.presentation.common.component.ArrowForwardIcon
 import com.jssdvv.ara.core.presentation.common.component.CheckIcon
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
 import com.jssdvv.ara.core.presentation.common.component.NavigationUpIconButton
@@ -88,6 +89,7 @@ fun SearchTopBar(
     navigationIcon: @Composable (() -> Unit)? = null,
     actionIcon: @Composable (() -> Unit)? = null,
     bottomRow: @Composable (() -> Unit)? = null,
+    isExpandable: Boolean = true,
 ) {
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
@@ -104,6 +106,16 @@ fun SearchTopBar(
 
     LaunchedEffect(keyboardVisible) { if (!keyboardVisible) focusManager.clearFocus() }
     BackHandler(expanded) { focusManager.clearFocus() }
+
+    val effectiveLeadingIcon: @Composable (() -> Unit)? = if (isExpandable && expanded) {
+        {
+            IconButton(onClick = { focusManager.clearFocus() }) {
+                ArrowForwardIcon()
+            }
+        }
+    } else {
+        leadingIcon
+    }
 
     Surface(
         modifier = modifier.pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
@@ -135,7 +147,7 @@ fun SearchTopBar(
                     modifier = Modifier.weight(1f),
                     textStyle = textStyle,
                     placeholder = placeholder,
-                    leadingIcon = leadingIcon,
+                    leadingIcon = effectiveLeadingIcon,
                     trailingIcon = trailingIcon,
                     prefix = prefix,
                     suffix = suffix,
