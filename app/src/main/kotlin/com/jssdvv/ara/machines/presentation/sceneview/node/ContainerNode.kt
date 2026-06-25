@@ -7,6 +7,7 @@ import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.presentation.sceneview.utility.AxisNodesMap
 import com.jssdvv.ara.machines.presentation.sceneview.utility.MODEL_UNSELECTED_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.createModelMaterial
+import com.jssdvv.ara.machines.presentation.sceneview.utility.objectOffset
 import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.loaders.ModelLoader
@@ -21,6 +22,11 @@ import net.openhft.hashing.LongHashFunction
  * Groups a [ModelNode] with its editor overlays.
  */
 class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
+
+    companion object {
+        private const val ASSET_PREFIX = "android_asset/"
+    }
+
     var modelId: Int = 0
 
     var modelNode: ModelNode? = null
@@ -31,25 +37,20 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
 
     fun setModelNode(modelLoader: ModelLoader, materialLoader: MaterialLoader) {
         val rawUri = model.glbUri.toString()
-        val isAsset = rawUri.contains("android_asset/")
 
-        val instance = if (isAsset) {
-            val assetPath = rawUri.substringAfter("android_asset/")
-            modelLoader.createModelInstance(assetPath)
+        val instance = if (rawUri.contains(ASSET_PREFIX)) {
+            modelLoader.createModelInstance(rawUri.substringAfter(ASSET_PREFIX))
         } else {
-            val file = model.glbUri.toFile()
-            modelLoader.createModelInstance(file)
+            modelLoader.createModelInstance(model.glbUri.toFile())
         }
 
-        modelNode = ModelNode(instance, false).apply{
+        modelNode = ModelNode(instance, false).apply {
             this.name = this@ContainerNode.model.id.toString()
             this.isHittable = false
             this.isTouchable = false
             this.position = -(this.quaternion * this.boundingBox.centerPosition)
             this.parent = this@ContainerNode
-            this.setMaterialInstance(materialLoader.createModelMaterial(
-                MODEL_UNSELECTED_COLOR
-            ))
+            this.setMaterialInstance(materialLoader.createModelMaterial(MODEL_UNSELECTED_COLOR))
             this.renderableNodes.forEach { renderable ->
                 renderable.isHittable = true
                 renderable.isTouchable = true
@@ -60,29 +61,22 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
 
     fun generatePivotNodes() {
         val modelNode = this@ContainerNode.modelNode ?: return
-        if(pivotNodes.isNotEmpty()) return
-        pivotNodes = modelNode.renderableNodes.map { renderableNode ->
-            val center = renderableNode.axisAlignedBoundingBox.centerPosition
-            val position = renderableNode.position + renderableNode.quaternion * center
-            val quaternion =  renderableNode.quaternion
-            val pivot = PivotNode(engine).apply {
-                this.name = renderableNode.name
-                this.modelId = this@ContainerNode.modelId
-                this.hash = LongHashFunction.xx3().hashChars(renderableNode.name ?: "")
-                this.renderableNode = renderableNode
-                this.parent = this@ContainerNode
-                this.transform = Transform(position, quaternion)
-                this.initialTransform = Transform(position, quaternion)
-            }
+        if (pivotNodes.isNotEmpty()) return
 
-            renderableNode.apply {
-                this.parent = pivot
-                // Don't touch this future me
-                this.position = -center
-                this.quaternion = Quaternion()
-            }
+        pivotNodes = modelNode.renderableNodes.map { renderable ->
 
-            pivot
+            val center = renderable.axisAlignedBoundingBox.centerPosition
+            val pivotTransform = getLocalTransform(renderable).objectOffset(center)
+
+            PivotNode(engine).apply {
+                modelId = this@ContainerNode.modelId
+                parent = this@ContainerNode
+                name = renderable.name
+                hash = LongHashFunction.xx3().hashChars(renderable.name ?: "")
+                transform = pivotTransform
+                initialTransform = pivotTransform
+                renderableNode = renderable.apply { transform = Transform(-center) }
+            }
         }
     }
 
@@ -92,7 +86,7 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
     }
 
     fun setGizmoVisibility(visible: Boolean, materialLoader: MaterialLoader) {
-        if(visible) generateGizmoNode(materialLoader)
+        if (visible) generateGizmoNode(materialLoader)
         gizmoNode?.isVisible = visible
     }
 
@@ -110,13 +104,17 @@ class ContainerNode(engine: Engine, val model: Model) : Node(engine) {
         }
     }
 
-    fun restorePosition() { position = Position() }
-    fun restoreQuaternion() { quaternion = Quaternion() }
+    fun restorePosition() {
+        position = Position()
+    }
+
+    fun restoreQuaternion() {
+        quaternion = Quaternion()
+    }
 
     init {
         modelId = model.id
         transform = model.offsetTransform
         isTouchable = false
-        isHittable = false
     }
 }

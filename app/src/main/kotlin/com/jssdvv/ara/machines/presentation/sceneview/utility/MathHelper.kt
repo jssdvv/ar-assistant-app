@@ -1,10 +1,14 @@
 package com.jssdvv.ara.machines.presentation.sceneview.utility
 
+import com.jssdvv.ara.machines.domain.type.Axis
 import dev.romainguy.kotlin.math.Quaternion
+import dev.romainguy.kotlin.math.dot
 import dev.romainguy.kotlin.math.normalize
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Transform
 import io.github.sceneview.math.quaternion
+import kotlin.math.PI
+import kotlin.math.atan2
 
 fun Position.objectOffset(offset: Position, quaternion: Quaternion): Position {
     return this + quaternion * offset
@@ -53,3 +57,14 @@ fun Quaternion.offset(offset: Quaternion, global: Boolean = false): Quaternion {
 fun Transform.offset(offset: Transform, global: Boolean = false): Transform {
     return if (global) globalOffset(offset) else objectOffset(offset)
 }
+
+fun Quaternion.degreesFromAxis(axis: Axis): Float {
+    val sinHalfTheta = dot(xyz, axis.unitVector)
+    val radians = 2 * atan2(sinHalfTheta.toDouble(), w.toDouble())
+    return (radians * 180 / PI).toFloat()
+}
+
+fun unidirectionalTranslation(axis: Axis, value: Float) = axis.unitVector * value
+
+fun unidirectionalRotation(axis: Axis, degrees: Float) =
+    Quaternion.fromEuler(axis.unitVector * degrees)

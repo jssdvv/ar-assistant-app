@@ -27,7 +27,6 @@ fun configureARSession(
             }
         )
     }
-
 }
 
 fun isTorchSupported(session: Session, context: Context): Boolean {

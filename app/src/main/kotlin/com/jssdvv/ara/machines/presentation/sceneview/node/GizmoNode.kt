@@ -9,7 +9,9 @@ import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_Y_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.GIZMO_Z_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.createGizmoMaterial
 import com.jssdvv.ara.machines.presentation.sceneview.utility.setPriorityIterable
+import dev.romainguy.kotlin.math.Quaternion
 import io.github.sceneview.loaders.MaterialLoader
+import io.github.sceneview.math.Position
 import io.github.sceneview.node.SphereNode
 
 /**
@@ -25,44 +27,41 @@ class GizmoNode(
     zColor: FloatArray = GIZMO_Z_COLOR,
 ) : SphereNode(
     engine = engine,
-    center = io.github.sceneview.math.Position(),
+    center = Position(),
     radius = DEFAULT_SPHERE_RADIUS,
     materialInstance = materialLoader.createGizmoMaterial(cColor)
 ) {
     companion object {
-        const val DEFAULT_SPHERE_RADIUS = Arrow.Companion.DEFAULT_SHAFT_RADIUS * 2.5F
-    }
-
-    val xArrowNode = ArrowNode(
-        engine = engine,
-        materialInstance = materialLoader.createGizmoMaterial(xColor)
-    ).apply {
-        this.parent = this@GizmoNode
-        this.quaternion = Axis.X.quaternion
-        this.position += Axis.X.unitVector * DEFAULT_SPHERE_RADIUS
-    }
-
-    val yArrowNode = ArrowNode(
-        engine = engine,
-        materialInstance = materialLoader.createGizmoMaterial(yColor)
-    ).apply {
-        this.parent = this@GizmoNode
-        this.quaternion = Axis.Y.quaternion
-        this.position += Axis.Y.unitVector * DEFAULT_SPHERE_RADIUS
-    }
-
-    val zArrowNode = ArrowNode(
-        engine = engine,
-        materialInstance = materialLoader.createGizmoMaterial(zColor)
-    ).apply {
-        this.parent = this@GizmoNode
-        this.quaternion = Axis.Z.quaternion
-        this.position += Axis.Z.unitVector * DEFAULT_SPHERE_RADIUS
+        const val DEFAULT_SPHERE_RADIUS = Arrow.DEFAULT_SHAFT_RADIUS * 2.5F
     }
 
     init {
         isHittable = false
         isTouchable = false
         setPriorityIterable(7)
+        childNodes = setOf(
+            ArrowNode(
+                engine = engine,
+                materialInstance = materialLoader.createGizmoMaterial(xColor)
+            ).apply {
+                this.quaternion = Quaternion(w = 0.707107F, z = -0.707107F)
+                this.position += Axis.X.unitVector * DEFAULT_SPHERE_RADIUS
+            },
+            ArrowNode(
+                engine = engine,
+                materialInstance = materialLoader.createGizmoMaterial(yColor)
+            ).apply {
+                this.quaternion = Quaternion(w = 0.707107F, y = 0.707107F)
+                this.position += Axis.Y.unitVector * DEFAULT_SPHERE_RADIUS
+            },
+            ArrowNode(
+                engine = engine,
+                materialInstance = materialLoader.createGizmoMaterial(zColor)
+            ).apply {
+                this.parent = this@GizmoNode
+                this.quaternion = Quaternion(w = 0.707107F, x = 0.707107F)
+                this.position += Axis.Z.unitVector * DEFAULT_SPHERE_RADIUS
+            }
+        )
     }
 }

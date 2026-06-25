@@ -3,6 +3,7 @@ package com.jssdvv.ara.machines.presentation.sceneview.utility
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.google.android.filament.Engine
 import com.google.ar.core.AugmentedImage
+import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.presentation.sceneview.node.AxisNode
@@ -19,10 +20,12 @@ import io.github.sceneview.safeDestroyEntity
 import io.github.sceneview.safeDestroyTransformable
 
 typealias ModelId = Int
+typealias OperationId = Int
 typealias ContainerNodesMap = MutableMap<ModelId, ContainerNode>
 typealias PivotNodesMap = MutableMap<Pivot, PivotNode>
 typealias AxisNodesMap = MutableMap<Axis, AxisNode>
 typealias PivotOffsetsMap = Map<Pivot, Transform>
+typealias PivotsTransformsMap = Map<OperationId, PivotOffsetsMap>
 
 
 val SnapshotStateList<Node>.markerNode: MarkerNode? get() = getOrNull(1) as? MarkerNode
@@ -31,8 +34,6 @@ fun SnapshotStateList<Node>.safeTerminate(nodes: Collection<Node> = this.toList(
     nodes.safeTerminate()
     removeAll(nodes)
 }
-
-fun Collection<Node>.filterMarkerNodes() = filterIsInstance<MarkerNode>()
 
 fun Collection<Node>.safeTerminate() = forEach(Node::safeTerminate)
 
@@ -54,6 +55,19 @@ fun ModelNode.setSelectedMaterial(materialLoader: MaterialLoader) {
 
 fun ModelNode.setUnselectedMaterial(materialLoader: MaterialLoader) {
     setMaterialInstance(materialLoader.createModelMaterial(MODEL_UNSELECTED_COLOR))
+}
+
+fun pivotsOffsets (
+    pivotNodesMap: PivotNodesMap,
+    transformedTargets: List<OperationTargets>
+) : PivotOffsetsMap = buildMap {
+    transformedTargets.forEach { (operation, pivots) ->
+        pivots.forEach { pivot ->
+            val node = pivotNodesMap[pivot] ?: return@forEach
+            val previous = get(pivot) ?: node.initialTransform
+            put(pivot, previous.offset(operation.offsetTransform, operation.global))
+        }
+    }
 }
 
 fun AugmentedImage.detectMarkerNode(

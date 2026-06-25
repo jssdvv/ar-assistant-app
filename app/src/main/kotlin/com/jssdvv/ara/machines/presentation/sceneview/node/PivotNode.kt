@@ -10,12 +10,12 @@ import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.type.OperationType
 import com.jssdvv.ara.machines.presentation.destination.ar_session.component.Speed
-import com.jssdvv.ara.machines.presentation.destination.steps.functions.unidirectionalRotation
 import com.jssdvv.ara.machines.presentation.sceneview.utility.MODEL_PLAYING_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.MODEL_SELECTED_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.MODEL_UNSELECTED_COLOR
 import com.jssdvv.ara.machines.presentation.sceneview.utility.createModelMaterial
 import com.jssdvv.ara.machines.presentation.sceneview.utility.offset
+import com.jssdvv.ara.machines.presentation.sceneview.utility.unidirectionalRotation
 import dev.romainguy.kotlin.math.Quaternion
 import dev.romainguy.kotlin.math.slerp
 import io.github.sceneview.loaders.MaterialLoader
@@ -41,24 +41,35 @@ class PivotNode(engine: Engine) : Node(engine) {
     var renderableVisible by mutableStateOf(true)
         private set
 
+    var isPlaying by mutableStateOf(false)
+        private set
+
+    var isSelected by mutableStateOf(false)
+        private set
+
     var initialTransform: Transform = Transform()
 
     var boxNode: BoxNode? = null
     var gizmoNode: GizmoNode? = null
     var renderableNode: ModelNode.RenderableNode? = null
+        set(value) {
+            field?.parent = null
+            field = value
+            value?.parent = this
+        }
 
-    fun restoreTransform() {
+    fun restoreInitialTransform() {
         transform = initialTransform
     }
 
     suspend fun animate(
         operation: Operation,
-        initialTransform: Transform = worldTransform,
+        initialTransform: Transform = transform,
         speed: Speed = Speed.NORMAL,
         playing: Boolean = true,
         looping: Boolean = true
     ) {
-        val finalTransform: Transform = initialTransform.offset(operation.offsetTransform, operation.global)
+        val finalTransform = initialTransform.offset(operation.offsetTransform, operation.global)
         val isScrew = operation.type == OperationType.SCREW
         val totalDegrees = operation.turns * 360F
 
@@ -106,8 +117,8 @@ class PivotNode(engine: Engine) : Node(engine) {
         while (true) {
             // Delay
             while (delayTimeMs < baseDelayMs) {
-                worldPosition = initialTransform.position
-                worldQuaternion = initialTransform.quaternion
+                position = initialTransform.position
+                quaternion = initialTransform.quaternion
                 updateMs { delayDeltaMs -> delayTimeMs += delayDeltaMs }
                 if (!playing) pauseUntilResumed { lastNanos = 0L }
                 yield()
@@ -117,15 +128,15 @@ class PivotNode(engine: Engine) : Node(engine) {
             while (animationTimeMs < baseDurationMs) {
                 updateMs { animationDeltaMs -> animationTimeMs += animationDeltaMs }
                 val ratio = (animationTimeMs / baseDurationMs).coerceIn(0F..1F)
-                worldPosition = lerp(initialTransform.position, finalTransform.position, ratio)
-                worldQuaternion = animationQuaternion(ratio)
+                position = lerp(initialTransform.position, finalTransform.position, ratio)
+                quaternion = animationQuaternion(ratio)
 
                 if (!playing) pauseUntilResumed { lastNanos = 0L }
                 yield()
             }
 
-            worldPosition = finalTransform.position
-            worldQuaternion = finalTransform.quaternion
+            position = finalTransform.position
+            quaternion = finalTransform.quaternion
 
             // Post Animation
             if (looping) {
@@ -141,8 +152,8 @@ class PivotNode(engine: Engine) : Node(engine) {
                 while (reverseTimeMs < baseDurationMs) {
                     updateMs { reverseDeltaMs -> reverseTimeMs += reverseDeltaMs }
                     val ratio = 1 - (reverseTimeMs / baseDurationMs).coerceIn(0F..1F)
-                    worldPosition = lerp(initialTransform.position, finalTransform.position, ratio)
-                    worldQuaternion = animationQuaternion(ratio)
+                    position = lerp(initialTransform.position, finalTransform.position, ratio)
+                    quaternion = animationQuaternion(ratio)
 
                     if (!playing) pauseUntilResumed { lastNanos = 0L }
                     yield()
@@ -171,42 +182,61 @@ class PivotNode(engine: Engine) : Node(engine) {
         gizmoNode = GizmoNode(engine, materialLoader).also { addChildNode(it) }
     }
 
-    fun setPlaying(materialLoader: MaterialLoader) {
-        boxNode?.isVisible = false
-        gizmoNode?.isVisible = false
-        renderableNode?.materialInstance = materialLoader
-            .createModelMaterial(MODEL_PLAYING_COLOR)
-    }
-
-    fun setSelection(selected: Boolean, materialLoader: MaterialLoader) {
-        val materialColor = if (selected) {
+    fun setVisuals(materialLoader: MaterialLoader, selected: Boolean = true) {
+        if (selected) {
             generateBoxNode(materialLoader)
             generateGizmoNode(materialLoader)
-            MODEL_SELECTED_COLOR
-        } else {
-            MODEL_UNSELECTED_COLOR
         }
         boxNode?.isVisible = selected
         gizmoNode?.isVisible = selected
-        renderableNode?.materialInstance = materialLoader.createModelMaterial(materialColor)
+    }
+
+    private fun applyMaterial(materialLoader: MaterialLoader) {
+        renderableNode?.materialInstance = materialLoader.createModelMaterial(
+            when {
+                isSelected -> MODEL_SELECTED_COLOR
+                isPlaying -> MODEL_PLAYING_COLOR
+                else -> MODEL_UNSELECTED_COLOR
+            }
+        )
+    }
+
+    fun setPlaying(materialLoader: MaterialLoader, playing: Boolean = true) {
+        isPlaying = playing
+        setVisuals(materialLoader, false)
+        applyMaterial(materialLoader)
+    }
+
+    fun setSelection(materialLoader: MaterialLoader, selected: Boolean = true) {
+        isSelected = selected
+        isTouchable = !selected
+        setVisuals(materialLoader, selected)
+        applyMaterial(materialLoader)
+    }
+
+    fun reset(materialLoader: MaterialLoader) {
+        isPlaying = false
+        isSelected = false
+        isTouchable = true
+        setVisuals(materialLoader, false)
+        applyMaterial(materialLoader)
     }
 
     fun updateGizmoOrientation(global: Boolean) {
-        gizmoNode?.worldQuaternion = if (global) Quaternion() else this@PivotNode.worldQuaternion
+        gizmoNode?.worldQuaternion =
+            if (global) parent?.worldQuaternion ?: Quaternion() else this@PivotNode.worldQuaternion
     }
 
     fun toggleVisibility() {
-        renderableVisible = !renderableVisible
-        renderableNode?.isVisible = renderableVisible
-    }
-
-    fun setRenderableVisibility(visible: Boolean) {
-        this.renderableVisible = visible
-        renderableNode?.isVisible = visible
+        val value = !renderableVisible
+        renderableVisible = value
+        renderableNode?.apply{
+            isTouchable = value
+            isVisible = value
+        }
     }
 
     init {
         isTouchable = false
-        isHittable = false
     }
 }

@@ -27,12 +27,12 @@ import io.github.sceneview.node.Node
  *
  * ```
  * SnapshotStateList<Node>
- * ├── OriginNode (1)
- * │       └── ContainerNode (n)
- * │               ├── ModelNode (1)
- * │               ├── GizmoNode (1: optional)
- * │               └── AxisNode (3: optional)
- * └── MarkerNode (1)
+ * ├── MarkerNode (1)
+ * └── OriginNode (1)
+ *         └── ContainerNode (n)
+ *                 ├── ModelNode (1)
+ *                 ├── GizmoNode (1: optional)
+ *                 └── AxisNode (3: optional)
  * ```
  *
  * In [CalibrationDestination], transformations are applied directly to [ContainerNode] since
@@ -46,6 +46,5 @@ class OriginNode(engine: Engine) : Node(engine) {
 
     init {
         isTouchable = false
-        isHittable = false
     }
 }
