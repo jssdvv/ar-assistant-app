@@ -153,7 +153,10 @@ fun ToolsContent(
     editingTool?.let { tool ->
         ToolEditDialog(
             tool = tool,
-            onSave = { onEvent(ToolsEvent.OnEditTool(it)) },
+            onSave = {
+                onEvent(ToolsEvent.OnEditTool(it))
+                editingTool = null
+            },
             onDismiss = { editingTool = null }
         )
     }
