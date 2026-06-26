@@ -138,6 +138,15 @@ class FilesManagerImpl(
         )
     }
 
+    override fun copyToolImageToInternalStorage(uri: Uri): File? {
+        return copyFileToInternalStorage(
+            uri = uri,
+            defaultName = "tool_image",
+            fileType = FileType.IMAGE,
+            targetDir = directoriesManager.getToolsMediaDir(),
+        )
+    }
+
     override fun copyModelToInternalStorage(uri: Uri, machineId: Int): File? {
         return copyFileToInternalStorage(
             uri = uri,

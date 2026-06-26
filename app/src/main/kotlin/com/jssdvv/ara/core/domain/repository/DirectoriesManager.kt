@@ -56,4 +56,11 @@ interface DirectoriesManager {
      * Directory path: ```com.jssdvv.ara.files/machine/vector```
      */
     fun getVectorDir(machineId: Int) : File
+
+    /**
+     * Exclusive directory for storing tool images.
+     *
+     * Directory path: ```com.jssdvv.ara.files/tools/media```
+     */
+    fun getToolsMediaDir(): File
 }

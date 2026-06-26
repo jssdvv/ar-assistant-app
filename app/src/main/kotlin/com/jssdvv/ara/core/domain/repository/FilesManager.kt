@@ -15,6 +15,7 @@ interface FilesManager {
     fun getBitmap(uri: Uri?): Bitmap?
     fun copyModelToInternalStorage(uri: Uri, machineId: Int): File?
     fun copyImageToInternalStorage(uri: Uri, machineId: Int): File?
+    fun copyToolImageToInternalStorage(uri: Uri): File?
     fun copyDocToInternalStorage(uri: Uri, machineId: Int): File?
     fun getFileDescriptor(uri: Uri?): ParcelFileDescriptor?
     fun saveBitmapToInternalStorage(bitmap: Bitmap, targetDir: File, rename: String? = null): File?

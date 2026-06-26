@@ -17,6 +17,7 @@ class DirectoriesManagerImpl(
         private const val DOC_DIR = "document"
         private const val MODEL_DIR = "model"
         private const val VECTOR_DIR = "vector"
+        private const val TOOLS_DIR = "tools"
     }
 
     private val internalStorageDir by lazy { context.filesDir }
@@ -42,5 +43,8 @@ class DirectoriesManagerImpl(
         .also(::checkDir)
 
     override fun getVectorDir(machineId: Int) = File(getRootMachineDir(), VECTOR_DIR)
+        .also(::checkDir)
+
+    override fun getToolsMediaDir() = File(internalStorageDir, TOOLS_DIR)
         .also(::checkDir)
 }
