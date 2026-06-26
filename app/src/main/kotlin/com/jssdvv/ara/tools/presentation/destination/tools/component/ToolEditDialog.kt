@@ -85,7 +85,7 @@ fun ToolEditDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16 / 9F)
+                    .aspectRatio(1f)
                     .background(noImageBgColor, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
@@ -115,7 +115,7 @@ fun ToolEditDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16 / 9F)
+                    .aspectRatio(1f)
                     .background(noImageBgColor, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {

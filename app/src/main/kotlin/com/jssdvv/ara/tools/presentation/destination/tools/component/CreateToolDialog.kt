@@ -80,7 +80,7 @@ fun CreateToolDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16 / 9F)
+                    .aspectRatio(1f)
                     .background(noImageBgColor, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
@@ -88,7 +88,7 @@ fun CreateToolDialog(
                     AsyncImage(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(16 / 9F),
+                            .aspectRatio(1f),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(it)
                             .build(),
@@ -112,7 +112,7 @@ fun CreateToolDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16 / 9F)
+                    .aspectRatio(1f)
                     .background(noImageBgColor, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
@@ -120,7 +120,7 @@ fun CreateToolDialog(
                     AsyncImage(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(16 / 9F),
+                            .aspectRatio(1f),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(it)
                             .build(),

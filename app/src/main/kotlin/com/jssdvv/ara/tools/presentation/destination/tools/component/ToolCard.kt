@@ -3,6 +3,7 @@ package com.jssdvv.ara.tools.presentation.destination.tools.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -56,6 +57,7 @@ fun ToolCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .sizeIn(maxHeight = 120.dp)
+                            .aspectRatio(1f)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.bodyMediaUri)
@@ -72,6 +74,7 @@ fun ToolCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .sizeIn(maxHeight = 120.dp)
+                            .aspectRatio(1f)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.symbolMediaUri)
