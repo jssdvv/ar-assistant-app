@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,12 +39,13 @@ import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.component.ChangeImageButton
 import com.jssdvv.ara.core.presentation.common.component.CheckIcon
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
-import com.jssdvv.ara.core.presentation.foundation.component.ColumnDialog
+import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
+import com.jssdvv.ara.core.presentation.foundation.component.MinimalDialog
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Tool
 import com.jssdvv.ara.machines.domain.type.ToolType
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ToolEditDialog(
     tool: Tool,
@@ -65,16 +68,19 @@ fun ToolEditDialog(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> if (uri != null) symbolMediaUri = uri }
 
-    ColumnDialog(
-        title = { Text(stringResource(R.string.dialog_tool_edit_title)) },
-        onDismissRequest = onDismiss,
-    ) {
+    MinimalDialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
         ) {
+            Text(
+                text = stringResource(R.string.dialog_tool_edit_title),
+                style = MaterialTheme.typography.titleLarge
+            )
+
             // Body Image
             Box(
                 modifier = Modifier
@@ -187,18 +193,18 @@ fun ToolEditDialog(
             }
 
             // Action buttons
-            androidx.compose.foundation.layout.FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
-                modifier = Modifier.fillMaxWidth()
+            FlowRow(
+                modifier = Modifier.align(Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
             ) {
-                com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon(
+                ButtonWithIcon(
                     onClick = onDismiss,
                     colors = ButtonDefaults.outlinedButtonColors(),
                     icon = { CloseIcon() },
                     content = { Text(stringResource(R.string.button_cancel_action)) }
                 )
 
-                com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon(
+                ButtonWithIcon(
                     onClick = {
                         onSave(
                             tool.copy(
