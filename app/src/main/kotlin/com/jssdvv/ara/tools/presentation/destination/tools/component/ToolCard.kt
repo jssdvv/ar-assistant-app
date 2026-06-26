@@ -53,7 +53,7 @@ fun ToolCard(
                 if (tool.bodyMediaUri != null) {
                     AsyncImage(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(120.dp)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.bodyMediaUri)
@@ -68,7 +68,7 @@ fun ToolCard(
                 if (tool.symbolMediaUri != null) {
                     AsyncImage(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(120.dp)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.symbolMediaUri)
