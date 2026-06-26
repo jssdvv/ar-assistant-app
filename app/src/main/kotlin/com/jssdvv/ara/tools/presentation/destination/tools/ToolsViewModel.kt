@@ -88,6 +88,14 @@ class ToolsViewModel @Inject constructor(
                     toolsDataManager.upsert(tool)
                 }
             }
+            is ToolsEvent.OnDeleteTool -> {
+                viewModelScope.launch {
+                    val tool = event.tool
+                    tool.bodyMediaUri?.path?.let { filesManager.deleteFile(File(it)) }
+                    tool.symbolMediaUri?.path?.let { filesManager.deleteFile(File(it)) }
+                    toolsDataManager.delete(tool)
+                }
+            }
         }
     }
 
@@ -112,6 +120,7 @@ sealed interface ToolsEvent {
     data class OnSortTools(val orderState: OrderState) : ToolsEvent
     data class OnCreateTool(val tool: Tool) : ToolsEvent
     data class OnEditTool(val tool: Tool) : ToolsEvent
+    data class OnDeleteTool(val tool: Tool) : ToolsEvent
 }
 
 sealed interface ToolsUiState {

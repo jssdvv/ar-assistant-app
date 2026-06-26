@@ -157,6 +157,10 @@ fun ToolsContent(
                 onEvent(ToolsEvent.OnEditTool(it))
                 editingTool = null
             },
+            onDelete = {
+                onEvent(ToolsEvent.OnDeleteTool(tool))
+                editingTool = null
+            },
             onDismiss = { editingTool = null }
         )
     }
