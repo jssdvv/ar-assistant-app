@@ -44,30 +44,31 @@ fun ToolCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(MaterialTheme.spacing.small),
+                .padding(MaterialTheme.spacing.extraSmall),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                AsyncImage(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(tool.bodyMediaUri)
-                        .crossfade(true)
-                        .build(),
-                    error = ColorPainter(Color.Gray),
-                    fallback = ColorPainter(Color.Gray),
-                    contentDescription = stringResource(R.string.image_tool_body_content_desc),
-                    contentScale = ContentScale.Crop
-                )
-
+                if (tool.bodyMediaUri != null) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(tool.bodyMediaUri)
+                            .crossfade(true)
+                            .build(),
+                        error = ColorPainter(Color.Gray),
+                        fallback = ColorPainter(Color.Gray),
+                        contentDescription = stringResource(R.string.image_tool_body_content_desc),
+                        contentScale = ContentScale.Crop
+                    )
+                }
                 if (tool.symbolMediaUri != null) {
                     AsyncImage(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(80.dp)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.symbolMediaUri)
