@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,12 +48,14 @@ fun ToolCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 if (tool.bodyMediaUri != null) {
                     AsyncImage(
                         modifier = Modifier
-                            .size(120.dp)
+                            .fillMaxWidth()
+                            .sizeIn(maxHeight = 120.dp)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.bodyMediaUri)
@@ -68,7 +70,8 @@ fun ToolCard(
                 if (tool.symbolMediaUri != null) {
                     AsyncImage(
                         modifier = Modifier
-                            .size(120.dp)
+                            .fillMaxWidth()
+                            .sizeIn(maxHeight = 120.dp)
                             .clip(RoundedCornerShape(MaterialTheme.spacing.small)),
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(tool.symbolMediaUri)
@@ -84,7 +87,7 @@ fun ToolCard(
 
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(2f)
                     .padding(start = MaterialTheme.spacing.small)
             ) {
                 Text(
