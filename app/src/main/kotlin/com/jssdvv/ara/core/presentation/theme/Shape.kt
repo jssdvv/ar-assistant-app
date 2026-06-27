@@ -54,11 +54,13 @@ object TubShapeTopDefaults {
 
 internal object TubShapeTopTokens {
     val CornerTinyTop = RoundedCornerConcaveShape(CornerRadiusTokens.tiny, ShapeEdge.Top)
-    val CornerExtraSmallTop = RoundedCornerConcaveShape(CornerRadiusTokens.extraSmall, ShapeEdge.Top)
+    val CornerExtraSmallTop =
+        RoundedCornerConcaveShape(CornerRadiusTokens.extraSmall, ShapeEdge.Top)
     val CornerSmallTop = RoundedCornerConcaveShape(CornerRadiusTokens.small, ShapeEdge.Top)
     val CornerMediumTop = RoundedCornerConcaveShape(CornerRadiusTokens.medium, ShapeEdge.Top)
     val CornerLargeTop = RoundedCornerConcaveShape(CornerRadiusTokens.large, ShapeEdge.Top)
-    val CornerExtraLargeTop = RoundedCornerConcaveShape(CornerRadiusTokens.extraLarge, ShapeEdge.Top)
+    val CornerExtraLargeTop =
+        RoundedCornerConcaveShape(CornerRadiusTokens.extraLarge, ShapeEdge.Top)
 }
 
 val LocalTubShapes = staticCompositionLocalOf { TubShapes() }

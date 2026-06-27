@@ -77,7 +77,7 @@ fun MarkersTopBar(
                 }
                 IconButton(
                     onClick = {
-                        if(selectedCountItems > 0){
+                        if (selectedCountItems > 0) {
                             onExportSelectedMarkers()
                         } else {
                             Toast.makeText(

@@ -11,7 +11,8 @@ data class ActivitiesDataManager(
 )
 
 class CountActivities(private val repository: ActivityRepository) {
-    operator fun invoke(machineId: Int): Flow<Int> = repository.countActivitiesByMachineId(machineId)
+    operator fun invoke(machineId: Int): Flow<Int> =
+        repository.countActivitiesByMachineId(machineId)
 }
 
 class SelectActivities(private val repository: ActivityRepository) {

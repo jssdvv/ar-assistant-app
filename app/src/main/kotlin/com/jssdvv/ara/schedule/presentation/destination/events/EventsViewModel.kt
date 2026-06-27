@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jssdvv.ara.core.data.repository.NotificationService
-import com.jssdvv.ara.machines.data.local.relation.MachineWithActivities
 import com.jssdvv.ara.machines.domain.model.Activity
 import com.jssdvv.ara.machines.domain.model.machine.Machine
 import com.jssdvv.ara.machines.domain.model.machine.MachineActivities
@@ -90,6 +89,7 @@ class EventsViewModel @Inject constructor(
                 displayedDate.update { event.date }
                 currentDate.update { event.date }
             }
+
             is EventsEvent.SelectDay -> selectDay(event.date)
             is EventsEvent.CreateEvent -> createEvent(event.event)
             is EventsEvent.SelectEvent -> selectEvent(event.event)
@@ -99,6 +99,7 @@ class EventsViewModel @Inject constructor(
                 selectedMachine.update { event.machine }
                 selectedActivity.update { null }
             }
+
             is EventsEvent.SelectActivity -> {
                 selectedActivity.update { event.activity }
             }
@@ -161,8 +162,8 @@ sealed interface EventsEvent {
     data class SelectEvent(val event: Event) : EventsEvent
     data class EditEvent(val event: Event) : EventsEvent
     data class DeleteEvent(val event: Event) : EventsEvent
-    data class SelectMachine(val machine: Machine): EventsEvent
-    data class SelectActivity(val activity: Activity): EventsEvent
+    data class SelectMachine(val machine: Machine) : EventsEvent
+    data class SelectActivity(val activity: Activity) : EventsEvent
 }
 
 sealed interface EventsUiState {

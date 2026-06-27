@@ -3,7 +3,7 @@ package com.jssdvv.ara.core.domain.utility
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 
-fun Color.hue() : Float {
+fun Color.hue(): Float {
     val hsv = FloatArray(3)
     android.graphics.Color.RGBToHSV(
         (red * 255).toInt(),
@@ -14,7 +14,7 @@ fun Color.hue() : Float {
     return hsv[0]
 }
 
-fun Color.saturation() : Float {
+fun Color.saturation(): Float {
     val hsv = FloatArray(3)
     android.graphics.Color.RGBToHSV(
         (red * 255).toInt(),
@@ -33,7 +33,7 @@ fun FloatArray.toComposeColor(): Color {
     }
 }
 
-fun Color.asContentColor() : Color {
+fun Color.asContentColor(): Color {
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(this.toArgb(), hsv)
     hsv[1] = .2F
@@ -41,7 +41,7 @@ fun Color.asContentColor() : Color {
     return Color(android.graphics.Color.HSVToColor(hsv))
 }
 
-fun Color.asContainerColor() : Color {
+fun Color.asContainerColor(): Color {
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(this.toArgb(), hsv)
     hsv[1] = .5F
@@ -49,7 +49,7 @@ fun Color.asContainerColor() : Color {
     return Color(android.graphics.Color.HSVToColor(hsv))
 }
 
-fun Color.asBorderColor() : Color {
+fun Color.asBorderColor(): Color {
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(this.toArgb(), hsv)
     hsv[1] = .4F

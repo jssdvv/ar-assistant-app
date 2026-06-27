@@ -197,7 +197,8 @@ fun CalibrationContent(
 
     // Model Edition
     val containerNodesMap: ContainerNodesMap = remember { mutableMapOf() }
-    val selectedContainer = remember(items.selectedModelId) { containerNodesMap[items.selectedModelId] }
+    val selectedContainer =
+        remember(items.selectedModelId) { containerNodesMap[items.selectedModelId] }
     var pressedAxis by remember { mutableStateOf<Axis?>(null) }
 
     // Components Visibility

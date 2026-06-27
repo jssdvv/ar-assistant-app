@@ -22,7 +22,9 @@ class DirectoriesManagerImpl(
 
     private val internalStorageDir by lazy { context.filesDir }
 
-    private fun checkDir(file: File) { if (!file.exists()) file.mkdirs() }
+    private fun checkDir(file: File) {
+        if (!file.exists()) file.mkdirs()
+    }
 
     override fun getRootMachineDir() = File(internalStorageDir, MACHINE_DIR)
         .also(::checkDir)

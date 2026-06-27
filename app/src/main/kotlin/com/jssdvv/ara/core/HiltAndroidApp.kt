@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import androidx.work.WorkerFactory
 import com.jssdvv.ara.core.data.repository.NotificationService
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject

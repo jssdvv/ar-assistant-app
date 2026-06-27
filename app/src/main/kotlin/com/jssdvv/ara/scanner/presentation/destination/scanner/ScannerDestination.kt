@@ -199,7 +199,7 @@ fun ScannerSuccessScreen(
         IconButton(
             onClick = { onToggleTorchState() }
         ) {
-            if(isTorchEnabled) {
+            if (isTorchEnabled) {
                 Icon(
                     painter = painterResource(R.drawable.ic_torch_filled),
                     tint = Color.Yellow,

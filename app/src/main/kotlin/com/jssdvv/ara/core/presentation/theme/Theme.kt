@@ -17,7 +17,7 @@ fun Theme(
         LocalTubShapes provides TubShapes()
     ) {
         MaterialTheme(
-            colorScheme = if(darkTheme) DarkColorScheme else LightColorScheme,
+            colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
             shapes = shapes,
             typography = Typography,
             content = content
@@ -25,7 +25,7 @@ fun Theme(
     }
 }
 
-val MaterialTheme.cornerRadius : CornerRadius
+val MaterialTheme.cornerRadius: CornerRadius
     @Composable
     @ReadOnlyComposable
     get() = LocalCornerRadius.current

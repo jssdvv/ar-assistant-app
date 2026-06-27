@@ -250,7 +250,7 @@ private fun EventForm(
     selectedMachine: Machine?,
     selectedActivity: Activity?,
     onMachineSelected: (Machine) -> Unit,
-    onActivitySelected : (Activity) -> Unit,
+    onActivitySelected: (Activity) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -367,7 +367,9 @@ private fun MachineDropdown(
         onExpandedChange = { expanded = it }
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
             value = selected?.name ?: "",
             onValueChange = {},
             readOnly = true,
@@ -419,7 +421,9 @@ private fun ActivityDropdown(
         onExpandedChange = { expanded = it }
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
             value = selected?.name ?: "",
             onValueChange = {},
             readOnly = true,

@@ -12,7 +12,7 @@ class BoxNode(
     size: Size,
     materialLoader: MaterialLoader,
     center: Position = Position()
-): CubeNode(
+) : CubeNode(
     engine = engine,
     size = size + Size(0.005F),
     center = center,

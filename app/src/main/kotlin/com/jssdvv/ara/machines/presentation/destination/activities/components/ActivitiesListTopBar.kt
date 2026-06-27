@@ -17,7 +17,7 @@ fun ActivitiesListTopBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        title = { Text( stringResource(R.string.top_bar_activities_title)) },
+        title = { Text(stringResource(R.string.top_bar_activities_title)) },
         navigationIcon = { NavigationUpIconButton(onBackClick) }
     )
 }

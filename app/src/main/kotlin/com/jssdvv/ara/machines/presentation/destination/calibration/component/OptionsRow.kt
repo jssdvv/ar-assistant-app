@@ -48,7 +48,9 @@ fun RowScope.OptionsRow(
         colors = if (isPlaneEnabled) colors.copy(containerColor = Color(0xFF00AAE4).copy(alpha = 0.4F)) else colors,
         content = {
             Icon(
-                painter = if(isPlaneEnabled) painterResource(R.drawable.ic_plane_renderer_on) else painterResource(R.drawable.ic_plane_renderer_off),
+                painter = if (isPlaneEnabled) painterResource(R.drawable.ic_plane_renderer_on) else painterResource(
+                    R.drawable.ic_plane_renderer_off
+                ),
                 contentDescription = null,
                 modifier = Modifier.size(iconSize),
             )

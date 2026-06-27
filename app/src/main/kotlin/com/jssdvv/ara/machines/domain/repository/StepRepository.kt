@@ -7,6 +7,6 @@ import kotlinx.coroutines.flow.Flow
 interface StepRepository {
     fun selectStepsOrdered(activityId: Int, orderType: OrderType): Flow<List<Step>>
     fun selectStepById(id: Int): Flow<Step?>
-    suspend fun upsertStep(vararg model: Step) : List<Long>
+    suspend fun upsertStep(vararg model: Step): List<Long>
     suspend fun deleteStep(vararg model: Step)
 }

@@ -54,7 +54,7 @@ fun Session.setImageDatabase(imageName: String, bitmap: Bitmap) {
     )
 }
 
-fun EnvironmentLoader.createMainEnvironment() : Environment {
+fun EnvironmentLoader.createMainEnvironment(): Environment {
     return createEnvironment(
         skybox = Skybox
             .Builder()

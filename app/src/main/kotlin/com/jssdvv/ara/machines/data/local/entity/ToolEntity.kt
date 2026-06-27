@@ -45,7 +45,7 @@ data class ToolEntity(
     @ColumnInfo(name = COLUMN_SYMBOL_MEDIA_URI)
     val symbolMediaUri: Uri?
 ) {
-    companion object{
+    companion object {
         const val TABLE_NAME = "tools"
         const val COLUMN_ID = "id"
         const val COLUMN_TYPE = "type"

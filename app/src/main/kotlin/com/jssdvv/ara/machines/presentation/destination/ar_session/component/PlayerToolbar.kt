@@ -65,7 +65,7 @@ fun PlayerToolbar(
 @Preview(showBackground = true, name = "Player Toolbar")
 @Composable
 fun PlayerToolbarPreview(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
 
     var currentStepIndex by remember { mutableStateOf(0) }

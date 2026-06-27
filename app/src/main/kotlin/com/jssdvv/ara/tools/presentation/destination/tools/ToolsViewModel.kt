@@ -2,6 +2,7 @@ package com.jssdvv.ara.tools.presentation.destination.tools
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jssdvv.ara.core.domain.repository.FilesManager
@@ -43,7 +44,7 @@ class ToolsViewModel @Inject constructor(
         val filtered = if (query.isBlank()) allTools
         else allTools.filter {
             it.name.contains(query, ignoreCase = true) ||
-                (it.code?.contains(query, ignoreCase = true) == true)
+                    (it.code?.contains(query, ignoreCase = true) == true)
         }
 
         val sorted = when (order.key) {
@@ -77,17 +78,25 @@ class ToolsViewModel @Inject constructor(
                     toolsDataManager.upsert(tool)
                 }
             }
+
             is ToolsEvent.OnEditTool -> {
                 viewModelScope.launch {
                     val oldTool = (uiState.value as? ToolsUiState.Success)
                         ?.tools?.find { it.id == event.tool.id }
                     val tool = event.tool.copy(
-                        bodyMediaUri = replaceToolImage(oldTool?.bodyMediaUri, event.tool.bodyMediaUri),
-                        symbolMediaUri = replaceToolImage(oldTool?.symbolMediaUri, event.tool.symbolMediaUri),
+                        bodyMediaUri = replaceToolImage(
+                            oldTool?.bodyMediaUri,
+                            event.tool.bodyMediaUri
+                        ),
+                        symbolMediaUri = replaceToolImage(
+                            oldTool?.symbolMediaUri,
+                            event.tool.symbolMediaUri
+                        ),
                     )
                     toolsDataManager.upsert(tool)
                 }
             }
+
             is ToolsEvent.OnDeleteTool -> {
                 viewModelScope.launch {
                     val tool = event.tool
@@ -99,7 +108,7 @@ class ToolsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun replaceToolImage(currentUri: Uri?, newUri: Uri?): Uri? {
+    private fun replaceToolImage(currentUri: Uri?, newUri: Uri?): Uri? {
         if (newUri == null) return null
         val uriType = filesManager.getUriType(newUri) ?: return newUri
         if (uriType != UriType.CONTENT) return newUri
@@ -108,7 +117,8 @@ class ToolsViewModel @Inject constructor(
             currentUri?.path?.let { path ->
                 try {
                     filesManager.deleteFile(File(path))
-                } catch (_: Exception) { }
+                } catch (_: Exception) {
+                }
             }
         }
         return file?.toUri() ?: currentUri

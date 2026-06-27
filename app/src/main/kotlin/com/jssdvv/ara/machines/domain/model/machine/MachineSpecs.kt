@@ -34,7 +34,7 @@ data class MachineSpecs(
     val length: String? = null,
     val width: String? = null,
     val jobDesc: String? = null,
-    val hoursPerDay : Int? = null,
+    val hoursPerDay: Int? = null,
     val roomTemp: String? = null,
     val additionalDesc: String? = null,
     val createdAt: Instant = Instant.now(),

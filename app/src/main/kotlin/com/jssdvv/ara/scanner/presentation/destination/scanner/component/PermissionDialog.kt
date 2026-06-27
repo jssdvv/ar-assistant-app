@@ -22,7 +22,7 @@ fun PermissionDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    if (!isPermanentlyDeclined){
+                    if (!isPermanentlyDeclined) {
                         onDismissPermissionDialog()
                         onRequestPermission()
                     } else {

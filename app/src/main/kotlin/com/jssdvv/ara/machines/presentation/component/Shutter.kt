@@ -112,7 +112,7 @@ fun ShutterButton(
             },
         contentAlignment = Alignment.Center
     ) {
-        val (currentContainerColor, currentContentColor) = if(enabled){
+        val (currentContainerColor, currentContentColor) = if (enabled) {
             containerColor to contentColor
         } else {
             disabledContainerColor to disabledContentColor

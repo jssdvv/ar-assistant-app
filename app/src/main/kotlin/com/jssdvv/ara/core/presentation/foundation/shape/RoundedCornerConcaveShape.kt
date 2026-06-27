@@ -143,9 +143,17 @@ class RoundedCornerConcaveShape(
                     close()
                 }
 
-                ShapeEdge.Right -> { TODO() }
-                ShapeEdge.Bottom -> { TODO()}
-                ShapeEdge.Left -> { TODO() }
+                ShapeEdge.Right -> {
+                    TODO()
+                }
+
+                ShapeEdge.Bottom -> {
+                    TODO()
+                }
+
+                ShapeEdge.Left -> {
+                    TODO()
+                }
             }
         }
     }

@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface EventRepository {
     fun selectAllEvents(): Flow<List<Event>>
-    suspend fun upsertEvent(model: Event) : Long
+    suspend fun upsertEvent(model: Event): Long
     suspend fun deleteEvent(vararg model: Event)
 }

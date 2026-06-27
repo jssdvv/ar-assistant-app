@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.dp
 fun LoopIconButton(
     isPaused: Boolean,
     isLooping: Boolean,
-    onClick : (isLooping: Boolean) -> Unit,
+    onClick: (isLooping: Boolean) -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled : Boolean = true
+    enabled: Boolean = true
 ) = Box(
     modifier = modifier
         .minimumInteractiveComponentSize()
@@ -49,9 +49,9 @@ fun LoopIconButton(
 
 @Composable
 fun SkipNextOperationIconButton(
-    onClick : () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled : Boolean = true
+    enabled: Boolean = true
 ) = IconButton(
     onClick = onClick,
     modifier = modifier,
@@ -61,9 +61,9 @@ fun SkipNextOperationIconButton(
 
 @Composable
 fun SkipPreviousOperationIconButton(
-    onClick : () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled : Boolean = true
+    enabled: Boolean = true
 ) = IconButton(
     onClick = onClick,
     modifier = modifier,
@@ -73,9 +73,9 @@ fun SkipPreviousOperationIconButton(
 
 @Composable
 fun SkipNextStepIconButton(
-    onClick : () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled : Boolean = true
+    enabled: Boolean = true
 ) = IconButton(
     onClick = onClick,
     modifier = modifier,
@@ -85,9 +85,9 @@ fun SkipNextStepIconButton(
 
 @Composable
 fun SkipPreviousStepIconButton(
-    onClick : () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled : Boolean = true
+    enabled: Boolean = true
 ) = IconButton(
     onClick = onClick,
     modifier = modifier,

@@ -229,6 +229,7 @@ class StepsViewModel @Inject constructor(
             it.copy(pivots = pivots + pivot)
         }
     }
+
     private fun unselectPivot(pivot: Pivot) {
         editingTargets.update {
             val pivots = it?.pivots ?: return@update null
@@ -474,6 +475,7 @@ sealed interface StepsEvent {
         val frequencyUnit: String?,
         val imageUri: Uri?,
     ) : StepsEvent
+
     data object OnDeleteActivity : StepsEvent
 }
 

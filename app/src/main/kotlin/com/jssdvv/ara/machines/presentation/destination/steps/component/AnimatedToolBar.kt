@@ -23,7 +23,7 @@ fun AnimatedToolBar(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
-    leadingContent : @Composable RowScope.() -> Unit = {},
+    leadingContent: @Composable RowScope.() -> Unit = {},
     trailingContent: @Composable RowScope.() -> Unit = {},
     content: @Composable RowScope.() -> Unit
 ) {

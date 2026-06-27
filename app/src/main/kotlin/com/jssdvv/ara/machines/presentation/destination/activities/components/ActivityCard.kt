@@ -37,7 +37,7 @@ fun ActivityCard(
     modifier: Modifier = Modifier,
 ) {
     HeroImageCard(
-        onClick = { if (isSelected) onNavigateToARSession() else onClick()},
+        onClick = { if (isSelected) onNavigateToARSession() else onClick() },
         isFocused = isSelected,
         imageUri = activity.imageUri,
         modifier = modifier,

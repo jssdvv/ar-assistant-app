@@ -103,7 +103,7 @@ internal fun MarkersScreen(
                     selectedItems = uiState.selectedMarkers,
                     isSelectionMode = uiState.isSelectionMode,
                     showDeleteMarkersDialog = showDeleteMarkersDialog,
-                    onShowDeleteMarkerDialog = {showDeleteMarkersDialog = it},
+                    onShowDeleteMarkerDialog = { showDeleteMarkersDialog = it },
                     onEvent = onEvent,
                 )
             }
@@ -179,7 +179,7 @@ fun MarkersSuccessScreen(
             onDeleteMarker = {
                 onEvent(MarkersEvent.OnDeleteMarker)
                 onEvent(MarkersEvent.OnOpenedMarkerChange(null))
-                             },
+            },
         )
     }
 

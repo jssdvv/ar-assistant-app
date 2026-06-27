@@ -97,7 +97,11 @@ fun DocumentsContent(
                 bottomRow = {
                     OrderSection(
                         orderState = data.orderState,
-                        usedOrderKeys = listOf(OrderKey.NAME, OrderKey.TYPE, OrderKey.CREATION_DATE),
+                        usedOrderKeys = listOf(
+                            OrderKey.NAME,
+                            OrderKey.TYPE,
+                            OrderKey.CREATION_DATE
+                        ),
                         onChangeOrder = { onEvent(DocumentsEvent.OnSortDocuments(it)) }
                     )
                 }
@@ -188,15 +192,15 @@ fun DocumentsContent(
         )
     }
 
-    if(openedDoc != null) {
+    if (openedDoc != null) {
         DocumentVisor(
             document = openedDoc.document,
             pageCount = openedDoc.pageCount,
-            pageSizes = openedDoc   .pageSizes,
+            pageSizes = openedDoc.pageSizes,
             pageBitmaps = openedDoc.pageBitmaps,
             currentPage = openedDoc.currentPage,
             search = openedDoc.search,
-            onLoadPage = {onEvent(DocumentsEvent.OnLoadPage(it))},
+            onLoadPage = { onEvent(DocumentsEvent.OnLoadPage(it)) },
             onShareDocument = { onEvent(DocumentsEvent.OnShareDocument(it)) },
             onCloseDocument = { onEvent(DocumentsEvent.OnClearShownDocument) }
         )

@@ -11,10 +11,13 @@ class RationaleProviderImpl : RationaleProvider {
     companion object {
         // Used permissionsManifestStrings in the app
         private const val CAMERA = Manifest.permission.CAMERA
+
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         private const val READ_MEDIA_IMAGES = Manifest.permission.READ_MEDIA_IMAGES
+
         @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-        private const val READ_MEDIA_VISUAL_USER_SELECTED = Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+        private const val READ_MEDIA_VISUAL_USER_SELECTED =
+            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
         private const val READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE
         private const val WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE
     }

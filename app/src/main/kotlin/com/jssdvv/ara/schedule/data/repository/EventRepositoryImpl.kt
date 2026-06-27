@@ -15,7 +15,7 @@ class EventRepositoryImpl(
     override fun selectAllEvents(): Flow<List<Event>> =
         dao.selectAllEvents().map { it.map(EventEntity::toDomain) }
 
-    override suspend fun upsertEvent(model: Event) : Long =
+    override suspend fun upsertEvent(model: Event): Long =
         dao.upsertEvents(model.toEntity())
 
     override suspend fun deleteEvent(vararg model: Event) =

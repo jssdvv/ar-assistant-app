@@ -57,10 +57,10 @@ fun ModelNode.setUnselectedMaterial(materialLoader: MaterialLoader) {
     setMaterialInstance(materialLoader.createModelMaterial(MODEL_UNSELECTED_COLOR))
 }
 
-fun pivotsOffsets (
+fun pivotsOffsets(
     pivotNodesMap: PivotNodesMap,
     transformedTargets: List<OperationTargets>
-) : PivotOffsetsMap = buildMap {
+): PivotOffsetsMap = buildMap {
     transformedTargets.forEach { (operation, pivots) ->
         pivots.forEach { pivot ->
             val node = pivotNodesMap[pivot] ?: return@forEach

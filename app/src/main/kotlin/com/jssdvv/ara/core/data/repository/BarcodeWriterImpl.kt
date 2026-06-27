@@ -65,7 +65,7 @@ class BarcodeWriterImpl(
             hints
         )
 
-        if(randomQRColor) {
+        if (randomQRColor) {
             val hsv = FloatArray(3)
             hsv[0] = (Random.nextFloat() * 360).coerceIn(0F, 360F)
             hsv[1] = 1F

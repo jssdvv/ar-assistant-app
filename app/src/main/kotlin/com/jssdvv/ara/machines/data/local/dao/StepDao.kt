@@ -24,7 +24,7 @@ interface StepDao {
     fun selectStepById(id: Int): Flow<StepEntity?>
 
     @Upsert
-    suspend fun upsertStep(vararg entity: StepEntity) : List<Long>
+    suspend fun upsertStep(vararg entity: StepEntity): List<Long>
 
     @Delete
     suspend fun deleteStep(vararg entity: StepEntity)

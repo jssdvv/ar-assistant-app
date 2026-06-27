@@ -179,7 +179,8 @@ internal fun CalendarHeader(
         }
         IconButton(
             modifier = Modifier.align(Alignment.CenterEnd),
-            onClick = onToggleCalendar) {
+            onClick = onToggleCalendar
+        ) {
             Icon(
                 painter = painterResource(R.drawable.ic_date),
                 contentDescription = stringResource(R.string.icon_toggle_calendar_content_desc)

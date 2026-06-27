@@ -144,7 +144,7 @@ fun CalibrationBottomSheetContent(
                 }
             }
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             ButtonWithIcon(
                 onClick = onDeleteModel,

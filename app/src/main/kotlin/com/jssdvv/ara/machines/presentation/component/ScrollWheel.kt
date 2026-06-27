@@ -39,7 +39,7 @@ fun OutlinedScrollWheel(
 ) {
     Box(
         modifier = modifier
-            .size(250.dp,40.dp)
+            .size(250.dp, 40.dp)
             .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small)
     ) {
         ScrollWheel(
@@ -99,7 +99,8 @@ fun ScrollWheel(
                             if (dragAmount != 0f) {
 
                                 // The polygon rotation is similar every angle step
-                                rotationRad = (rotationRad + dragAmount / circumradius) % centralAngleRad
+                                rotationRad =
+                                    (rotationRad + dragAmount / circumradius) % centralAngleRad
                                 fullRotationRad += dragAmount / circumradius
 
                                 val ticks = (fullRotationRad / centralAngleRad).toInt()

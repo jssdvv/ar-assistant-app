@@ -11,5 +11,5 @@ data class Model(
     val calibrated: Boolean = false,
 
     // Model's position and rotation in Origin's local space.
-    val offsetTransform: Transform  = Transform()
+    val offsetTransform: Transform = Transform()
 )

@@ -77,5 +77,5 @@ interface PermissionHandler {
      *
      * @return A [PermissionState] representing the current state of the manifestString.
      */
-    fun getPermissionState(permission: String, shouldShowDialog: Boolean, ): PermissionState
+    fun getPermissionState(permission: String, shouldShowDialog: Boolean): PermissionState
 }

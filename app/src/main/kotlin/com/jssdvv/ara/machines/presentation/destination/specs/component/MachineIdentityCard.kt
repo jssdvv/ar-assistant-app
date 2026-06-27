@@ -129,7 +129,7 @@ fun MachineIdentityCard(
                         )
                     }
                 )
-                ExposedDropdownMenuBox (
+                ExposedDropdownMenuBox(
                     expanded = showTypeDropDownMenu,
                     onExpandedChange = { showTypeDropDownMenu = it }
                 ) {

@@ -80,7 +80,7 @@ fun NavGraphBuilder.machinesNavGraph(
             deepLinks = listOf(navDeepLink<MachinesGraph.SpecsRoute>(basePath = "${baseUri}/machine"))
         ) {
             SpecsDestination(
-                onNavigateUp =  { navHostController.navigateUp() },
+                onNavigateUp = { navHostController.navigateUp() },
                 onNavigateToActivities = navHostController::navigateToActivities,
                 onNavigateToDocuments = navHostController::navigateToDocuments
             )

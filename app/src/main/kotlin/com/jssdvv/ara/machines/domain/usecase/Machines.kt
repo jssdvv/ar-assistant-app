@@ -27,7 +27,7 @@ class SelectMachines(private val repository: MachineRepository) {
     operator fun invoke(orderState: OrderState): Flow<List<Machine>> =
         repository.selectModelsOrdered(orderState)
 
-    suspend fun selectMachineAndDetails(machineId: Int) : MachineDetails =
+    suspend fun selectMachineAndDetails(machineId: Int): MachineDetails =
         repository.selectMachineAndDetailsByMachineId(machineId)
 
     fun selectMachineWithActivities(): Flow<List<MachineActivities>> =

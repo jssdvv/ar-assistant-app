@@ -206,7 +206,7 @@ fun RemovableRenderableItem(
     name: String,
     onRemoveClick: () -> Unit,
     modifier: Modifier = Modifier
-) = Row (
+) = Row(
     modifier = modifier
         .height(56.dp)
         .padding(horizontal = MaterialTheme.spacing.medium),

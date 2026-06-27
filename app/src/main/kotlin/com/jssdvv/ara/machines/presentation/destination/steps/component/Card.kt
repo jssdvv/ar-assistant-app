@@ -152,7 +152,7 @@ fun StepCard(
                     )
 
                     if (noOperations) {
-                        Column (
+                        Column(
                             modifier = this
                                 .fillMaxWidth()
                                 .padding(vertical = MaterialTheme.spacing.small),
@@ -200,7 +200,7 @@ fun SelectableRenderablesCard(
     modifier: Modifier = Modifier,
     items: List<Pivot>,
     onActivateSelection: () -> Unit,
-    onDeleteItem : (Pivot) -> Unit
+    onDeleteItem: (Pivot) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val itemHeight = 56.dp
@@ -211,7 +211,7 @@ fun SelectableRenderablesCard(
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
             val visibleItemsSize = layoutInfo.visibleItemsInfo.size
-            if(items.size <= maxVisibleItems) 0
+            if (items.size <= maxVisibleItems) 0
             else items.size - (listState.firstVisibleItemIndex + visibleItemsSize)
         }
     }
@@ -227,20 +227,20 @@ fun SelectableRenderablesCard(
         isFocused = false,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Column{
+        Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onActivateSelection() }
                     .padding(MaterialTheme.spacing.medium),
                 contentAlignment = Alignment.CenterStart,
-            ){
+            ) {
                 Text(
                     text = "Select a part...", // todo create string res??
                     style = MaterialTheme.typography.labelLarge
                 )
             }
-            if(items.isNotEmpty()) HorizontalDivider()
+            if (items.isNotEmpty()) HorizontalDivider()
             Box(modifier = Modifier.fillMaxWidth()) {
                 LazyColumn(
                     state = listState,
@@ -280,7 +280,9 @@ fun SelectableRenderablesCard(
                     visible = showBackToTop,
                     enter = scaleIn() + fadeIn(),
                     exit = scaleOut() + fadeOut(),
-                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp)
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 8.dp)
                 ) {
                     FilledIconButton(
                         onClick = {

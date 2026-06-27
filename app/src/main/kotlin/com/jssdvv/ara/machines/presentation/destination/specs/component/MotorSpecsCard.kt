@@ -123,7 +123,8 @@ fun MotorSpecsCard(
                     value = motorSpecsState.nominalPower?.toString() ?: "",
                     onValueChange = {
                         if (it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                            motorSpecsState = motorSpecsState.copy(nominalPower = it.toDoubleOrNull())
+                            motorSpecsState =
+                                motorSpecsState.copy(nominalPower = it.toDoubleOrNull())
                         }
                     },
                     label = { Text(stringResource(R.string.text_field_motor_nominal_power_label)) },
@@ -210,7 +211,8 @@ fun MotorSpecsCard(
                     value = motorSpecsState.serviceFactor?.toString() ?: "",
                     onValueChange = {
                         if (it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                            motorSpecsState = motorSpecsState.copy(serviceFactor = it.toDoubleOrNull())
+                            motorSpecsState =
+                                motorSpecsState.copy(serviceFactor = it.toDoubleOrNull())
                         }
                     },
                     label = { Text(stringResource(R.string.text_field_motor_service_factor_label)) },
@@ -227,7 +229,8 @@ fun MotorSpecsCard(
                     value = motorSpecsState.powerFactor?.toString() ?: "",
                     onValueChange = {
                         if (it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                            motorSpecsState = motorSpecsState.copy(powerFactor = it.toDoubleOrNull())
+                            motorSpecsState =
+                                motorSpecsState.copy(powerFactor = it.toDoubleOrNull())
                         }
                     },
                     label = { Text(stringResource(R.string.text_field_motor_power_factor_label)) },
@@ -305,7 +308,9 @@ fun MotorSpecsCard(
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = motorSpecsState.ingressProtection ?: "",
-                    onValueChange = { motorSpecsState = motorSpecsState.copy(ingressProtection = it) },
+                    onValueChange = {
+                        motorSpecsState = motorSpecsState.copy(ingressProtection = it)
+                    },
                     label = { Text(stringResource(R.string.text_field_motor_ingress_protection_label)) },
                     leadingIcon = {
                         Icon(
@@ -377,7 +382,9 @@ fun MotorSpecsCard(
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = motorSpecsState.insulationClass ?: "",
-                    onValueChange = { motorSpecsState = motorSpecsState.copy(insulationClass = it) },
+                    onValueChange = {
+                        motorSpecsState = motorSpecsState.copy(insulationClass = it)
+                    },
                     label = { Text(stringResource(R.string.text_field_motor_insulation_class_label)) },
                     leadingIcon = {
                         Icon(
@@ -391,7 +398,8 @@ fun MotorSpecsCard(
                     value = motorSpecsState.insulationTemp?.toString() ?: "",
                     onValueChange = {
                         if (it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                            motorSpecsState = motorSpecsState.copy(insulationTemp = it.toDoubleOrNull())
+                            motorSpecsState =
+                                motorSpecsState.copy(insulationTemp = it.toDoubleOrNull())
                         }
                     },
                     label = { Text(stringResource(R.string.text_field_motor_insulation_class_temp_label)) },
@@ -429,29 +437,121 @@ fun MotorSpecsCard(
                         .padding(16.dp)
                 ) {
                     listOf(
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_efficiency_class_label, motorSpecs.effClass),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_phases_number_label, motorSpecs.phasesNumber?.toString()),
-                        Triple(R.drawable.ic_power, R.string.text_field_motor_nominal_power_label, motorSpecs.nominalPower?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_frequency_label, motorSpecs.frequency?.toString()),
-                        Triple(R.drawable.ic_speed, R.string.text_field_motor_rpm_label, motorSpecs.rpm?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_rpm_range_label, motorSpecs.rpmRange),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_nominal_voltage_label, motorSpecs.nominalVoltage),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_nominal_current_label, motorSpecs.nominalCurrent),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_service_factor_label, motorSpecs.serviceFactor?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_power_factor_label, motorSpecs.powerFactor?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_duty_label, motorSpecs.duty),
-                        Triple(R.drawable.ic_heat, R.string.text_field_motor_room_temp_label, motorSpecs.roomTemp?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_energy_efficiency_label, motorSpecs.energyEff?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_max_altitude_label, motorSpecs.maxAltitude?.toString()),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_ingress_protection_label, motorSpecs.ingressProtection),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_mounting_type_label, motorSpecs.mountingType),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_frame_type_label, motorSpecs.frameType),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_cooling_method_label, motorSpecs.coolingMethod),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_drive_end_label, motorSpecs.driveEnd),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_non_drive_end_label, motorSpecs.nonDriveEnd),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_insulation_class_label, motorSpecs.insulationClass),
-                        Triple(R.drawable.ic_text, R.string.text_field_motor_insulation_class_temp_label, motorSpecs.insulationTemp?.toString()),
-                        Triple(R.drawable.ic_weight, R.string.text_field_motor_weight_label, motorSpecs.weight?.toString()),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_efficiency_class_label,
+                            motorSpecs.effClass
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_phases_number_label,
+                            motorSpecs.phasesNumber?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_power,
+                            R.string.text_field_motor_nominal_power_label,
+                            motorSpecs.nominalPower?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_frequency_label,
+                            motorSpecs.frequency?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_speed,
+                            R.string.text_field_motor_rpm_label,
+                            motorSpecs.rpm?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_rpm_range_label,
+                            motorSpecs.rpmRange
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_nominal_voltage_label,
+                            motorSpecs.nominalVoltage
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_nominal_current_label,
+                            motorSpecs.nominalCurrent
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_service_factor_label,
+                            motorSpecs.serviceFactor?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_power_factor_label,
+                            motorSpecs.powerFactor?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_duty_label,
+                            motorSpecs.duty
+                        ),
+                        Triple(
+                            R.drawable.ic_heat,
+                            R.string.text_field_motor_room_temp_label,
+                            motorSpecs.roomTemp?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_energy_efficiency_label,
+                            motorSpecs.energyEff?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_max_altitude_label,
+                            motorSpecs.maxAltitude?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_ingress_protection_label,
+                            motorSpecs.ingressProtection
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_mounting_type_label,
+                            motorSpecs.mountingType
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_frame_type_label,
+                            motorSpecs.frameType
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_cooling_method_label,
+                            motorSpecs.coolingMethod
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_drive_end_label,
+                            motorSpecs.driveEnd
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_non_drive_end_label,
+                            motorSpecs.nonDriveEnd
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_insulation_class_label,
+                            motorSpecs.insulationClass
+                        ),
+                        Triple(
+                            R.drawable.ic_text,
+                            R.string.text_field_motor_insulation_class_temp_label,
+                            motorSpecs.insulationTemp?.toString()
+                        ),
+                        Triple(
+                            R.drawable.ic_weight,
+                            R.string.text_field_motor_weight_label,
+                            motorSpecs.weight?.toString()
+                        ),
                     ).forEach { (icon, label, value) ->
                         DetailListItem(
                             painter = painterResource(icon),

@@ -18,10 +18,10 @@ interface OperationDao {
     @RawQuery(observedEntities = [OperationEntity::class, PivotComposite::class])
     fun selectOperationsWithTargetsByStepsIdsOrdered(
         query: SupportSQLiteQuery
-    ) : Flow<List<OperationWithTargets>>
+    ): Flow<List<OperationWithTargets>>
 
     @Upsert
-    suspend fun upsertOperation(vararg entity: OperationEntity) : List<Long>
+    suspend fun upsertOperation(vararg entity: OperationEntity): List<Long>
 
     @Delete
     suspend fun deleteOperation(vararg entity: OperationEntity)

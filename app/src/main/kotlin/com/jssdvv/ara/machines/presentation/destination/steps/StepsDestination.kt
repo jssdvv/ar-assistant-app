@@ -205,7 +205,6 @@ fun StepsContent(
     }
 
 
-
     var transformedPivots by remember { mutableStateOf(setOf<Pivot>()) }
     LaunchedEffect(animation) {
         transformedPivots.forEach { pivotNodesMap[it]?.restoreInitialTransform() }
@@ -364,7 +363,7 @@ fun StepsContent(
                 onChangeInfo = { onEvent(StepsEvent.OnChangeEditingOperation(it)) },
                 onSaveEditing = {
                     items.currentEditingTargets.pivots.forEach {
-                        pivotNodesMap[it]?.apply{
+                        pivotNodesMap[it]?.apply {
                             setSelection(materialLoader, false)
                             setPlaying(materialLoader)
                         }
@@ -373,7 +372,7 @@ fun StepsContent(
                 },
                 onCancelEditing = {
                     items.currentEditingTargets.pivots.forEach {
-                        pivotNodesMap[it]?.apply{
+                        pivotNodesMap[it]?.apply {
                             setSelection(materialLoader, false)
                             setPlaying(materialLoader)
                         }

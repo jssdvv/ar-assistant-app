@@ -32,10 +32,10 @@ fun AnimationIcon(
 @Composable
 fun ChangeIcon(
     modifier: Modifier = Modifier,
-    painter : Painter = painterResource(R.drawable.ic_change),
+    painter: Painter = painterResource(R.drawable.ic_change),
     contentDescription: String? = null
 ) = Icon(
     painter = painter,
-    contentDescription =contentDescription,
+    contentDescription = contentDescription,
     modifier = modifier
 )

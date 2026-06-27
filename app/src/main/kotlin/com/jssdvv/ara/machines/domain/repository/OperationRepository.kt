@@ -9,7 +9,8 @@ interface OperationRepository {
     fun selectOperationsWithTargetsByStepsIdsOrdered(
         stepsIds: List<Int>,
         orderType: OrderType
-    ) : Flow<List<OperationTargets>>
+    ): Flow<List<OperationTargets>>
+
     suspend fun upsertOperationTargets(vararg model: OperationTargets)
     suspend fun upsertOperation(vararg model: Operation)
     suspend fun deleteOperation(vararg model: Operation)

@@ -23,7 +23,7 @@ fun ShutterActionButton(
             containerColor = Color.White,
             contentColor = Color.Black
         ),
-        iconInFront= iconInFront,
+        iconInFront = iconInFront,
         icon = icon,
         content = content
     )

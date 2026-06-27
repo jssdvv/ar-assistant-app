@@ -1,7 +1,6 @@
 package com.jssdvv.ara.machines.data.local.mapper.machine
 
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
-import com.jssdvv.ara.machines.data.local.mapper.machine.toDomain
 import com.jssdvv.ara.machines.data.local.mapper.toDomain
 import com.jssdvv.ara.machines.data.local.mapper.toEntity
 import com.jssdvv.ara.machines.data.local.relation.MachineAndDetails

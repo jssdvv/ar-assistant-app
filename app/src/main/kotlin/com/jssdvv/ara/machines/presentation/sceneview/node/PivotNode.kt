@@ -230,7 +230,7 @@ class PivotNode(engine: Engine) : Node(engine) {
     fun toggleVisibility() {
         val value = !renderableVisible
         renderableVisible = value
-        renderableNode?.apply{
+        renderableNode?.apply {
             isTouchable = value
             isVisible = value
         }

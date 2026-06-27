@@ -2,7 +2,7 @@ package com.jssdvv.ara.core.domain.utility
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import com.jssdvv.ara.R
 import com.jssdvv.ara.schedule.domain.type.RecurrenceUnit
@@ -11,7 +11,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.compose.ui.platform.LocalResources
 
 object DateFormats {
     @SuppressLint("ConstantLocale")
