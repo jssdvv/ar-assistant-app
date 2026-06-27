@@ -16,6 +16,7 @@
     <string name="button_save_action">Guardar</string>
     <string name="button_edit_action">Editar</string>
     <string name="button_add_action">Agregar</string>
+    <string name="button_delete_action">Eliminar</string>
 
     <!--COMMON ICON [COMPONENT]-->
 

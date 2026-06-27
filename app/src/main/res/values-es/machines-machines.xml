@@ -21,4 +21,14 @@
 
     <string name="card_machine_image_content_desc">Imagen de la máquina</string>
 
+    <!--MACHINES FAB [COMPONENT]-->
+
+    <string name="fab_machines_create_action">Nueva máquina</string>
+
+    <!--MACHINE DIALOG [COMPONENT]-->
+
+    <string name="dialog_machine_create_title">Nueva Máquina</string>
+    <string name="dialog_machine_edit_title">Editar Máquina</string>
+    <string name="text_field_machine_name_label">Nombre</string>
+
 </resources>

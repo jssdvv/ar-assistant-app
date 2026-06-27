@@ -17,9 +17,7 @@ import com.jssdvv.ara.core.presentation.common.state.ManifestString
 import com.jssdvv.ara.core.presentation.common.state.Permission
 import com.jssdvv.ara.machines.domain.model.Marker
 import com.jssdvv.ara.machines.domain.model.Model
-import com.jssdvv.ara.machines.domain.model.Operation
 import com.jssdvv.ara.machines.domain.model.OperationTargets
-import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.domain.model.Step
 import com.jssdvv.ara.machines.domain.usecase.MarkersDataManager
 import com.jssdvv.ara.machines.domain.usecase.ModelsDataManager
@@ -58,9 +56,9 @@ class ARSessionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val permissionHandler: PermissionHandler,
     private val filesManager: FilesManager,
-    private val markersDataManager: MarkersDataManager,
-    private val modelsDataManager: ModelsDataManager,
-    private val stepsDataManager: StepsDataManager,
+    markersDataManager: MarkersDataManager,
+    modelsDataManager: ModelsDataManager,
+    stepsDataManager: StepsDataManager,
     private val opsDataManager: OperationDataManager,
 ) : ViewModel() {
 
@@ -72,7 +70,7 @@ class ARSessionViewModel @Inject constructor(
     val machineId = route.machineId
     val activityId = route.activityId
 
-    private val _permissions = MutableStateFlow<Set<Permission>>(
+    private val _permissions = MutableStateFlow(
         setOf(
             Permission(
                 manifestString = CAMERA_PERMISSION,
@@ -147,15 +145,13 @@ class ARSessionViewModel @Inject constructor(
         )
 
     private val selectedOperationId = MutableStateFlow<Int?>(null)
-    private val currentOperation: StateFlow<Operation?> = combine(
+    private val currentTargets: StateFlow<OperationTargets?> = combine(
         operationsTargets,
         selectedOperationId
     ) { operationsTargets, selectedOperationId ->
         operationsTargets
             .firstOrNull { it.operation.id == selectedOperationId }
             .let { it ?: operationsTargets.firstOrNull() }
-            .also { animatedPivots.value = it?.pivots ?: emptySet() }
-            ?.operation
     }
         .distinctUntilChanged()
         .stateIn(
@@ -164,13 +160,12 @@ class ARSessionViewModel @Inject constructor(
             initialValue = null
         )
 
-    private val animatedPivots = MutableStateFlow(emptySet<Pivot>())
-    private val transformedTargets: StateFlow<List<OperationTargets>> = combine(
+    private val precedentTargets: StateFlow<List<OperationTargets>> = combine(
         operationsTargets,
-        currentOperation
+        currentTargets
     ) { opsTargets, current ->
         if (current == null) return@combine emptyList()
-        opsTargets.takeWhile { it.operation.id != current.id }
+        opsTargets.takeWhile { it.operation.id != current.operation.id }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
@@ -191,15 +186,14 @@ class ARSessionViewModel @Inject constructor(
             initialValue = null
         )
 
-    private val currentStepOperations: StateFlow<List<OperationTargets>> = combine(
+    private val stepOperations: StateFlow<List<OperationTargets>> = combine(
         operationsTargets,
         currentStep
     ) { operationsTargets, currentStep ->
-        operationsTargets
-            .filter { it.operation.stepId == currentStep?.id }
+        operationsTargets.filter { it.operation.stepId == currentStep?.id }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000L),
+        started = SharingStarted.Eagerly,
         initialValue = emptyList()
     )
 
@@ -219,7 +213,6 @@ class ARSessionViewModel @Inject constructor(
         selectedMarker,
         selectedMarkerBitmap,
         currentStep,
-        currentOperation,
         ::ARSessionItems
     ).stateIn(
         scope = viewModelScope,
@@ -228,8 +221,8 @@ class ARSessionViewModel @Inject constructor(
     )
 
     private val animation: StateFlow<ARSessionAnimation> = combine(
-        transformedTargets,
-        animatedPivots,
+        precedentTargets,
+        currentTargets,
         ::ARSessionAnimation
     ).stateIn(
         scope = viewModelScope,
@@ -310,29 +303,29 @@ class ARSessionViewModel @Inject constructor(
     }
 
     private fun selectNextStep() {
-        val currentStepId = currentStep.value?.id ?: return
-        val nextStep = steps.value.next { it.id == currentStepId }
+        val current = currentStep.value ?: return
+        val next = steps.value.next { it.id == current.id } ?: return
 
-        if (nextStep?.id != currentStepId) {
+        if (current.id != next.id) {
             val firstOpInNext = operationsTargets.value
-                .filter { it.operation.stepId == nextStep?.id }
+                .filter { it.operation.stepId == next.id }
                 .minByOrNull { it.operation.order }
 
-            selectStep(nextStep?.id)
+            selectStep(next.id)
             selectOperation(firstOpInNext?.operation?.id)
         }
     }
 
     private fun selectPreviousStep() {
-        val currentStepId = currentStep.value?.id ?: return
-        val previousStep = steps.value.previous { it.id == currentStepId }
+        val current = currentStep.value ?: return
+        val previous = steps.value.previous { it.id == current.id } ?: return
 
-        if (previousStep?.id != currentStepId) {
+        if (current.id != previous.id) {
             val firstOpInPrev = operationsTargets.value
-                .filter { it.operation.stepId == previousStep?.id }
+                .filter { it.operation.stepId == previous.id }
                 .minByOrNull { it.operation.order }
 
-            selectStep(previousStep?.id)
+            selectStep(previous.id)
             selectOperation(firstOpInPrev?.operation?.id)
         }
     }
@@ -342,58 +335,40 @@ class ARSessionViewModel @Inject constructor(
     }
 
     private fun selectNextOperation() {
-        val currentOp = currentOperation.value
-        val currentStep = currentStep.value ?: return
-        val stepsList = steps.value
-        val operationsTargets = this@ARSessionViewModel.operationsTargets.value
+        val current = currentTargets.value
+        val lastInStep = stepOperations.value.maxByOrNull { it.operation.order }
+        val isLast = lastInStep?.operation?.id == current?.operation?.id
 
-        val isLastOp = currentOp == null || currentStepOperations.value
-                    .maxByOrNull { it.operation.order }?.operation?.id == currentOp.id
-
-        if (isLastOp) {
-            val nextStep = stepsList.next { it.id == currentStep.id }
-
-            if (nextStep?.id != currentStep.id) {
-                val firstOpInNext = operationsTargets
-                    .filter { it.operation.stepId == nextStep?.id }
-                    .minByOrNull { it.operation.order }
-
-                selectStep(nextStep?.id)
-                selectOperation(firstOpInNext?.operation?.id)
-            } else {
-                selectOperation(currentOp?.id)
-            }
+        if (isLast) {
+            selectNextStep()
         } else {
-            val next = operationsTargets.next { it.operation.id == currentOp.id }
+            val next = operationsTargets.value
+                .next { it.operation.id == current?.operation?.id }
             selectOperation(next?.operation?.id)
         }
     }
 
     private fun selectPreviousOperation() {
-        val currentOp = currentOperation.value
-        val currentStep = currentStep.value ?: return
-        val stepsList = steps.value
-        val operationsTargets = this@ARSessionViewModel.operationsTargets.value
+        val current = currentTargets.value
+        val firstInStep = stepOperations.value.minByOrNull { it.operation.order }
+        val isFirst = firstInStep?.operation?.id == current?.operation?.id
 
-        val isFirstOp = currentOp == null || currentStepOperations.value
-                    .minByOrNull { it.operation.order }?.operation?.id == currentOp.id
+        if (isFirst) {
+            val current = currentStep.value ?: return
+            val previous = steps.value.previous { it.id == current.id } ?: return
 
-        if (isFirstOp) {
-            val previousStep = stepsList.previous { it.id == currentStep.id }
-
-            if (previousStep?.id != currentStep.id) {
-                val lastOpInPrev = operationsTargets
-                    .filter { it.operation.stepId == previousStep?.id }
+            if (current.id != previous.id) {
+                val firstOpInPrev = operationsTargets.value
+                    .filter { it.operation.stepId == previous.id }
                     .maxByOrNull { it.operation.order }
 
-                selectStep(previousStep?.id)
-                selectOperation(lastOpInPrev?.operation?.id)
-            } else {
-                selectOperation(currentOp?.id)
+                selectStep(previous.id)
+                selectOperation(firstOpInPrev?.operation?.id)
             }
         } else {
-            val previousOp = operationsTargets.previous { it.operation.id == currentOp.id }
-            selectOperation(previousOp?.operation?.id)
+            val previous = operationsTargets.value
+                .previous { it.operation.id == current?.operation?.id }
+            selectOperation(previous?.operation?.id)
         }
     }
 
@@ -490,13 +465,12 @@ data class ARSessionItems(
     val selectedMarker: Marker? = null,
     val currentBitmap: BitmapInfo? = null,
     val currentStep: Step? = null,
-    val currentOperation: Operation? = null
 )
 
 @Immutable
 data class ARSessionAnimation(
-    val transformedTargets: List<OperationTargets> = emptyList(),
-    val animatedPivots: Set<Pivot> = emptySet()
+    val precedentTargets: List<OperationTargets> = emptyList(),
+    val currentTargets: OperationTargets? = null
 )
 
 @Immutable

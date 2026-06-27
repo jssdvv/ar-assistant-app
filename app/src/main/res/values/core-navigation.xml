@@ -5,15 +5,15 @@
 
     <string name="graph_scanner_label">Scanner</string>
     <string name="graph_machines_label">Machines</string>
-    <string name="graph_schedule_label">Schedule</string>
     <string name="graph_tools_label">Tools</string>
+    <string name="graph_events_label">Events</string>
 
     <!--NAVIGATION GRAPH ICON [COMPONENT]-->
 
     <string name="icon_scanner_content_desc">Open the Barcode Scanner</string>
     <string name="icon_machines_content_desc">Open the Machines List</string>
-    <string name="icon_schedule_content_desc">Open the Schedule</string>
     <string name="icon_tools_content_desc">Open Tool List</string>
+    <string name="icon_events_content_desc">Open the Schedule</string>
 
     <!--COUNTER NAVIGATION BUTTON [COMPONENT]-->
 

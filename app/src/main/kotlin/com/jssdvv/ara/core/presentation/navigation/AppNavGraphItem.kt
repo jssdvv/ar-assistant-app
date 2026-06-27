@@ -5,11 +5,12 @@ import androidx.annotation.StringRes
 import com.jssdvv.ara.R
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
+import com.jssdvv.ara.schedule.presentation.navigation.EventsGraph
 import com.jssdvv.ara.tools.presentation.navigation.ToolsGraph
 import kotlin.reflect.KClass
 
 /**
- * A enum class representing the navigation graph items of the navigation host.
+ * An enum class representing the navigation graph items of the navigation host.
  *
  * @see [AppNavHost]
  *
@@ -46,5 +47,12 @@ enum class AppNavGraphItem(
         labelTextId = R.string.graph_tools_label,
         iconContentDescId = R.string.icon_tools_content_desc,
         route = ToolsGraph::class
+    ),
+    EVENTS(
+        selectedIconId = R.drawable.ic_events_filled,
+        unselectedIconId = R.drawable.ic_events_outlined,
+        labelTextId = R.string.graph_events_label,
+        iconContentDescId = R.string.icon_events_content_desc,
+        route = EventsGraph::class
     )
 }

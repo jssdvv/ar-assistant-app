@@ -28,7 +28,7 @@ enum class Speed(
         denominator = 0.5F,
         displayText = ".5×",
         notificationStringId = R.string.notification_chip_message_speed_half,
-        notificationIconResId = R.drawable.ic_slow_motion
+        notificationIconResId = R.drawable.ic_half_speed
     ),
     NORMAL(
         denominator = 1F,
@@ -40,7 +40,13 @@ enum class Speed(
         denominator = 2F,
         displayText = "2×",
         notificationStringId = R.string.notification_chip_message_speed_double,
-        notificationIconResId = R.drawable.ic_fast_forward
+        notificationIconResId = R.drawable.ic_double_speed
+    ),
+    QUADRUPLE(
+        denominator = 4F,
+        displayText = "4×",
+        notificationStringId = R.string.notification_chip_message_speed_quadruple,
+        notificationIconResId = R.drawable.ic_quadruple_speed
     )
 }
 

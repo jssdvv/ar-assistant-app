@@ -49,6 +49,9 @@
     <string name="button_event_save_action">Save</string>
     <string name="button_event_delete_action">Delete</string>
     <string name="button_event_cancel_action">Cancel</string>
+    <string name="dialog_event_navigate_title">Go to activities?</string>
+    <string name="dialog_event_navigate_body">Do you want to go to the activity list for this event?</string>
+    <string name="button_event_navigate_go_action">Go</string>
 
     <string name="recurrence_every_one_day">Every day</string>
     <plurals name="recurrence_every_days">

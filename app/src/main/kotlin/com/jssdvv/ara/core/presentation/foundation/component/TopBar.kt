@@ -71,7 +71,7 @@ import com.jssdvv.ara.core.presentation.theme.spacing
 fun SearchTopBar(
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = { SearchIcon() },

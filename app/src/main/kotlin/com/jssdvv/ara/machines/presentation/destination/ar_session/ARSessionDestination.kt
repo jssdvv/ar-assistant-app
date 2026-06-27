@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -39,20 +40,20 @@ import com.jssdvv.ara.core.presentation.foundation.component.ARSceneSurface
 import com.jssdvv.ara.core.presentation.foundation.component.ButtonWithIcon
 import com.jssdvv.ara.core.presentation.foundation.component.LoadingWheelScreen
 import com.jssdvv.ara.core.presentation.theme.spacing
-import com.jssdvv.ara.machines.domain.model.OperationTargets
 import com.jssdvv.ara.machines.domain.model.Pivot
 import com.jssdvv.ara.machines.presentation.component.NotificationChip
 import com.jssdvv.ara.machines.presentation.component.SceneMarkerIconButton
 import com.jssdvv.ara.machines.presentation.component.ShutterSection
+import com.jssdvv.ara.machines.presentation.destination.ar_session.component.OperationOverlay
 import com.jssdvv.ara.machines.presentation.destination.ar_session.component.OptionsRow
 import com.jssdvv.ara.machines.presentation.destination.calibration.component.SelectedMarkerDialog
 import com.jssdvv.ara.machines.presentation.destination.steps.component.AnimationIcon
 import com.jssdvv.ara.machines.presentation.destination.steps.component.StepIcon
 import com.jssdvv.ara.machines.presentation.sceneview.utility.PivotNodesMap
-import com.jssdvv.ara.machines.presentation.sceneview.utility.applyOffset
 import com.jssdvv.ara.machines.presentation.sceneview.utility.configureARSession
 import com.jssdvv.ara.machines.presentation.sceneview.utility.detectMarkerNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.markerNode
+import com.jssdvv.ara.machines.presentation.sceneview.utility.pivotsOffsets
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberContainerNode
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberNodes
 import com.jssdvv.ara.machines.presentation.sceneview.utility.rememberOriginNode
@@ -195,37 +196,38 @@ fun ARCameraContent(
         }
     }
 
-    var previousTransformedPivots by remember { mutableStateOf(emptySet<Pivot>()) }
-    LaunchedEffect(animation, items.currentOperation, options) {
-        val transformedPivots: Set<Pivot> = animation.transformedTargets
-            .flatMapTo(mutableSetOf(), OperationTargets::pivots)
+    var animatedPivots by remember { mutableStateOf(setOf<Pivot>()) }
+    LaunchedEffect(animation.currentTargets) {
+        animatedPivots.forEach { pivotNodesMap[it]?.reset(materialLoader) }
+        animatedPivots = animation.currentTargets?.pivots ?: emptySet()
+        animatedPivots.forEach { pivotNodesMap[it]?.setPlaying(materialLoader) }
+    }
 
-        val animatedPivots = animation.animatedPivots
+    var transformedPivots by remember { mutableStateOf(setOf<Pivot>()) }
+    LaunchedEffect(animation, options) {
+        animation.currentTargets?.pivots?.forEach {
+            pivotNodesMap[it]?.restoreInitialTransform()
+        }
+        transformedPivots.forEach { pivotNodesMap[it]?.restoreInitialTransform() }
 
-        previousTransformedPivots.forEach { pivotNodesMap[it]?.restoreTransform() }
-        previousTransformedPivots = transformedPivots + animatedPivots
-
-        // Calculate offset of transformed targets pivots
-        animation.transformedTargets.forEach { opTargets ->
-            val operation = opTargets.operation
-            opTargets.pivots.forEach { pivot ->
-                pivotNodesMap[pivot]?.applyOffset(operation.offsetTransform, operation.global)
-            }
+        pivotsOffsets(pivotNodesMap, animation.precedentTargets).forEach { (pivot, transform) ->
+            pivotNodesMap[pivot]?.transform = transform
         }
 
-        val currentOperation = items.currentOperation ?: return@LaunchedEffect
-        val nodesToAnimate = animatedPivots.mapNotNull { pivotNodesMap[it] }
-        coroutineScope {
-            nodesToAnimate.map {
-                launch {
-                    it.animate(
-                        operation = currentOperation,
-                        speed = options.speed,
-                        playing = options.playing,
-                        looping = options.looping
-                    )
-                }
-            }.joinAll()
+        animation.currentTargets?.let { (operation, pivots) ->
+            transformedPivots = pivots
+            coroutineScope {
+                pivots.mapNotNull(pivotNodesMap::get).map {
+                    launch {
+                        it.animate(
+                            operation = operation,
+                            speed = options.speed,
+                            playing = options.playing,
+                            looping = options.looping
+                        )
+                    }
+                }.joinAll()
+            }
         }
     }
 
@@ -294,53 +296,76 @@ fun ARCameraContent(
             }
         )
 
-        ShutterSection(
-            visible = showShutterSection,
-            shutterClickEnabled = true,
-            shutterPressEnabled = isShutterEnabled,
-            onClickShutter = { onEvent(ARSessionEvent.OnTogglePlay) },
-            onPressShutter = { onEvent(ARSessionEvent.OnRepositionOrigin(origin, marker)) },
-            modifier = Modifier.align(Alignment.BottomCenter),
-            leftSection = {
-                Column(
-                    modifier = Modifier.padding(start = MaterialTheme.spacing.small),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-                ) {
-                    ButtonWithIcon(
-                        onClick = { onEvent(ARSessionEvent.OnSelectPreviousStep) },
-                        icon = { StepIcon(Modifier.graphicsLayer { rotationY = 180F }) },
-                        content = { Text("Previous") }
-                    )
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            if (
+                animation.currentTargets != null &&
+                items.currentStep != null &&
+                marker != null
+            ) {
+                OperationOverlay(
+                    step = items.currentStep,
+                    operation = animation.currentTargets.operation,
+                    tool = null,
+                )
+            }
 
-                    ButtonWithIcon(
-                        onClick = { onEvent(ARSessionEvent.OnSelectPreviousOperation) },
-                        icon = { AnimationIcon(Modifier.graphicsLayer { rotationY = 180F }) },
-                        content = { Text("Previous") }
-                    )
-                }
-            },
-            rightSection = {
-                Column(
-                    modifier = Modifier.padding(end = MaterialTheme.spacing.small),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-                ) {
-                    ButtonWithIcon(
-                        onClick = { onEvent(ARSessionEvent.OnSelectNextStep) },
-                        iconInFront = false,
-                        icon = { StepIcon() },
-                        content = { Text("Next") }
-                    )
+            ShutterSection(
+                visible = showShutterSection,
+                shutterClickEnabled = true,
+                shutterPressEnabled = isShutterEnabled,
+                onClickShutter = { onEvent(ARSessionEvent.OnTogglePlay) },
+                onPressShutter = { onEvent(ARSessionEvent.OnRepositionOrigin(origin, marker)) },
+                leftSection = {
+                    Column(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.small),
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                    ) {
+                        ButtonWithIcon(
+                            onClick = { onEvent(ARSessionEvent.OnSelectPreviousStep) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = marker != null,
+                            icon = { StepIcon(Modifier.graphicsLayer { rotationY = 180F }) },
+                            content = { Text("Anterior") }
+                        )
 
-                    ButtonWithIcon(
-                        onClick = { onEvent(ARSessionEvent.OnSelectNextOperation) },
-                        iconInFront = false,
-                        icon = { AnimationIcon() },
-                        content = { Text("Next") }
-                    )
-                }
-            },
-            iconDrawableId = if (options.playing) R.drawable.ic_pause else R.drawable.ic_play
-        )
+                        ButtonWithIcon(
+                            onClick = { onEvent(ARSessionEvent.OnSelectPreviousOperation) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = marker != null,
+                            icon = { AnimationIcon(Modifier.graphicsLayer { rotationY = 180F }) },
+                            content = { Text("Anterior") }
+                        )
+                    }
+                },
+                rightSection = {
+                    Column(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.small),
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+                    ) {
+                        ButtonWithIcon(
+                            onClick = { onEvent(ARSessionEvent.OnSelectNextStep) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = marker != null,
+                            iconInFront = false,
+                            icon = { StepIcon() },
+                            content = { Text("Siguiente") }
+                        )
+
+                        ButtonWithIcon(
+                            onClick = { onEvent(ARSessionEvent.OnSelectNextOperation) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = marker != null,
+                            iconInFront = false,
+                            icon = { AnimationIcon() },
+                            content = { Text("Siguiente") }
+                        )
+                    }
+                },
+                iconDrawableId = if (options.playing) R.drawable.ic_pause else R.drawable.ic_play
+            )
+        }
 
         if (showMarkersDialog) {
             SelectedMarkerDialog(

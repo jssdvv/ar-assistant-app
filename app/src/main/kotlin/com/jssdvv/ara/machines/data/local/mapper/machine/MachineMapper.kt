@@ -1,8 +1,13 @@
 package com.jssdvv.ara.machines.data.local.mapper.machine
 
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
+import com.jssdvv.ara.machines.data.local.mapper.machine.toDomain
+import com.jssdvv.ara.machines.data.local.mapper.toDomain
+import com.jssdvv.ara.machines.data.local.mapper.toEntity
 import com.jssdvv.ara.machines.data.local.relation.MachineAndDetails
+import com.jssdvv.ara.machines.data.local.relation.MachineWithActivities
 import com.jssdvv.ara.machines.domain.model.machine.Machine
+import com.jssdvv.ara.machines.domain.model.machine.MachineActivities
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 
 fun MachineEntity.toDomain() = Machine(
@@ -51,4 +56,14 @@ fun MachineDetails.toEntity() = MachineAndDetails(
     machineSpecs = machineSpecs.toEntity(),
     motorIdentity = motorIdentity.toEntity(),
     motorSpecs = motorSpecs.toEntity()
+)
+
+fun MachineWithActivities.toDomain() = MachineActivities(
+    machine = machine.toDomain(),
+    activities = activities.map { it.toDomain() }
+)
+
+fun MachineActivities.toEntity() = MachineWithActivities(
+    machine = machine.toEntity(),
+    activities = activities.map { it.toEntity() }
 )

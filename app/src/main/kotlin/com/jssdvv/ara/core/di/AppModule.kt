@@ -7,6 +7,7 @@ import com.jssdvv.ara.core.data.local.SeedDatabaseCallback
 import com.jssdvv.ara.core.data.repository.BarcodeWriterImpl
 import com.jssdvv.ara.core.data.repository.DirectoriesManagerImpl
 import com.jssdvv.ara.core.data.repository.FilesManagerImpl
+import com.jssdvv.ara.core.data.repository.NotificationService
 import com.jssdvv.ara.core.data.repository.PDFHelperImpl
 import com.jssdvv.ara.core.data.repository.PermissionHandlerImpl
 import com.jssdvv.ara.core.data.repository.RationaleProviderImpl
@@ -90,4 +91,10 @@ object AppModule {
         directoriesManager: DirectoriesManager,
         filesManager: FilesManager
     ): PDFHelper = PDFHelperImpl(context, directoriesManager, filesManager)
+
+    @Provides
+    @Singleton
+    fun provideNotificationService(
+        context: Context
+    ): NotificationService = NotificationService(context)
 }

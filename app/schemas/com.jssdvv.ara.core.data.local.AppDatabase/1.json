@@ -1,0 +1,1332 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "3fc9318b35e0bbbf3fefbb6a85558f5c",
+    "entities": [
+      {
+        "tableName": "machine",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `code` TEXT NOT NULL, `name` TEXT NOT NULL, `type` INTEGER NOT NULL, `location` TEXT, `brand` TEXT, `model` TEXT, `serial` TEXT, `fabrication_year` INTEGER, `price` REAL, `acquisition_date` TEXT, `image_uri` TEXT, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "location",
+            "columnName": "location",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "brand",
+            "columnName": "brand",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serial",
+            "columnName": "serial",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fabricationYear",
+            "columnName": "fabrication_year",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "acquisitionDate",
+            "columnName": "acquisition_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_machine_id",
+            "unique": true,
+            "columnNames": [
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_machine_id` ON `${TABLE_NAME}` (`id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "machine_specs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `service_capacity` TEXT, `speed` TEXT, `lubricant` TEXT, `power_supply` TEXT, `weight` TEXT, `height` TEXT, `length` TEXT, `width` TEXT, `job_desc` TEXT, `hours_per_day` INTEGER, `room_temp` TEXT, `additional_desc` TEXT, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serviceCapacity",
+            "columnName": "service_capacity",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "speed",
+            "columnName": "speed",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lubricant",
+            "columnName": "lubricant",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "powerSupply",
+            "columnName": "power_supply",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "length",
+            "columnName": "length",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "jobDesc",
+            "columnName": "job_desc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hoursPerDay",
+            "columnName": "hours_per_day",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "roomTemp",
+            "columnName": "room_temp",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "additionalDesc",
+            "columnName": "additional_desc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_machine_specs_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_machine_specs_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "motor_identity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `brand` TEXT, `model` TEXT, `serial_number` TEXT, `product_number` TEXT, `fabrication_country` TEXT, `standards` TEXT, `fabrication_year` INTEGER, `price` REAL, `acquisition_date` TEXT, `image_uri` TEXT, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brand",
+            "columnName": "brand",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serialNumber",
+            "columnName": "serial_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "productNumber",
+            "columnName": "product_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fabricationCountry",
+            "columnName": "fabrication_country",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "standards",
+            "columnName": "standards",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fabricationYear",
+            "columnName": "fabrication_year",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "acquisitionDate",
+            "columnName": "acquisition_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_motor_identity_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_motor_identity_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "motor_specs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `eff_class` TEXT, `phases_number` INTEGER, `nominal_power` REAL, `frequency` REAL, `rpm` INTEGER, `rpm_range` TEXT, `nominal_voltage` TEXT, `nominal_current` TEXT, `service_factor` REAL, `power_factor` REAL, `duty` TEXT, `room_temp` REAL, `energy_eff` REAL, `max_altitude` INTEGER, `ingress_protection` TEXT, `mounting_type` TEXT, `frame_type` TEXT, `cooling_method` TEXT, `drive_end` TEXT, `non_drive_end` TEXT, `insulation_class` TEXT, `insulation_temp` REAL, `weight` REAL, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "effClass",
+            "columnName": "eff_class",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "phasesNumber",
+            "columnName": "phases_number",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "nominalPower",
+            "columnName": "nominal_power",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "rpm",
+            "columnName": "rpm",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rpmRange",
+            "columnName": "rpm_range",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nominalVoltage",
+            "columnName": "nominal_voltage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nominalCurrent",
+            "columnName": "nominal_current",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceFactor",
+            "columnName": "service_factor",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "powerFactor",
+            "columnName": "power_factor",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "duty",
+            "columnName": "duty",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "roomTemp",
+            "columnName": "room_temp",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "energyEff",
+            "columnName": "energy_eff",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maxAltitude",
+            "columnName": "max_altitude",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ingressProtection",
+            "columnName": "ingress_protection",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mountingType",
+            "columnName": "mounting_type",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "frameType",
+            "columnName": "frame_type",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "coolingMethod",
+            "columnName": "cooling_method",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "driveEnd",
+            "columnName": "drive_end",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nonDriveEnd",
+            "columnName": "non_drive_end",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "insulationClass",
+            "columnName": "insulation_class",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "insulationTemp",
+            "columnName": "insulation_temp",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_motor_specs_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_motor_specs_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "document",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `category` INTEGER NOT NULL, `name` TEXT NOT NULL, `preview_uri` TEXT NOT NULL, `file_uri` TEXT NOT NULL, `created_at` INTEGER NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "previewUri",
+            "columnName": "preview_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileUri",
+            "columnName": "file_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_document_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_document_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tools",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` INTEGER NOT NULL, `name` TEXT NOT NULL, `number` TEXT, `body_media_uri` TEXT, `symbol_media_uri` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bodyMediaUri",
+            "columnName": "body_media_uri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "symbolMediaUri",
+            "columnName": "symbol_media_uri",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tools_id",
+            "unique": true,
+            "columnNames": [
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tools_id` ON `${TABLE_NAME}` (`id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "activity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `name` TEXT NOT NULL, `type` INTEGER NOT NULL, `description` TEXT, `frequency` INTEGER, `frequency_unit` TEXT, `image_uri` TEXT, `created_at` INTEGER NOT NULL, `modified_at` INTEGER NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "frequencyUnit",
+            "columnName": "frequency_unit",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAt",
+            "columnName": "modified_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_activity_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_activity_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "step",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `activity_id` INTEGER NOT NULL, `order` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `image_uri` TEXT, FOREIGN KEY(`activity_id`) REFERENCES `activity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityId",
+            "columnName": "activity_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_step_activity_id",
+            "unique": false,
+            "columnNames": [
+              "activity_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_step_activity_id` ON `${TABLE_NAME}` (`activity_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "activity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "activity_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "operation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `step_id` INTEGER NOT NULL, `order` INTEGER NOT NULL, `title` TEXT NOT NULL, `type` INTEGER NOT NULL, `delay` REAL NOT NULL, `duration` REAL NOT NULL, `axis` INTEGER NOT NULL, `turns` REAL NOT NULL, `global` INTEGER NOT NULL, `offset_vx` REAL NOT NULL, `offset_vy` REAL NOT NULL, `offset_vz` REAL NOT NULL, `offset_qx` REAL NOT NULL, `offset_qy` REAL NOT NULL, `offset_qz` REAL NOT NULL, `offset_qw` REAL NOT NULL, FOREIGN KEY(`step_id`) REFERENCES `step`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stepId",
+            "columnName": "step_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "delay",
+            "columnName": "delay",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duration",
+            "columnName": "duration",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "axis",
+            "columnName": "axis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "turns",
+            "columnName": "turns",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "global",
+            "columnName": "global",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetVx",
+            "columnName": "offset_vx",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetVy",
+            "columnName": "offset_vy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetVz",
+            "columnName": "offset_vz",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQx",
+            "columnName": "offset_qx",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQy",
+            "columnName": "offset_qy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQz",
+            "columnName": "offset_qz",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQw",
+            "columnName": "offset_qw",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_operation_step_id",
+            "unique": false,
+            "columnNames": [
+              "step_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_operation_step_id` ON `${TABLE_NAME}` (`step_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "step",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "step_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "pivot_composite",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`operation_id` INTEGER NOT NULL, `model_id` INTEGER NOT NULL, `hash` INTEGER NOT NULL, PRIMARY KEY(`operation_id`, `model_id`, `hash`), FOREIGN KEY(`operation_id`) REFERENCES `operation`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`model_id`) REFERENCES `model`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "operationId",
+            "columnName": "operation_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modelId",
+            "columnName": "model_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hash",
+            "columnName": "hash",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "operation_id",
+            "model_id",
+            "hash"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pivot_composite_operation_id",
+            "unique": false,
+            "columnNames": [
+              "operation_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pivot_composite_operation_id` ON `${TABLE_NAME}` (`operation_id`)"
+          },
+          {
+            "name": "index_pivot_composite_model_id",
+            "unique": false,
+            "columnNames": [
+              "model_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pivot_composite_model_id` ON `${TABLE_NAME}` (`model_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "operation",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "operation_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "model",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "model_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "model",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `name` TEXT NOT NULL, `glb_uri` TEXT NOT NULL, `calibrated` INTEGER NOT NULL, `offset_vx` REAL NOT NULL, `offset_vy` REAL NOT NULL, `offset_vz` REAL NOT NULL, `offset_qx` REAL NOT NULL, `offset_qy` REAL NOT NULL, `offset_qz` REAL NOT NULL, `offset_qw` REAL NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "glbUri",
+            "columnName": "glb_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calibrated",
+            "columnName": "calibrated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetVx",
+            "columnName": "offset_vx",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetVy",
+            "columnName": "offset_vy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetVz",
+            "columnName": "offset_vz",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQx",
+            "columnName": "offset_qx",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQy",
+            "columnName": "offset_qy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQz",
+            "columnName": "offset_qz",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "offsetQw",
+            "columnName": "offset_qw",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_model_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_model_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "marker",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `machine_id` INTEGER NOT NULL, `index` INTEGER NOT NULL, `image_uri` TEXT NOT NULL, `size_centimeters` REAL NOT NULL, `calibrated` INTEGER NOT NULL, `origin_offset_vx` REAL NOT NULL, `origin_offset_vy` REAL NOT NULL, `origin_offset_vz` REAL NOT NULL, `origin_offset_qx` REAL NOT NULL, `origin_offset_qy` REAL NOT NULL, `origin_offset_qz` REAL NOT NULL, `origin_offset_qw` REAL NOT NULL, FOREIGN KEY(`machine_id`) REFERENCES `machine`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "machineId",
+            "columnName": "machine_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "index",
+            "columnName": "index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sizeCentimeters",
+            "columnName": "size_centimeters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calibrated",
+            "columnName": "calibrated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetVx",
+            "columnName": "origin_offset_vx",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetVy",
+            "columnName": "origin_offset_vy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetVz",
+            "columnName": "origin_offset_vz",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetQx",
+            "columnName": "origin_offset_qx",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetQy",
+            "columnName": "origin_offset_qy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetQz",
+            "columnName": "origin_offset_qz",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originOffsetQw",
+            "columnName": "origin_offset_qw",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_marker_machine_id",
+            "unique": false,
+            "columnNames": [
+              "machine_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_marker_machine_id` ON `${TABLE_NAME}` (`machine_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "machine",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "machine_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "event",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `activity_id` INTEGER NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `date` TEXT NOT NULL, `recurrent` INTEGER NOT NULL, `quantity` INTEGER NOT NULL, `recurrence_unit` INTEGER NOT NULL, FOREIGN KEY(`activity_id`) REFERENCES `activity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityId",
+            "columnName": "activity_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recurrent",
+            "columnName": "recurrent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recurrenceUnit",
+            "columnName": "recurrence_unit",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_event_activity_id",
+            "unique": false,
+            "columnNames": [
+              "activity_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_event_activity_id` ON `${TABLE_NAME}` (`activity_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "activity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "activity_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3fc9318b35e0bbbf3fefbb6a85558f5c')"
+    ]
+  }
+}

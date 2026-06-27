@@ -47,6 +47,9 @@
     <string name="button_event_save_action">Guardar</string>
     <string name="button_event_delete_action">Eliminar</string>
     <string name="button_event_cancel_action">Cancelar</string>
+    <string name="dialog_event_navigate_title">¿Ir a las actividades?</string>
+    <string name="dialog_event_navigate_body">¿Quieres ir a la lista de actividades de este evento?</string>
+    <string name="button_event_navigate_go_action">Ir</string>
 
     <string name="recurrence_every_one_day">Cada día</string>
     <!-- Cada N días -->

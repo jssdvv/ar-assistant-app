@@ -17,6 +17,9 @@
     <string name="text_field_fabrication_year_label">Fabrication year</string>
     <string name="text_field_price_label">Price</string>
     <string name="text_field_acquisition_date_label">Acquisition date</string>
+    <string name="text_field_product_number_label">Product number</string>
+    <string name="text_field_fabrication_country_label">Fabrication country</string>
+    <string name="text_field_standards_label">Standards</string>
 
     <string name="icon_machine_code_content_desc">Enter the Machine Code</string>
     <string name="icon_machine_name_content_desc">Enter the Machine Name</string>
@@ -70,6 +73,30 @@
     <string name="icon_machine_additional_desc_content_desc">Enter the Machine Additional Description</string>
 
     <!--MOTOR SPECIFICATIONS CARD [COMPONENT]-->
+
+    <string name="icon_motor_efficiency_class_content_desc">Enter the Motor Efficiency Class</string>
+    <string name="icon_motor_phases_number_content_desc">Enter the Motor Number of Phases</string>
+    <string name="icon_motor_nominal_power_content_desc">Enter the Motor Nominal Power</string>
+    <string name="icon_motor_frequency_content_desc">Enter the Motor Frequency</string>
+    <string name="icon_motor_rpm_content_desc">Enter the Motor RPM</string>
+    <string name="icon_motor_rpm_range_content_desc">Enter the Motor RPM Range</string>
+    <string name="icon_motor_nominal_voltage_content_desc">Enter the Motor Nominal Voltage</string>
+    <string name="icon_motor_nominal_current_content_desc">Enter the Motor Nominal Current</string>
+    <string name="icon_motor_service_factor_content_desc">Enter the Motor Service Factor</string>
+    <string name="icon_motor_power_factor_content_desc">Enter the Motor Power Factor</string>
+    <string name="icon_motor_duty_content_desc">Enter the Motor Duty</string>
+    <string name="icon_motor_room_temp_content_desc">Enter the Motor Room Temperature</string>
+    <string name="icon_motor_energy_efficiency_content_desc">Enter the Motor Energy Efficiency</string>
+    <string name="icon_motor_max_altitude_content_desc">Enter the Motor Maximum Altitude</string>
+    <string name="icon_motor_ingress_protection_content_desc">Enter the Motor Ingress Protection</string>
+    <string name="icon_motor_mounting_type_content_desc">Enter the Motor Mounting Type</string>
+    <string name="icon_motor_frame_type_content_desc">Enter the Motor Frame Type</string>
+    <string name="icon_motor_cooling_method_content_desc">Enter the Motor Cooling Method</string>
+    <string name="icon_motor_drive_end_content_desc">Enter the Motor Drive End</string>
+    <string name="icon_motor_non_drive_end_content_desc">Enter the Motor Non Drive End</string>
+    <string name="icon_motor_insulation_class_content_desc">Enter the Motor Insulation Class</string>
+    <string name="icon_motor_insulation_class_temp_content_desc">Enter the Motor Insulation Class Temperature</string>
+    <string name="icon_motor_weight_content_desc">Enter the Motor Weight</string>
 
     <string name="text_field_motor_efficiency_class_label">Efficiency class</string>
     <string name="text_field_motor_phases_number_label">Number of phases</string>
@@ -136,5 +163,14 @@
     <string name="icon_pneumatic_content_desc">Pneumatic Machine</string>
     <string name="icon_thermal_content_desc">Thermal Machine</string>
     <string name="icon_unknown_content_desc">Unknown Machine</string>
+
+<!--DELETE MACHINE [ACTION]-->
+
+<string name="specs_delete_machine_action">Delete machine</string>
+
+<!--DELETE MACHINE DIALOG [COMPONENT]-->
+
+<string name="dialog_delete_machine_title">Delete machine</string>
+<string name="dialog_delete_machine_warning">This action will permanently delete the machine and all its associated data (activities, documents, markers, etc.). Are you sure you want to continue?</string>
 
 </resources>

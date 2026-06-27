@@ -17,6 +17,9 @@
     <string name="text_field_fabrication_year_label">Año de fabricación</string>
     <string name="text_field_price_label">Precio</string>
     <string name="text_field_acquisition_date_label">Fecha de adquisición</string>
+    <string name="text_field_product_number_label">Número de producto</string>
+    <string name="text_field_fabrication_country_label">País de fabricación</string>
+    <string name="text_field_standards_label">Normas</string>
 
     <string name="icon_machine_code_content_desc">Ingrese el Código de la Máquina</string>
     <string name="icon_machine_name_content_desc">Ingrese el Nombre de la Máquina</string>
@@ -71,6 +74,30 @@
 
     <!--MOTOR SPECIFICATIONS CARD [COMPONENT]-->
 
+    <string name="icon_motor_efficiency_class_content_desc">Ingrese la Clase de Eficiencia del Motor</string>
+    <string name="icon_motor_phases_number_content_desc">Ingrese el Número de Fases del Motor</string>
+    <string name="icon_motor_nominal_power_content_desc">Ingrese la Potencia Nominal del Motor</string>
+    <string name="icon_motor_frequency_content_desc">Ingrese la Frecuencia del Motor</string>
+    <string name="icon_motor_rpm_content_desc">Ingrese las RPM del Motor</string>
+    <string name="icon_motor_rpm_range_content_desc">Ingrese el Rango de RPM del Motor</string>
+    <string name="icon_motor_nominal_voltage_content_desc">Ingrese el Voltaje Nominal del Motor</string>
+    <string name="icon_motor_nominal_current_content_desc">Ingrese la Corriente Nominal del Motor</string>
+    <string name="icon_motor_service_factor_content_desc">Ingrese el Factor de Servicio del Motor</string>
+    <string name="icon_motor_power_factor_content_desc">Ingrese el Factor de Potencia del Motor</string>
+    <string name="icon_motor_duty_content_desc">Ingrese el Tipo de Servicio del Motor</string>
+    <string name="icon_motor_room_temp_content_desc">Ingrese la Temperatura Ambiente del Motor</string>
+    <string name="icon_motor_energy_efficiency_content_desc">Ingrese la Eficiencia Energética del Motor</string>
+    <string name="icon_motor_max_altitude_content_desc">Ingrese la Altitud Máxima del Motor</string>
+    <string name="icon_motor_ingress_protection_content_desc">Ingrese el Grado de Protección del Motor</string>
+    <string name="icon_motor_mounting_type_content_desc">Ingrese el Tipo de Montaje del Motor</string>
+    <string name="icon_motor_frame_type_content_desc">Ingrese el Tipo de Marco del Motor</string>
+    <string name="icon_motor_cooling_method_content_desc">Ingrese el Método de Refrigeración del Motor</string>
+    <string name="icon_motor_drive_end_content_desc">Ingrese el Rodamiento Delantero del Motor</string>
+    <string name="icon_motor_non_drive_end_content_desc">Ingrese el Rodamiento Trasero del Motor</string>
+    <string name="icon_motor_insulation_class_content_desc">Ingrese la Clase de Aislamiento del Motor</string>
+    <string name="icon_motor_insulation_class_temp_content_desc">Ingrese la Temperatura de Clase de Aislamiento del Motor</string>
+    <string name="icon_motor_weight_content_desc">Ingrese el Peso del Motor</string>
+
     <string name="text_field_motor_efficiency_class_label">Clase de eficiencia</string>
     <string name="text_field_motor_phases_number_label">Número de fases</string>
     <string name="text_field_motor_nominal_power_label">Potencia nominal</string>
@@ -110,5 +137,14 @@
     <string name="icon_pneumatic_content_desc">Máquina Neumática</string>
     <string name="icon_thermal_content_desc">Máquina Térmica</string>
     <string name="icon_unknown_content_desc">Máquina Desconocida</string>
+
+<!--ELIMINAR MÁQUINA [ACCIÓN]-->
+
+<string name="specs_delete_machine_action">Eliminar máquina</string>
+
+<!--DIÁLOGO ELIMINAR MÁQUINA [COMPONENTE]-->
+
+<string name="dialog_delete_machine_title">Eliminar máquina</string>
+<string name="dialog_delete_machine_warning">Esta acción eliminará permanentemente la máquina y todos sus datos asociados (actividades, documentos, marcadores, etc.). ¿Estás seguro de que deseas continuar?</string>
 
 </resources>

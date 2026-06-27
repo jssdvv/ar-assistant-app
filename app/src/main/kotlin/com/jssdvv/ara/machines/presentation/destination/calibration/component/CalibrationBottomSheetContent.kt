@@ -37,7 +37,7 @@ import com.jssdvv.ara.machines.domain.type.Axis
 import com.jssdvv.ara.machines.domain.type.measurement.Measurement
 import com.jssdvv.ara.machines.domain.type.measurement.MeasurementMode
 import com.jssdvv.ara.machines.domain.type.measurement.Rotation
-import com.jssdvv.ara.machines.domain.type.measurement.Translation
+import com.jssdvv.ara.machines.domain.type.measurement.TranslationUnits
 import com.jssdvv.ara.machines.presentation.component.OutlinedScrollWheel
 
 @Composable
@@ -105,7 +105,7 @@ fun CalibrationBottomSheetContent(
                 modifier = Modifier.width(338.dp)
             ) {
                 if (measurement == Measurement.TRANSLATION) {
-                    Translation.entries.forEachIndexed { index, translation ->
+                    TranslationUnits.entries.forEachIndexed { index, translation ->
                         SegmentedButton(
                             selected = translation == mode.translation,
                             shape = SegmentedButtonDefaults.itemShape(index, Rotation.entries.size),

@@ -1,6 +1,7 @@
 package com.jssdvv.ara.machines.domain.model.machine
 
 import android.net.Uri
+import com.jssdvv.ara.machines.domain.model.Activity
 import com.jssdvv.ara.machines.domain.type.MachineType
 import java.time.Instant
 import java.time.LocalDate
@@ -47,4 +48,9 @@ data class MachineDetails(
     val machineSpecs: MachineSpecs = MachineSpecs(machineId = machine.id),
     val motorIdentity: MotorIdentity = MotorIdentity(machineId = machine.id),
     val motorSpecs: MotorSpecs = MotorSpecs(machineId = machine.id)
+)
+
+data class MachineActivities(
+    val machine: Machine,
+    val activities: List<Activity>
 )

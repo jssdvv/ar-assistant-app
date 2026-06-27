@@ -8,7 +8,9 @@ import com.jssdvv.ara.machines.data.local.dao.MachineDao
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
 import com.jssdvv.ara.machines.data.local.mapper.machine.toDomain
 import com.jssdvv.ara.machines.data.local.mapper.machine.toEntity
+import com.jssdvv.ara.machines.data.local.relation.MachineWithActivities
 import com.jssdvv.ara.machines.domain.model.machine.Machine
+import com.jssdvv.ara.machines.domain.model.machine.MachineActivities
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.model.machine.MotorIdentity
@@ -61,6 +63,13 @@ class MachineRepositoryImpl(
     override suspend fun selectMachineAndDetailsByMachineId(machineId: Int): MachineDetails =
         dao.selectEntityAndDetails(machineId).toDomain()
 
+    override fun selectMachineWithActivities(): Flow<List<MachineActivities>> =
+        dao.selectMachinesWithActivities()
+            .map { it.map(MachineWithActivities::toDomain) }
+
+    override suspend fun getMachineIdByActivityId(activityId: Int): Int =
+        dao.getMachineIdByActivityId(activityId)
+
     override fun searchModelsOrdered(search: String, orderState: OrderState): Flow<List<Machine>> =
         dao.selectEntitiesOrdered(buildSearchQuery(search, orderState))
             .map { it.map(MachineEntity::toDomain) }
@@ -69,11 +78,11 @@ class MachineRepositoryImpl(
         dao.selectEntitiesOrdered(buildSelectQuery(orderState))
             .map { it.map(MachineEntity::toDomain) }
 
-    override suspend fun upsertMachine(vararg model: Machine)  {
+    override suspend fun upsertMachine(vararg model: Machine) {
         dao.upsertEntity(*model.map(Machine::toEntity).toTypedArray())
     }
 
-    override suspend fun upsertMachineAndDetails(relation: MachineDetails)  {
+    override suspend fun upsertMachineAndDetails(relation: MachineDetails) {
         dao.upsertMachineAndDetails(relation.toEntity())
     }
 

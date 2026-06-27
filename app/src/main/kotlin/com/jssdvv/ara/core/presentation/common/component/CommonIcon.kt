@@ -5,6 +5,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,17 @@ fun ArrowBackIcon(
     contentDescription: String = stringResource(R.string.icon_arrow_back_content_desc),
 ) = Icon(
     modifier = modifier,
+    painter = painter,
+    contentDescription = contentDescription,
+)
+
+@Composable
+fun ArrowForwardIcon(
+    modifier: Modifier = Modifier,
+    painter: Painter = painterResource(R.drawable.ic_arrow_back),
+    contentDescription: String = stringResource(R.string.icon_arrow_back_opposite_content_desc),
+) = Icon(
+    modifier = modifier.graphicsLayer { rotationZ = 180f },
     painter = painter,
     contentDescription = contentDescription,
 )

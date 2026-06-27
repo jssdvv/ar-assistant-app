@@ -12,6 +12,7 @@ import com.jssdvv.ara.core.presentation.AppState
 import com.jssdvv.ara.machines.presentation.navigation.machinesNavGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
 import com.jssdvv.ara.scanner.presentation.navigation.scannerNavGraph
+import com.jssdvv.ara.schedule.presentation.navigation.eventsNavGraph
 import com.jssdvv.ara.tools.presentation.navigation.toolsNavGraph
 
 /**
@@ -46,6 +47,7 @@ fun AppNavHost(
         scannerNavGraph(appState)
         machinesNavGraph(appState)
         toolsNavGraph(appState)
+        eventsNavGraph(appState)
     }
 }
 

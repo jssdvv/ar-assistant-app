@@ -18,6 +18,7 @@
     <string name="notification_chip_message_speed_half">Speed set to half</string>
     <string name="notification_chip_message_speed_normal">Speed set to normal</string>
     <string name="notification_chip_message_speed_double">Speed set to double</string>
+    <string name="notification_chip_message_speed_quadruple">Speed set to quadruple</string>
 
     <string name="notification_chip_message_origin_repositioned">Models repositioned to %s</string>
     <string name="notification_chip_message_origin_calibrated">Models calibrated to %s</string>
@@ -27,5 +28,7 @@
 
     <string name="card_step_operations_empty_message">No operations yet</string>
     <string name="button_editor_add_step_action">Add step</string>
+
+    <string name="label_image_not_available">Image not available</string>
 
 </resources>

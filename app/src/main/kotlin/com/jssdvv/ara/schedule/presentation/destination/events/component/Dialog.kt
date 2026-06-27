@@ -100,9 +100,10 @@ fun CreateEventDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    val activityId = dialogState.selectedActivity?.id ?: return@Button
                     onConfirm(
                         Event(
-                            activityId = 0,
+                            activityId = activityId,
                             title = title,
                             description = description.ifBlank { null },
                             date = date,
@@ -479,4 +480,27 @@ private fun RecurrenceUnitDropdown(
             }
         }
     }
+}
+
+@Composable
+fun NavigateToActivityDialog(
+    event: Event,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.dialog_event_navigate_title)) },
+        text = { Text(stringResource(R.string.dialog_event_navigate_body)) },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(stringResource(R.string.button_event_navigate_go_action))
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(R.string.button_event_cancel_action))
+            }
+        }
+    )
 }

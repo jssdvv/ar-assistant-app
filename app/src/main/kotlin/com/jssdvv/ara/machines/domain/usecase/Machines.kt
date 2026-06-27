@@ -2,6 +2,7 @@ package com.jssdvv.ara.machines.domain.usecase
 
 import com.jssdvv.ara.core.domain.type.OrderState
 import com.jssdvv.ara.machines.domain.model.machine.Machine
+import com.jssdvv.ara.machines.domain.model.machine.MachineActivities
 import com.jssdvv.ara.machines.domain.model.machine.MachineDetails
 import com.jssdvv.ara.machines.domain.model.machine.MachineSpecs
 import com.jssdvv.ara.machines.domain.model.machine.MotorIdentity
@@ -28,6 +29,12 @@ class SelectMachines(private val repository: MachineRepository) {
 
     suspend fun selectMachineAndDetails(machineId: Int) : MachineDetails =
         repository.selectMachineAndDetailsByMachineId(machineId)
+
+    fun selectMachineWithActivities(): Flow<List<MachineActivities>> =
+        repository.selectMachineWithActivities()
+
+    suspend fun getMachineIdByActivityId(activityId: Int): Int =
+        repository.getMachineIdByActivityId(activityId)
 }
 
 class UpsertMachines(private val repository: MachineRepository) {

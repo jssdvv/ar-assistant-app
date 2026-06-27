@@ -18,6 +18,7 @@
     <string name="notification_chip_message_speed_half">Velocidad media</string>
     <string name="notification_chip_message_speed_normal">Velocidad normal</string>
     <string name="notification_chip_message_speed_double">Velocidad doble</string>
+    <string name="notification_chip_message_speed_quadruple">velocidad cuadruple</string>
 
     <string name="notification_chip_message_origin_repositioned">Modelos reposicionados a %s</string>
     <string name="notification_chip_message_origin_calibrated">Modelos calibrados a %s</string>
@@ -27,5 +28,7 @@
 
     <string name="card_step_operations_empty_message">Aún no hay operaciones</string>
     <string name="button_editor_add_step_action">Añadir paso</string>
+
+    <string name="label_image_not_available">Imagen no disponible</string>
 
 </resources>

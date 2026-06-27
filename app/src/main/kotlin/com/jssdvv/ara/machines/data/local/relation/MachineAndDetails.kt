@@ -2,6 +2,7 @@ package com.jssdvv.ara.machines.data.local.relation
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import com.jssdvv.ara.machines.data.local.entity.ActivityEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineSpecsEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MotorIdentityEntity
@@ -37,4 +38,15 @@ data class MachineAndDetails(
         entityColumn = MotorSpecsEntity.COLUMN_MACHINE_ID
     )
     val motorSpecs: MotorSpecsEntity,
+)
+
+data class MachineWithActivities(
+    @Embedded
+    val machine: MachineEntity,
+
+    @Relation(
+        parentColumn = MachineEntity.COLUMN_ID,
+        entityColumn = ActivityEntity.COLUMN_MACHINE_ID
+    )
+    val activities: List<ActivityEntity>
 )

@@ -12,6 +12,7 @@ import androidx.navigation.navOptions
 import com.jssdvv.ara.core.presentation.navigation.AppNavGraphItem
 import com.jssdvv.ara.machines.presentation.navigation.MachinesGraph
 import com.jssdvv.ara.scanner.presentation.navigation.ScannerGraph
+import com.jssdvv.ara.schedule.presentation.navigation.EventsGraph
 import com.jssdvv.ara.tools.presentation.navigation.ToolsGraph
 
 @Composable
@@ -48,6 +49,7 @@ class AppState(
             AppNavGraphItem.SCANNER -> navHostController.navigate(ScannerGraph, navOptions)
             AppNavGraphItem.MACHINES -> navHostController.navigate(MachinesGraph, navOptions)
             AppNavGraphItem.TOOLS -> navHostController.navigate(ToolsGraph, navOptions)
+            AppNavGraphItem.EVENTS -> navHostController.navigate(EventsGraph, navOptions)
         }
     }
 }

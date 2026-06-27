@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,21 +37,32 @@ import com.jssdvv.ara.schedule.presentation.destination.events.component.DeleteE
 import com.jssdvv.ara.schedule.presentation.destination.events.component.EditEventDialog
 import com.jssdvv.ara.schedule.presentation.destination.events.component.EventCard
 import com.jssdvv.ara.schedule.presentation.destination.events.component.EventsCalendar
+import com.jssdvv.ara.schedule.presentation.destination.events.component.MonthYearPickerDialog
+import com.jssdvv.ara.schedule.presentation.destination.events.component.NavigateToActivityDialog
 import java.time.LocalDate
 
 @Composable
 fun EventsDestination(
     viewModel: EventsViewModel = hiltViewModel(),
+    onNavigateToActivities: (Int) -> Unit,
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { machineId ->
+            onNavigateToActivities(machineId)
+        }
+    }
+
     EventsScreen(
         uiState = viewModel.uiState.collectAsStateWithLifecycle().value,
-        onEvent = viewModel::onEvent
+        dialogState = viewModel.dialogState.collectAsStateWithLifecycle().value,
+        onEvent = viewModel::onEvent,
     )
 }
 
 @Composable
 fun EventsScreen(
     uiState: EventsUiState,
+    dialogState: EventDialogState,
     onEvent: (EventsEvent) -> Unit,
 ) {
     when (uiState) {
@@ -59,6 +71,7 @@ fun EventsScreen(
         is EventsUiState.Success -> {
             EventsContent(
                 events = uiState.events,
+                dialogState = dialogState,
                 eventCountPerDay = uiState.eventCountPerDay,
                 currentDate = uiState.currentDate,
                 selectedDate = uiState.selectedDate,
@@ -72,6 +85,7 @@ fun EventsScreen(
 @Composable
 fun EventsContent(
     events: List<Event>,
+    dialogState: EventDialogState,
     eventCountPerDay: Map<LocalDate, Int>,
     currentDate: LocalDate,
     selectedDate: LocalDate,
@@ -79,11 +93,12 @@ fun EventsContent(
     modifier: Modifier = Modifier,
 ) {
     var isCalendarVisible by remember { mutableStateOf(true) }
-
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showMonthPicker by remember { mutableStateOf(false) }
 
     var eventToEdit by remember { mutableStateOf<Event?>(null) }
     var eventToDelete by remember { mutableStateOf<Event?>(null) }
+    var eventToNavigate by remember { mutableStateOf<Event?>(null) }
 
     if (showCreateDialog) {
         CreateEventDialog(
@@ -92,9 +107,13 @@ fun EventsContent(
                 onEvent(EventsEvent.CreateEvent(it))
                 showCreateDialog = false
             },
-            onDismiss = { showCreateDialog = false }
+            onDismiss = { showCreateDialog = false },
+            dialogState = dialogState,
+            onMachineSelected = { onEvent(EventsEvent.SelectMachine(it)) },
+            onActivitySelected = { onEvent(EventsEvent.SelectActivity(it)) }
         )
     }
+
     eventToEdit?.let { event ->
         EditEventDialog(
             event = event,
@@ -102,7 +121,10 @@ fun EventsContent(
                 onEvent(EventsEvent.EditEvent(it))
                 eventToEdit = null
             },
-            onDismiss = { eventToEdit = null }
+            onDismiss = { eventToEdit = null },
+            dialogState = dialogState,
+            onMachineSelected = { onEvent(EventsEvent.SelectMachine(it)) },
+            onActivitySelected = { onEvent(EventsEvent.SelectActivity(it)) }
         )
     }
     eventToDelete?.let { event ->
@@ -113,6 +135,17 @@ fun EventsContent(
                 eventToDelete = null
             },
             onDismiss = { eventToDelete = null }
+        )
+    }
+
+    eventToNavigate?.let { event ->
+        NavigateToActivityDialog(
+            event = event,
+            onConfirm = {
+                onEvent(EventsEvent.SelectEvent(event))
+                eventToNavigate = null
+            },
+            onDismiss = { eventToNavigate = null }
         )
     }
 
@@ -142,10 +175,20 @@ fun EventsContent(
                 eventCountPerDay = eventCountPerDay,
                 onPreviousMonth = { onEvent(EventsEvent.PreviousMonth) },
                 onNextMonth = { onEvent(EventsEvent.NextMonth) },
-                onSelectMonth = { onEvent(EventsEvent.SelectMonth) },
+                onSelectMonth = { showMonthPicker = true },
                 onEvent = onEvent,
             )
             HorizontalDivider()
+
+            if (showMonthPicker) {
+                MonthYearPickerDialog(
+                    currentDate = currentDate,
+                    onMonthYearSelected = { date ->
+                        onEvent(EventsEvent.SelectMonth(date))
+                    },
+                    onDismiss = { showMonthPicker = false }
+                )
+            }
 
             if (events.isEmpty()) {
                 Box(
@@ -165,7 +208,10 @@ fun EventsContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = MaterialTheme.spacing.medium),
-                    contentPadding = PaddingValues(top = MaterialTheme.spacing.small, bottom = 80.dp),
+                    contentPadding = PaddingValues(
+                        top = MaterialTheme.spacing.small,
+                        bottom = 80.dp
+                    ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)
                 ) {
@@ -175,7 +221,7 @@ fun EventsContent(
                     ) { event ->
                         EventCard(
                             event = event,
-                            onClick = { onEvent(EventsEvent.SelectEvent(event)) },
+                            onClick = { eventToNavigate = event },
                             onEdit = { eventToEdit = event },
                             onDelete = { eventToDelete = event }
                         )

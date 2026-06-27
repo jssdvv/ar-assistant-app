@@ -9,11 +9,13 @@ import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.jssdvv.ara.machines.data.local.entity.ActivityEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MachineSpecsEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MotorIdentityEntity
 import com.jssdvv.ara.machines.data.local.entity.machine.MotorSpecsEntity
 import com.jssdvv.ara.machines.data.local.relation.MachineAndDetails
+import com.jssdvv.ara.machines.data.local.relation.MachineWithActivities
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -26,6 +28,18 @@ interface MachineDao {
         """
     )
     suspend fun selectEntityAndDetails(machineId: Int): MachineAndDetails
+
+    @Transaction
+    @Query(
+        """
+            SELECT * FROM ${MachineEntity.TABLE_NAME}
+            ORDER BY ${MachineEntity.COLUMN_ID}
+        """
+    )
+    fun selectMachinesWithActivities(): Flow<List<MachineWithActivities>>
+
+    @Query("SELECT machine_id FROM ${ActivityEntity.TABLE_NAME} WHERE ${ActivityEntity.COLUMN_ID} = :activityId")
+    suspend fun getMachineIdByActivityId(activityId: Int): Int
 
     @RawQuery(observedEntities = [MachineEntity::class])
     fun searchEntitiesOrdered(query: SupportSQLiteQuery): Flow<List<MachineEntity>>
