@@ -1,9 +1,8 @@
-<svg width="91.8" height="91.8" version="1.2" viewBox="0 0 91.8 91.8"
+<svg height="91.8" version="1.2" viewBox="0 0 91.8 91.8" width="91.8"
     xmlns="http://www.w3.org/2000/svg">
     <path
         d="m81.8 45.9a35.9 35.9 0 0 1-35.9 35.9 35.9 35.9 0 0 1-35.9-35.9 35.9 35.9 0 0 1 35.9-35.9 35.9 35.9 0 0 1 35.9 35.9z"
         fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-    <path
-        d="m45.9 11.259-30 17.32v34.641l30 17.321 30-17.321v-34.641z"
-        fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
+    <path d="m45.9 11.259-30 17.32v34.641l30 17.321 30-17.321v-34.641z" fill="none" stroke="#000"
+        stroke-linecap="round" stroke-linejoin="round" stroke-width="1" />
 </svg>
