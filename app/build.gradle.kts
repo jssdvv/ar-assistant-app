@@ -68,6 +68,7 @@ dependencies {
     // Android
     implementation(libs.androidx.core.ktx) // Checked
     implementation(libs.androidx.activity.compose) // Checked
+    implementation(libs.androidx.work.runtime.ktx) // Checked
 
     // Kotlin
     implementation(libs.jetbrains.kotlinx.serialization.json) // Checked
@@ -100,6 +101,7 @@ dependencies {
     // DI
     implementation(libs.androidx.hilt.navigation.compose) // Checked
     implementation(libs.google.dagger.hilt.android) // Checked
+    implementation(libs.androidx.hilt.work) // Checked
     kapt(libs.google.dagger.hilt.android.compiler) // Checked
 
     // Images
