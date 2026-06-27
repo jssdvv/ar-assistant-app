@@ -138,13 +138,13 @@
     <string name="icon_thermal_content_desc">Máquina Térmica</string>
     <string name="icon_unknown_content_desc">Máquina Desconocida</string>
 
-<!--ELIMINAR MÁQUINA [ACCIÓN]-->
+    <!--ELIMINAR MÁQUINA [ACCIÓN]-->
 
-<string name="specs_delete_machine_action">Eliminar máquina</string>
+    <string name="specs_delete_machine_action">Eliminar máquina</string>
 
-<!--DIÁLOGO ELIMINAR MÁQUINA [COMPONENTE]-->
+    <!--DIÁLOGO ELIMINAR MÁQUINA [COMPONENTE]-->
 
-<string name="dialog_delete_machine_title">Eliminar máquina</string>
-<string name="dialog_delete_machine_warning">Esta acción eliminará permanentemente la máquina y todos sus datos asociados (actividades, documentos, marcadores, etc.). ¿Estás seguro de que deseas continuar?</string>
+    <string name="dialog_delete_machine_title">Eliminar máquina</string>
+    <string name="dialog_delete_machine_warning">Esta acción eliminará permanentemente la máquina y todos sus datos asociados (actividades, documentos, marcadores, etc.). ¿Estás seguro de que deseas continuar?</string>
 
 </resources>

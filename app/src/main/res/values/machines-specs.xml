@@ -164,13 +164,13 @@
     <string name="icon_thermal_content_desc">Thermal Machine</string>
     <string name="icon_unknown_content_desc">Unknown Machine</string>
 
-<!--DELETE MACHINE [ACTION]-->
+    <!--DELETE MACHINE [ACTION]-->
 
-<string name="specs_delete_machine_action">Delete machine</string>
+    <string name="specs_delete_machine_action">Delete machine</string>
 
-<!--DELETE MACHINE DIALOG [COMPONENT]-->
+    <!--DELETE MACHINE DIALOG [COMPONENT]-->
 
-<string name="dialog_delete_machine_title">Delete machine</string>
-<string name="dialog_delete_machine_warning">This action will permanently delete the machine and all its associated data (activities, documents, markers, etc.). Are you sure you want to continue?</string>
+    <string name="dialog_delete_machine_title">Delete machine</string>
+    <string name="dialog_delete_machine_warning">This action will permanently delete the machine and all its associated data (activities, documents, markers, etc.). Are you sure you want to continue?</string>
 
 </resources>
