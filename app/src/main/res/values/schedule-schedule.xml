@@ -5,6 +5,10 @@
 
     <string name="top_bar_events_title">Events</string>
 
+    <!--EVENTS FAB [COMPONENT]-->
+
+    <string name="fab_events_create_action">New event</string>
+
     <!--CALENDAR TOP BAR [COMPONENT]-->
 
     <string name="icon_previous_month_content_desc">Go to previous month</string>
@@ -16,11 +20,58 @@
     <string-array name="calendar_days_symbol_designation">
         <item>Sun</item>
         <item>Mon</item>
-        <item>Thu</item>
-        <item>Wed</item>
         <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
         <item>Fri</item>
         <item>Sat</item>
     </string-array>
+
+    <!--EVENTS LIST [COMPONENT]-->
+
+    <string name="icon_toggle_calendar_content_desc">Toggle calendar visibility</string>
+    <string name="screen_events_empty_message">No events for this day</string>
+
+    <!--EVENT DIALOGS [COMPONENT]-->
+
+    <string name="dialog_event_create_title">New Event</string>
+    <string name="dialog_event_edit_title">Edit Event</string>
+    <string name="dialog_event_delete_title">Delete Event</string>
+    <string name="dialog_event_delete_body">Are you sure you want to delete this event?</string>
+    <string name="form_event_title_label">Title</string>
+    <string name="form_event_description_label">Description</string>
+    <string name="form_event_date_label">Date</string>
+    <string name="form_event_recurrent_label">Recurrent</string>
+    <string name="form_event_every_label">Every</string>
+    <string name="form_event_unit_label">Unit</string>
+    <string name="form_event_machine_label">Machine</string>
+    <string name="form_event_activity_label">Activity</string>
+    <string name="button_event_save_action">Save</string>
+    <string name="button_event_delete_action">Delete</string>
+    <string name="button_event_cancel_action">Cancel</string>
+
+    <string name="recurrence_every_one_day">Every day</string>
+    <plurals name="recurrence_every_days">
+        <item quantity="one">Every %d day</item>
+        <item quantity="other">Every %d days</item>
+    </plurals>
+
+    <string name="recurrence_every_one_week">Every week</string>
+    <plurals name="recurrence_every_weeks">
+        <item quantity="one">Every %d week</item>
+        <item quantity="other">Every %d weeks</item>
+    </plurals>
+
+    <string name="recurrence_every_one_month">Every month</string>
+    <plurals name="recurrence_every_months">
+        <item quantity="one">Every %d month</item>
+        <item quantity="other">Every %d months</item>
+    </plurals>
+
+    <string name="recurrence_every_one_year">Every year</string>
+    <plurals name="recurrence_every_years">
+        <item quantity="one">Every %d year</item>
+        <item quantity="other">Every %d years</item>
+    </plurals>
 
 </resources>

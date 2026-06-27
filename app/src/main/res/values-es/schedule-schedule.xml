@@ -3,6 +3,18 @@
 
     <!--EVENTS SCREEN-->
 
+    <string name="top_bar_events_title">Eventos</string>
+
+    <!--CALENDAR TOP BAR [COMPONENT]-->
+
+    <string name="icon_previous_month_content_desc">Ir al mes anterior</string>
+    <string name="icon_next_month_content_desc">Ir al mes siguiente</string>
+    <string name="button_select_month_label">Seleccionar mes</string>
+
+    <!--EVENTS FAB [COMPONENT]-->
+
+    <string name="fab_events_create_action">Nuevo evento</string>
+
     <string-array name="calendar_days_symbol_designation">
         <item>D</item>
         <item>L</item>
@@ -12,5 +24,53 @@
         <item>V</item>
         <item>S</item>
     </string-array>
+
+    <!--EVENTS LIST [COMPONENT]-->
+
+    <string name="icon_toggle_calendar_content_desc">Alternar visibilidad del calendario</string>
+    <string name="screen_events_empty_message">Sin eventos para este día</string>
+
+    <!--EVENT DIALOGS [COMPONENT]-->
+
+    <string name="dialog_event_create_title">Nuevo Evento</string>
+    <string name="dialog_event_edit_title">Editar Evento</string>
+    <string name="dialog_event_delete_title">Eliminar Evento</string>
+    <string name="dialog_event_delete_body">¿Estás seguro de que quieres eliminar este evento?</string>
+    <string name="form_event_title_label">Título</string>
+    <string name="form_event_description_label">Descripción</string>
+    <string name="form_event_date_label">Fecha</string>
+    <string name="form_event_recurrent_label">Recurrente</string>
+    <string name="form_event_every_label">Cada</string>
+    <string name="form_event_unit_label">Unidad</string>
+    <string name="form_event_machine_label">Máquina</string>
+    <string name="form_event_activity_label">Actividad</string>
+    <string name="button_event_save_action">Guardar</string>
+    <string name="button_event_delete_action">Eliminar</string>
+    <string name="button_event_cancel_action">Cancelar</string>
+
+    <string name="recurrence_every_one_day">Cada día</string>
+    <!-- Cada N días -->
+    <plurals name="recurrence_every_days">
+        <item quantity="one">Cada %d día</item>
+        <item quantity="other">Cada %d días</item>
+    </plurals>
+
+    <string name="recurrence_every_one_week">Cada semana</string>
+    <plurals name="recurrence_every_weeks">
+        <item quantity="one">Cada %d semana</item>
+        <item quantity="other">Cada %d semanas</item>
+    </plurals>
+
+    <string name="recurrence_every_one_month">Cada mes</string>
+    <plurals name="recurrence_every_months">
+        <item quantity="one">Cada %d mes</item>
+        <item quantity="other">Cada %d meses</item>
+    </plurals>
+
+    <string name="recurrence_every_one_year">Cada año</string>
+    <plurals name="recurrence_every_years">
+        <item quantity="one">Cada %d año</item>
+        <item quantity="other">Cada %d años</item>
+    </plurals>
 
 </resources>
