@@ -1,21 +1,77 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ──────────────────────────────────────────────
+# General
+# ──────────────────────────────────────────────
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# JNI — enlaces a código nativo
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ──────────────────────────────────────────────
+# Kotlin
+# ──────────────────────────────────────────────
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
+-dontwarn kotlinx.coroutines.**
+-dontwarn kotlinx.datetime.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ──────────────────────────────────────────────
+# KotlinX Serialization
+# ──────────────────────────────────────────────
+-keep @kotlinx.serialization.Serializable class * { *; }
+-keep @androidx.annotation.Keep class *
+-keepclassmembers class * {
+    *** Companion;
+}
+
+# ──────────────────────────────────────────────
+# Hilt
+# ──────────────────────────────────────────────
+-keepclassmembers class * {
+    @javax.inject.Inject <init>(...);
+}
+-keep class * extends dagger.hilt.android.internal.managers.ActivityComponentManager { *; }
+-dontwarn dagger.hilt.**
+
+# ──────────────────────────────────────────────
+# WorkManager + Hilt Worker
+# ──────────────────────────────────────────────
+-keepclassmembers class * extends androidx.work.ListenableWorker { *; }
+
+# ──────────────────────────────────────────────
+# Room
+# ──────────────────────────────────────────────
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keepclassmembers @androidx.room.Entity class * { *; }
+
+# ──────────────────────────────────────────────
+# Navigation — rutas serializables
+# ──────────────────────────────────────────────
+-keep @kotlinx.serialization.Serializable class * { *; }
+
+# ──────────────────────────────────────────────
+# Coil
+# ──────────────────────────────────────────────
+-dontwarn coil.**
+
+# ──────────────────────────────────────────────
+# Sceneview & Filament (AR y Renderizado 3D)
+# ──────────────────────────────────────────────
+-keep class io.github.sceneview.** { *; }
+-dontwarn io.github.sceneview.**
+
+# ──────────────────────────────────────────────
+# Zero Allocation Hashing
+# ──────────────────────────────────────────────
+-keep class net.openhft.hashing.** { *; }
+-dontwarn net.openhft.hashing.**
+-dontwarn sun.misc.**
+
+# ──────────────────────────────────────────────
+# ML Kit & ZXing (consumer rules incluidas en AAR,
+# se mantienen aquí solo como respaldo explícito)
+# ──────────────────────────────────────────────
+-dontwarn com.google.mlkit.vision.barcode.**
+-dontwarn com.google.zxing.**
