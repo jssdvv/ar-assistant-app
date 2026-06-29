@@ -20,3 +20,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ar_maintassist"
 include(":app")
+include(":benchmark")
