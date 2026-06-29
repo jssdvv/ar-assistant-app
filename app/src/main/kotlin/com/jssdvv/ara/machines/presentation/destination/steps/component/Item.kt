@@ -28,11 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.presentation.common.component.CloseIcon
@@ -40,7 +38,7 @@ import com.jssdvv.ara.core.presentation.common.component.EditIcon
 import com.jssdvv.ara.core.presentation.common.component.ToggleVisibleIconButton
 import com.jssdvv.ara.core.presentation.theme.spacing
 import com.jssdvv.ara.machines.domain.model.Operation
-import com.jssdvv.ara.machines.domain.type.OperationType
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun RenderableItem(
@@ -142,7 +140,7 @@ fun OperationItem(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = LocalContext.current.getString(
+                text = stringResource(
                     R.string.operation_item_duration_label,
                     operation.duration
                 ),
@@ -150,7 +148,7 @@ fun OperationItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = LocalContext.current.getString(
+                text = stringResource(
                     R.string.operation_item_starting_delay_label,
                     operation.delay
                 ),
@@ -163,41 +161,6 @@ fun OperationItem(
             onClick = onEditOperation,
             content = { EditIcon() }
         )
-    }
-}
-
-@Preview
-@Composable
-fun OperationsTest(modifier: Modifier = Modifier) {
-    val ops = listOf(
-        Operation(
-            id = 1,
-            stepId = 1,
-            order = 1,
-            title = "Operation 1",
-            type = OperationType.SCREW,
-            duration = 10F,
-        ),
-        Operation(
-            id = 2,
-            stepId = 1,
-            order = 2,
-            title = "Operation 2",
-            type = OperationType.POINT_TO_POINT,
-            duration = 10F,
-        )
-    )
-
-    Column {
-        ops.forEach { op ->
-            OperationItem(
-                operation = op,
-                onClick = {},
-                onEditOperation = {},
-                modifier = modifier,
-                isSelected = op.id == 1
-            )
-        }
     }
 }
 

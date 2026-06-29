@@ -27,7 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jssdvv.ara.R
 import com.jssdvv.ara.core.domain.utility.recurrenceLabel
@@ -35,7 +34,6 @@ import com.jssdvv.ara.core.presentation.common.component.DeleteIcon
 import com.jssdvv.ara.core.presentation.common.component.EditIcon
 import com.jssdvv.ara.schedule.domain.model.Event
 import com.jssdvv.ara.schedule.domain.type.RecurrenceUnit
-import java.time.LocalDate
 
 @Composable
 fun EventCard(
@@ -133,26 +131,5 @@ fun EventCard(
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun EventCardPreview() {
-    MaterialTheme {
-        EventCard(
-            event = Event(
-                activityId = 1,
-                title = "Machine Maintenance",
-                description = "Monthly inspection and lubrication of machine components",
-                date = LocalDate.now(),
-                recurrent = true,
-                quantity = 1,
-                recurrenceUnit = RecurrenceUnit.MONTHS
-            ),
-            onClick = {},
-            onEdit = {},
-            onDelete = {}
-        )
     }
 }
