@@ -3,12 +3,14 @@ package com.jssdvv.ara.core.presentation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
+import androidx.compose.ui.platform.testTag
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
@@ -66,7 +68,12 @@ internal fun InternalApp(
                             contentDescription = stringResource(navGraphItem.iconContentDescId)
                         )
                     },
-                    label = { Text(stringResource(navGraphItem.labelTextId)) }
+                    label = {
+                        Text(
+                            text = stringResource(navGraphItem.labelTextId),
+                            modifier = Modifier.testTag(navGraphItem.name)
+                        )
+                    }
                 )
             }
         },

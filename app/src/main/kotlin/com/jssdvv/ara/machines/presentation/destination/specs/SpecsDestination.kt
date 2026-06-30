@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -203,6 +204,7 @@ fun SpecsContent(
             ) {
                 CounterButton(
                     onClick = { machine?.id?.let { onNavigateToActivities(it) } },
+                    modifier = Modifier.testTag("navigate_to_activities"),
                     title = stringResource(R.string.counter_button_activities_label),
                     count = counters.activitiesCount,
                     icon = { ActivitiesIcon() }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -99,10 +100,12 @@ fun ActivityCard(
             ) {
                 EditButtonWithIcon(
                     onClick = onNavigateToAnimations,
+                    modifier = Modifier.testTag("navigate_to_steps"),
                     isOutlined = true
                 )
                 ButtonWithIcon(
                     onClick = onNavigateToARSession,
+                    modifier = Modifier.testTag("navigate_to_ar_session"),
                     icon = {
                         Icon(
                             painter = painterResource(R.drawable.ic_augmented_reality_outlined),
