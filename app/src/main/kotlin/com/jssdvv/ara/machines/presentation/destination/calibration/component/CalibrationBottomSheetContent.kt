@@ -128,9 +128,9 @@ fun CalibrationBottomSheetContent(
         item {
             Column {
                 listOf(
+                    Axis.Y to Axis.Y.color.toComposeColor(),
                     Axis.X to Axis.X.color.toComposeColor(),
-                    Axis.Z to Axis.Z.color.toComposeColor(),
-                    Axis.Y to Axis.Y.color.toComposeColor()
+                    Axis.Z to Axis.Z.color.toComposeColor()
                 ).forEach { (axis, color) ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         SubtractButton { onTickDragged(axis, -1) }

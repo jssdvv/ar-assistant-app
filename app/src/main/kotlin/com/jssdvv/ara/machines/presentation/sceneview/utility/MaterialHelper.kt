@@ -13,13 +13,13 @@ val MODEL_UNSELECTED_COLOR = floatArrayOf(0.20F, 0.68F, 1.00F)
 
 val DISABLED_COLOR = floatArrayOf(0.50F, 0.50F, 0.50F)
 val GIZMO_C_COLOR = floatArrayOf(1.00F, 0.60F, 0.20F)
-val GIZMO_X_COLOR = floatArrayOf(1.00F, 0.00F, 0.00F)
-val GIZMO_Y_COLOR = floatArrayOf(0.00F, 1.00F, 0.00F)
-val GIZMO_Z_COLOR = floatArrayOf(0.00F, 0.00F, 1.00F)
+val GIZMO_X_COLOR = floatArrayOf(0.00F, 1.00F, 0.00F)
+val GIZMO_Y_COLOR = floatArrayOf(0.00F, 0.00F, 1.00F)
+val GIZMO_Z_COLOR = floatArrayOf(1.00F, 0.00F, 0.00F)
 
-val PLANE_LOST_TRACKING_COLOR = floatArrayOf(1.00F, 0.20F, 0.20F)
-val PLANE_FULL_TRACKING_COLOR = floatArrayOf(0.00F, 0.90F, 0.45F)
-val PLANE_LAST_POSITION_COLOR = floatArrayOf(1.00F, 0.80F, 0.00F)
+val PLANE_LOST_TRACKING_COLOR = floatArrayOf(1.00F, 0.20F, 0.30F)
+val PLANE_FULL_TRACKING_COLOR = floatArrayOf(0.00F, 1.00F, 0.00F)
+val PLANE_LAST_POSITION_COLOR = floatArrayOf(1.00F, 1.00F, 0.00F)
 
 /**
  * Material instance for complex shapes like models, renderables.
