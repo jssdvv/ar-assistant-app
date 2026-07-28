@@ -36,6 +36,7 @@ class NavigationBenchmark {
         }
     ) {
         pressHome()
+        device.waitForIdle()
         startActivityAndWait()
 
         device.wait(Until.hasObject(By.res("MACHINES")), 2_000)
@@ -65,6 +66,7 @@ class NavigationBenchmark {
         }
     ) {
         pressHome()
+        device.waitForIdle()
         startActivityAndWait()
 
         device.wait(Until.hasObject(By.res("MACHINES")), 2_000)
@@ -94,6 +96,7 @@ class NavigationBenchmark {
         }
     ) {
         pressHome()
+        device.waitForIdle()
         startActivityAndWait()
 
         device.wait(Until.hasObject(By.res("MACHINES")), 2_000)

@@ -29,6 +29,7 @@ class StartupBenchmark {
         }
     ) {
         pressHome()
+        device.waitForIdle()
         startActivityAndWait()
     }
 
@@ -44,6 +45,7 @@ class StartupBenchmark {
         }
     ) {
         pressHome()
+        device.waitForIdle()
         startActivityAndWait()
     }
 
@@ -56,9 +58,11 @@ class StartupBenchmark {
         compilationMode = CompilationMode.DEFAULT,
         setupBlock = {
             device.executeShellCommand("pm grant com.jssdvv.ara android.permission.CAMERA")
+            Thread.sleep(500)
         }
     ) {
         pressHome()
+        device.waitForIdle()
         startActivityAndWait()
     }
 }
