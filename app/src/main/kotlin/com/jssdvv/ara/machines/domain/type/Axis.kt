@@ -15,25 +15,25 @@ enum class Axis(
     val color: FloatArray,
     val quaternion: Quaternion
 ) {
-    X(
-        rotationNameId = R.string.enum_axis_x_name,
-        unitVector = Float3(x = 1F),
-        color = GIZMO_X_COLOR,
-        quaternion = Quaternion(w = 0.707107F, x = 0.707107F)
-    ),
-
     Y(
         rotationNameId = R.string.enum_axis_y_name,
         unitVector = Float3(y = 1F),
         color = GIZMO_Y_COLOR,
-        quaternion = Quaternion(w = 0.707107F, y = 0.707107F)
+        quaternion = Quaternion()
+    ),
+
+    X(
+        rotationNameId = R.string.enum_axis_x_name,
+        unitVector = Float3(x = 1F),
+        color = GIZMO_X_COLOR,
+        quaternion = Quaternion(w = 0.707107F, z = -0.707107F)
     ),
 
     Z(
         rotationNameId = R.string.enum_axis_z_name,
         unitVector = Float3(z = 1F),
         color = GIZMO_Z_COLOR,
-        quaternion = Quaternion(w = 0.707107F, z = 0.707107F)
+        quaternion = Quaternion(w = 0.707107F, x = 0.707107F)
     );
 
     companion object {

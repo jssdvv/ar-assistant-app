@@ -44,22 +44,21 @@ class GizmoNode(
                 engine = engine,
                 materialInstance = materialLoader.createGizmoMaterial(xColor)
             ).apply {
-                this.quaternion = Quaternion(w = 0.707107F, z = -0.707107F)
+                this.quaternion = Axis.X.quaternion
                 this.position += Axis.X.unitVector * DEFAULT_SPHERE_RADIUS
             },
             ArrowNode(
                 engine = engine,
                 materialInstance = materialLoader.createGizmoMaterial(yColor)
             ).apply {
-                this.quaternion = Quaternion(w = 0.707107F, y = 0.707107F)
+                this.quaternion = Axis.Y.quaternion
                 this.position += Axis.Y.unitVector * DEFAULT_SPHERE_RADIUS
             },
             ArrowNode(
                 engine = engine,
                 materialInstance = materialLoader.createGizmoMaterial(zColor)
             ).apply {
-                this.parent = this@GizmoNode
-                this.quaternion = Quaternion(w = 0.707107F, x = 0.707107F)
+                this.quaternion = Axis.Z.quaternion
                 this.position += Axis.Z.unitVector * DEFAULT_SPHERE_RADIUS
             }
         )
